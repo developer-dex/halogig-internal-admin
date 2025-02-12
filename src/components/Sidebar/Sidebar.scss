@@ -1,0 +1,219 @@
+.sidebar-container {
+  display: flex;
+  height: calc(100vh - 70px);
+  position: fixed;
+  left: 0;
+  top: 70px;
+  z-index: 100;
+
+  // Slim Sidebar stays fixed
+  .slim-sidebar {
+    width: 80px;
+    background-color: white;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 0;
+    position: relative; // Change to relative
+    z-index: 2; // Higher z-index to stay on top
+
+    .top-icons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+
+      .icon-item {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #666;
+
+        &.primary {
+          color: #1976d2;
+          svg {
+            font-size: 28px;
+          }
+        }
+
+        &:hover {
+          background-color: #f5f7fa;
+        }
+      }
+    }
+
+    .bottom-avatars {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+
+      .user-avatar {
+        width: 45px;
+        height: 45px;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+
+      .icon-item {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        cursor: pointer;
+      }
+    }
+  }
+
+  // Main Sidebar slides out
+  .main-sidebar {
+    width: 280px;
+    background-color: white;
+    border-right: 1px solid #eee;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+    justify-content: space-between;
+
+    .profile-section {
+      text-align: center;
+      margin-bottom: 40px;
+
+      .profile-avatar {
+        margin: 0 auto 15px;
+        border: 3px solid white;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      }
+
+      .profile-info {
+        h3 {
+          margin: 0;
+          font-size: 1.2rem;
+          color: #333;
+          font-weight: 500;
+          font-family: 'Roboto', sans-serif;
+        }
+        p {
+          margin: 5px 0;
+          color: #666;
+          font-size: 0.9rem;
+          font-family: 'Roboto', sans-serif;
+        }
+      }
+    }
+
+    .menu-grid {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .menu-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+
+        .menu-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px 15px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          background-color: #f8f9fa;
+
+          svg {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 8px;
+          }
+
+          span {
+            font-size: 0.9rem;
+            color: #666;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+          }
+
+          &:hover {
+            background-color: #f0f7ff;
+          }
+
+          &.active {
+            background-color: #f0f7ff;
+            svg, span {
+              color: #1976d2;
+            }
+          }
+        }
+      }
+    }
+
+    .seller-support {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+
+      h4 {
+        text-align: center;
+        color: #333;
+        font-weight: 500;
+        margin-bottom: 15px;
+        font-family: 'Roboto', sans-serif;
+      }
+
+      .support-icons {
+        display: flex;
+        justify-content: center;
+        border-radius: 30px;
+        background-color: white;
+        border: 2px solid #EDEFF2        ;
+        gap: 12px;
+        height: 60px;
+
+        .support-icon {
+          // width: 40px;
+          // height: 40px;
+          // display: flex;
+          // align-items: center;
+          // justify-content: center;
+          // background-color: #f5f7fa;
+          // border-radius: 8px;
+          // cursor: pointer;
+          // transition: all 0.3s ease;
+
+          svg {
+            font-size: 20px;
+            color: #666;
+          }
+
+          &:hover {
+            background-color: #e3e8ef;
+          }
+        }
+      }
+    }
+  }
+
+  &.closed {
+    .main-sidebar {
+      transform: translateX(-280px); // Only move the width of main sidebar
+    }
+  }
+} 

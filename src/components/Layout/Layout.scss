@@ -1,0 +1,23 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  .layout-container {
+    display: flex;
+    flex: 1;
+    margin-top: 70px; // Add top margin to account for fixed header
+
+    .main-content {
+      flex: 1;
+      margin-left: 360px; // 80px + 280px for both sidebars
+      padding: 20px;
+      background-color: #f5f6fa;
+      transition: margin-left 0.3s ease;
+
+      &.sidebar-closed {
+        margin-left: 80px; // Only the slim sidebar width
+      }
+    }
+  }
+} 
