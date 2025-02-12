@@ -4,7 +4,7 @@ import { freelancerDataReducer } from "../features/admin/freelancerManagementSli
 
 const store = configureStore({
   reducer: {
-    clientData: clientDataReducer,
+    clientDataReducer: clientDataReducer,
     freelancerDataReducer:freelancerDataReducer,
   },
   middleware: getDefaultMiddleware =>

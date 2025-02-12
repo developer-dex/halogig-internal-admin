@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiEndPoints } from "../../config/path";
 import { showError } from "../../helpers/messageHelper";
-import { getApi } from "../../services/api";
+import { getApi, patchApi } from "../../services/api";
 
 
 // Removed TypeScript type annotations
@@ -29,16 +29,15 @@ export const clientData = createAsyncThunk(
 
 export const statusChange = createAsyncThunk(
     "/statusChange",
-    async ()=>{
-        try{
-            const payload = await getApi(`${apiEndPoints.STATUS_UPDATE}`); // Updated API call
+    async (id, apiData) => { // Accept id as a parameter
+        try {
+            const payload = await patchApi(`${apiEndPoints.STATUS_UPDATE}/${id}/status`, apiData); // Updated API call to include id
             return payload;
-        }
-        catch(e){
-            showError(e.response.data.message)
+        } catch (e) {
+            showError(e.response.data.message);
         }
     }
-)
+);
 
 export const clientDataSlice = createSlice({
     name: "clientData",

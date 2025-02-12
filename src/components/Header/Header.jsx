@@ -4,9 +4,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import { Link, useLocation } from 'react-router-dom';
 import './Header.scss';
 
 const Header = ({ toggleSidebar }) => {
+  const location = useLocation();
+
   return (
     <AppBar position="static" className="header">
       <Toolbar>
@@ -18,9 +21,9 @@ const Header = ({ toggleSidebar }) => {
             <MenuIcon />
           </IconButton>
           <nav className="top-nav">
-            <a href="#" className="active">Access Dashboard</a>
-            <a href="#">About Us</a>
-            <a href="#">Registration</a>
+            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>Access Dashboard</Link>
+            <Link to="/clients" className={location.pathname === '/clients' ? 'active' : ''}>Client</Link>
+            <Link to="/freelancer" className={location.pathname === '/freelancer' ? 'active' : ''}>FreeLancer</Link>
             <a href="#">User Policy</a>
             <a href="#">Contacts</a>
           </nav>

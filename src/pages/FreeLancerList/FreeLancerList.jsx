@@ -17,24 +17,28 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { freelancerData } from '../../features/admin/freelancerManagementSlice';
+import { statusChange } from '../../features/admin/clientManagementSlice';
 
 const FreeLancerList = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [partners, setPartners] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const pageLimit = 10;
 
   // Get data from Redux store
-  const { isLoading, responseData } = useSelector((state) => state.clientData);
+  // const { isLoading, responseData } = useSelector((state) => state.clientData);
   const totalEntries = 10;
 
   const fetchPartners = async () => {
+    setIsLoading(true)
     const response = await dispatch(freelancerData({ 
       page: currentPage, 
       pageLimit 
     }));
     console.log('res', response.payload.data.data)
-    setPartners(response.payload.data.data);
+    setPartners(response.payload.data.data.freelancers);
+    setIsLoading(false)
   };
 
   useEffect(() => {
@@ -45,8 +49,13 @@ const FreeLancerList = () => {
     setCurrentPage(page);
   };
 
-  const handleStatusChange = (partnerId, newStatus) => {
-    // Here you would typically dispatch an action to update the status
+  const handleStatusChange = async (partnerId, newStatus) => {
+    console.log('partnerId', partnerId);
+    console.log('newStatus', newStatus);
+    const statusObj = {
+      "status":newStatus
+    }
+    const response = await dispatch(statusChange(partnerId, statusObj))
     console.log('Status changed for partner', partnerId, 'to', newStatus);
   };
 
@@ -61,10 +70,10 @@ const FreeLancerList = () => {
   return (
     <div className="partner-list">
       <div className="search-container">
-        <div className="search-box">
+        {/* <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
-        </div>
+        </div> */}
       </div>
 
       <h2>Partner List</h2>

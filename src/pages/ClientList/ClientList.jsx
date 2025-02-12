@@ -19,26 +19,30 @@ import EditIcon from '@mui/icons-material/Edit';
 import LockIcon from '@mui/icons-material/Lock';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
-import { clientData } from '../../features/admin/clientManagementSlice';
+import { clientData, statusChange } from '../../features/admin/clientManagementSlice';
 import './ClientList.scss';
 
 const ClientList = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [partners, setPartners] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const pageLimit = 10;
 
   // Get data from Redux store
-  const { isLoading, responseData } = useSelector((state) => state.clientData);
   const totalEntries = 10;
 
   const fetchPartners = async () => {
+    setIsLoading(true)
     const response = await dispatch(clientData({ 
       page: currentPage, 
       pageLimit 
     }));
     console.log('res', response.payload.data.data)
-    setPartners(response.payload.data.data);
+    setPartners(response.payload.data.data.clients);
+    setIsLoading(false)
+
   };
 
   useEffect(() => {
@@ -49,8 +53,13 @@ const ClientList = () => {
     setCurrentPage(page);
   };
 
-  const handleStatusChange = (partnerId, newStatus) => {
-    // Here you would typically dispatch an action to update the status
+  const handleStatusChange = async (partnerId, newStatus) => {
+    console.log('partnerId', partnerId);
+    console.log('newStatus', newStatus);
+    const statusObj = {
+      "status":newStatus
+    }
+    const response = await dispatch(statusChange(partnerId, statusObj))
     console.log('Status changed for partner', partnerId, 'to', newStatus);
   };
 
@@ -65,10 +74,10 @@ const ClientList = () => {
   return (
     <div className="partner-list">
       <div className="search-container">
-        <div className="search-box">
+        {/* <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
-        </div>
+        </div> */}
       </div>
 
       <h2>Partner List</h2>
