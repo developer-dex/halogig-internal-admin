@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
   Paper,
   IconButton,
@@ -14,6 +14,13 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormControlLabel,
+  Checkbox,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { freelancerData } from '../../features/admin/freelancerManagementSlice';
@@ -22,41 +29,60 @@ import { statusChange } from '../../features/admin/clientManagementSlice';
 const FreeLancerList = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const [partners, setPartners] = useState([]);
+  const [freelancers, setFreelancers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const statusOptions = ['Pending', 'Approved', 'Rejected', 'Under Review'];
   const pageLimit = 10;
 
   // Get data from Redux store
   // const { isLoading, responseData } = useSelector((state) => state.clientData);
   const totalEntries = 10;
 
-  const fetchPartners = async () => {
+  const fetchFreelancers = async () => {
     setIsLoading(true)
-    const response = await dispatch(freelancerData({ 
-      page: currentPage, 
-      pageLimit 
+    const response = await dispatch(freelancerData({
+      page: currentPage,
+      pageLimit
     }));
     console.log('res', response.payload.data.data)
-    setPartners(response.payload.data.data.freelancers);
+    setFreelancers(response.payload.data.data.freelancers);
     setIsLoading(false)
   };
 
   useEffect(() => {
-    fetchPartners();
+    fetchFreelancers();
   }, [dispatch, currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  const handleStatusChange = async (partnerId, newStatus) => {
-    console.log('partnerId', partnerId);
-    console.log('newStatus', newStatus);
-    const statusObj = {
-      "status":newStatus
-    }
-    const response = await dispatch(statusChange(partnerId, statusObj))
-    console.log('Status changed for partner', partnerId, 'to', newStatus);
+  const handleOpenModal = (partner) => {
+    setSelectedPartner(partner);
+    setSelectedStatus(partner.status);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedPartner(null);
+    setSelectedStatus('');
+  };
+
+  const handleStatusChange = async () => {
+    if (!selectedPartner) return;
+    const statusObj = { status: selectedStatus };
+    console.log('status', statusObj);
+    // Updated to pass an object containing both id and statusObj
+    await dispatch(statusChange({ id: selectedPartner.id, apiData: statusObj }));
+    setFreelancers((prevFreelancers) =>
+      prevFreelancers.map((p) => (p.id === selectedPartner.id ? { ...p, status: selectedStatus } : p))
+    );
+    handleCloseModal();
+    fetchFreelancers();
   };
 
   if (isLoading) {
@@ -90,30 +116,22 @@ const FreeLancerList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {partners.map((partner) => (
-                <TableRow key={partner.id}>
+              {freelancers.map((freelancer) => (
+                <TableRow key={freelancer.id}>
                   <TableCell>
-                          {partner.first_name}
+                    {freelancer.first_name}
                   </TableCell>
                   <TableCell>
-                    {partner.last_name}
-                    </TableCell>
-                  <TableCell>
-                    {partner.email}
-                    </TableCell>
-                  <TableCell>
-                    <FormControl size="small">
-                      <Select
-                        value={partner.status || 'pending'}
-                        onChange={(e) => handleStatusChange(partner.id, e.target.value)}
-                        className="status-select"
-                      >
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
-                        <MenuItem value="rejected">Rejected</MenuItem>
-                      </Select>
-                    </FormControl>
+                    {freelancer.last_name}
                   </TableCell>
+                  <TableCell>
+                    {freelancer.email}
+                  </TableCell>
+                  <TableCell>
+                  <Button variant="outlined" onClick={() => handleOpenModal(freelancer)}>
+                    {freelancer.status}
+                  </Button>                 
+                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -122,11 +140,11 @@ const FreeLancerList = () => {
 
         <div className="table-footer">
           <div className="entries-info">
-            Showing <span>{partners.length}</span> of {totalEntries}
+            Showing <span>{freelancers.length}</span> of {totalEntries}
           </div>
           <div className="pagination">
-            <button 
-              className="prev" 
+            <button
+              className="prev"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -136,7 +154,7 @@ const FreeLancerList = () => {
               {/* Calculate total pages */}
               {Array.from({ length: Math.ceil(totalEntries / pageLimit) }, (_, i) => i + 1)
                 .map((page) => (
-                  <span 
+                  <span
                     key={page}
                     className={currentPage === page ? 'active' : ''}
                     onClick={() => handlePageChange(page)}
@@ -146,7 +164,7 @@ const FreeLancerList = () => {
                 ))
               }
             </div>
-            <button 
+            <button
               className="next"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === Math.ceil(totalEntries / pageLimit)}
@@ -156,6 +174,29 @@ const FreeLancerList = () => {
           </div>
         </div>
       </div>
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Select Status</DialogTitle>
+        <DialogContent>
+          {statusOptions.map((status) => (
+            <FormControlLabel
+              key={status}
+              control={
+                <Checkbox
+                  checked={selectedStatus === status}
+                  onChange={() => setSelectedStatus(status)}
+                />
+              }
+              label={status}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button onClick={handleStatusChange} color="primary" variant="contained">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

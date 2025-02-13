@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, version } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Table, 
@@ -14,6 +14,13 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormControlLabel,
+  Checkbox,
+  DialogActions,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import LockIcon from '@mui/icons-material/Lock';
@@ -25,44 +32,61 @@ import './ClientList.scss';
 const ClientList = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const [partners, setPartners] = useState([]);
+  const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const statusOptions = ['Pending', 'Approved', 'Rejected', 'Under Review'];
   const pageLimit = 10;
 
   // Get data from Redux store
   const totalEntries = 10;
 
-  const fetchPartners = async () => {
+  const fetchClients = async () => {
     setIsLoading(true)
     const response = await dispatch(clientData({ 
       page: currentPage, 
       pageLimit 
     }));
     console.log('res', response.payload.data.data)
-    setPartners(response.payload.data.data.clients);
+    setClients(response.payload.data.data.clients);
     setIsLoading(false)
 
   };
 
   useEffect(() => {
-    fetchPartners();
+    fetchClients();
   }, [dispatch, currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  const handleStatusChange = async (partnerId, newStatus) => {
-    console.log('partnerId', partnerId);
-    console.log('newStatus', newStatus);
-    const statusObj = {
-      "status":newStatus
-    }
-    const response = await dispatch(statusChange(partnerId, statusObj))
-    console.log('Status changed for partner', partnerId, 'to', newStatus);
+  const handleOpenModal = (partner) => {
+    setSelectedPartner(partner);
+    setSelectedStatus(partner.status);
+    setOpenModal(true);
   };
 
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedPartner(null);
+    setSelectedStatus('');
+  };
+
+  const handleStatusChange = async () => {
+    if (!selectedPartner) return;
+    const statusObj = { status: selectedStatus };
+    console.log('status', statusObj);
+    // Updated to pass an object containing both id and statusObj
+    await dispatch(statusChange({ id: selectedPartner.id, apiData: statusObj }));
+    setClients((prevFreelancers) =>
+      prevFreelancers.map((p) => (p.id === selectedPartner.id ? { ...p, status: selectedStatus } : p))
+    );
+    handleCloseModal();
+    fetchClients();
+  };
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -94,29 +118,21 @@ const ClientList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {partners.map((partner) => (
-                <TableRow key={partner.id}>
+              {clients.map((client) => (
+                <TableRow key={client.id}>
                   <TableCell>
-                          {partner.first_name}
+                          {client.first_name}
                   </TableCell>
                   <TableCell>
-                    {partner.last_name}
+                    {client.last_name}
                     </TableCell>
                   <TableCell>
-                    {partner.email}
+                    {client.email}
                     </TableCell>
                   <TableCell>
-                    <FormControl size="small">
-                      <Select
-                        value={partner.status || 'pending'}
-                        onChange={(e) => handleStatusChange(partner.id, e.target.value)}
-                        className="status-select"
-                      >
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
-                        <MenuItem value="rejected">Rejected</MenuItem>
-                      </Select>
-                    </FormControl>
+                  <Button variant="outlined" onClick={() => handleOpenModal(client)}>
+                    {client.status}
+                  </Button>   
                   </TableCell>
                 </TableRow>
               ))}
@@ -126,7 +142,7 @@ const ClientList = () => {
 
         <div className="table-footer">
           <div className="entries-info">
-            Showing <span>{partners.length}</span> of {totalEntries}
+            Showing <span>{clients.length}</span> of {totalEntries}
           </div>
           <div className="pagination">
             <button 
@@ -160,6 +176,29 @@ const ClientList = () => {
           </div>
         </div>
       </div>
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Select Status</DialogTitle>
+        <DialogContent>
+          {statusOptions.map((status) => (
+            <FormControlLabel
+              key={status}
+              control={
+                <Checkbox
+                  checked={selectedStatus === status}
+                  onChange={() => setSelectedStatus(status)}
+                />
+              }
+              label={status}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button onClick={handleStatusChange} color="primary" variant="contained">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

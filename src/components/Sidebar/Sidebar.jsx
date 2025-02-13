@@ -14,6 +14,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import ChatIcon from '@mui/icons-material/Chat';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import TelegramIcon from '@mui/icons-material/Telegram';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.scss';
 
@@ -124,6 +125,9 @@ const Sidebar = ({ isOpen }) => {
             </div>
             <div className="support-icon">
               <ChatIcon />
+            </div>
+            <div className="support-icon">
+              <TelegramIcon />
             </div>
             <div className="support-icon">
               <WhatsAppIcon />

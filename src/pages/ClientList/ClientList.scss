@@ -86,6 +86,7 @@
         .MuiTableHead-root {
           flex-shrink: 0; // Keep header fixed
           background-color: #f8f9fa;
+          border-bottom: 1px solid #eee;
           
           .MuiTableRow-root {
             display: table;

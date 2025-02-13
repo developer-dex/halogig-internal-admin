@@ -6,7 +6,7 @@ import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/partners" replace />} />
+      <Route path="/" element={<Navigate to="/clients" replace />} />
       <Route path="/freelancer" element={<FreeLancerList />} />
       <Route path="/clients" element={<ClientList />} />
     </Routes>

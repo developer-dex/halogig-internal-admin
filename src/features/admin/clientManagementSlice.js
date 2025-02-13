@@ -29,9 +29,12 @@ export const clientData = createAsyncThunk(
 
 export const statusChange = createAsyncThunk(
     "/statusChange",
-    async (id, apiData) => { // Accept id as a parameter
+    async ({id, apiData}) => { // Accept id as a parameter
+        console.log('apiData', apiData)
         try {
-            const payload = await patchApi(`${apiEndPoints.STATUS_UPDATE}/${id}/status`, apiData); // Updated API call to include id
+            const payload = await patchApi(`${apiEndPoints.STATUS_UPDATE}/${id}/status`, apiData);
+            console.log('payload', payload);
+             // Updated API call to include id
             return payload;
         } catch (e) {
             showError(e.response.data.message);
