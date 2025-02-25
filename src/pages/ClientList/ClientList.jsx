@@ -118,10 +118,15 @@ const ClientList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {clients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell>
-                          {client.first_name}
+              {clients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">No data found</TableCell>
+                </TableRow>
+              ) : (
+                clients.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell>
+                      {client.first_name}
                   </TableCell>
                   <TableCell>
                     {client.last_name}
@@ -134,8 +139,9 @@ const ClientList = () => {
                     {client.status}
                   </Button>   
                   </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

@@ -116,10 +116,15 @@ const FreeLancerList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {freelancers.map((freelancer) => (
-                <TableRow key={freelancer.id}>
-                  <TableCell>
-                    {freelancer.first_name}
+              {freelancers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">No data found</TableCell>
+                </TableRow>
+              ) : (
+                freelancers.map((freelancer) => (
+                  <TableRow key={freelancer.id}>
+                    <TableCell>
+                      {freelancer.first_name}
                   </TableCell>
                   <TableCell>
                     {freelancer.last_name}
@@ -132,8 +137,9 @@ const FreeLancerList = () => {
                     {freelancer.status}
                   </Button>                 
                    </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
