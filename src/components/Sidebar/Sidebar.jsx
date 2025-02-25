@@ -63,8 +63,8 @@ const Sidebar = ({ isOpen }) => {
             <img src="/path-to-avatar.jpg" alt="" />
           </Avatar>
           <div className="profile-info">
-            <h3>Hello Alfred Bryant</h3>
-            <p>admin.seller@yahoo.com</p>
+            <h3>Hello, Ankur Gupta</h3>
+            <p>admin@halogig.com</p>
           </div>
         </div>
 
