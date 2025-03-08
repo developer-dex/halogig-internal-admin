@@ -1,11 +1,11 @@
 import React, { useEffect, useState, version } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
   Paper,
   IconButton,
@@ -45,9 +45,9 @@ const ClientList = () => {
 
   const fetchClients = async () => {
     setIsLoading(true)
-    const response = await dispatch(clientData({ 
-      page: currentPage, 
-      pageLimit 
+    const response = await dispatch(clientData({
+      page: currentPage,
+      pageLimit
     }));
     console.log('res', response.payload.data.data)
     setClients(response.payload.data.data.clients);
@@ -121,18 +121,18 @@ const ClientList = () => {
               {clients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell>
-                          {client.first_name ? client.first_name : '--'}
+                    {client.first_name ? client.first_name : '--'}
                   </TableCell>
                   <TableCell>
                     {client.last_name ? client.last_name : '--'}
-                    </TableCell>
+                  </TableCell>
                   <TableCell>
                     {client.email ? client.email : '--'}
-                    </TableCell>
+                  </TableCell>
                   <TableCell>
-                  <Button variant="outlined" onClick={() => handleOpenModal(client)}>
-                    {client.status}
-                  </Button>   
+                    <Button variant="outlined" onClick={() => handleOpenModal(client)}>
+                      {client.status}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -145,8 +145,8 @@ const ClientList = () => {
             Showing <span>{clients.length}</span> of {totalEntries}
           </div>
           <div className="pagination">
-            <button 
-              className="prev" 
+            <button
+              className="prev"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -156,7 +156,7 @@ const ClientList = () => {
               {/* Calculate total pages */}
               {Array.from({ length: Math.ceil(totalEntries / pageLimit) }, (_, i) => i + 1)
                 .map((page) => (
-                  <span 
+                  <span
                     key={page}
                     className={currentPage === page ? 'active' : ''}
                     onClick={() => handlePageChange(page)}
@@ -166,7 +166,7 @@ const ClientList = () => {
                 ))
               }
             </div>
-            <button 
+            <button
               className="next"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === Math.ceil(totalEntries / pageLimit)}

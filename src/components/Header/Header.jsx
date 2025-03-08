@@ -44,8 +44,8 @@ const Header = ({ toggleSidebar }) => {
             <SettingsOutlinedIcon />
           </IconButton>
           <div className="user-info">
-            <Avatar sx={{ bgcolor: '#1976d2' }}>CS</Avatar>
-            <span>Clayton Santos</span>
+            <Avatar sx={{ bgcolor: '#1976d2' }}>AG</Avatar>
+            <span>Ankur Gupta</span>
           </div>
         </div>
       </Toolbar>
