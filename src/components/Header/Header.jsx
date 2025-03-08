@@ -24,8 +24,8 @@ const Header = ({ toggleSidebar }) => {
             <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>Access Dashboard</Link>
             <Link to="/clients" className={location.pathname === '/clients' ? 'active' : ''}>Client</Link>
             <Link to="/freelancer" className={location.pathname === '/freelancer' ? 'active' : ''}>FreeLancer</Link>
+            <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contacts</Link>
             <a href="#">User Policy</a>
-            <a href="#">Contacts</a>
           </nav>
         </div>
 

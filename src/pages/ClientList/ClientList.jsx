@@ -104,7 +104,7 @@ const ClientList = () => {
         </div> */}
       </div>
 
-      <h2>Partner List</h2>
+      <h2>Client List</h2>
 
       <div className="table-wrapper">
         <TableContainer>
@@ -121,13 +121,13 @@ const ClientList = () => {
               {clients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell>
-                          {client.first_name}
+                          {client.first_name ? client.first_name : '--'}
                   </TableCell>
                   <TableCell>
-                    {client.last_name}
+                    {client.last_name ? client.last_name : '--'}
                     </TableCell>
                   <TableCell>
-                    {client.email}
+                    {client.email ? client.email : '--'}
                     </TableCell>
                   <TableCell>
                   <Button variant="outlined" onClick={() => handleOpenModal(client)}>

@@ -102,7 +102,7 @@ const FreeLancerList = () => {
         </div> */}
       </div>
 
-      <h2>Partner List</h2>
+      <h2>FreeLancer List</h2>
 
       <div className="table-wrapper">
         <TableContainer>
@@ -119,13 +119,13 @@ const FreeLancerList = () => {
               {freelancers.map((freelancer) => (
                 <TableRow key={freelancer.id}>
                   <TableCell>
-                    {freelancer.first_name}
+                    {freelancer.first_name ? freelancer.first_name : '--'}
                   </TableCell>
                   <TableCell>
-                    {freelancer.last_name}
+                    {freelancer.last_name ? freelancer.last_name : '--'}
                   </TableCell>
                   <TableCell>
-                    {freelancer.email}
+                    {freelancer.email ? freelancer.email : '--'}
                   </TableCell>
                   <TableCell>
                   <Button variant="outlined" onClick={() => handleOpenModal(freelancer)}>

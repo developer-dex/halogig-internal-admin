@@ -1,5 +1,9 @@
 export const apiEndPoints = {
   GET_CLIENT_DATA: "admin/clients",
   GET_FRELANCER_DATA:"admin/freelancers",
-  STATUS_UPDATE:"admin/user"
+  GET_CONTACT_US:"admin/contact-us",
+  STATUS_UPDATE:"admin/user",
+  GET_ENROLL_AS: "designation",
+  GET_COUNTRIES: "country",
+  ADD_CLIENT:"admin/add-client"
 };

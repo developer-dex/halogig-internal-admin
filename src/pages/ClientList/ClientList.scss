@@ -53,6 +53,7 @@
     padding-left: 28px;
     font-size: 20px;
     padding-top: 20px;
+    // padding-bottom: 20px;
     font-weight: 500;
     color: #333;
     // margin-bottom: 16px;
@@ -70,6 +71,7 @@
     flex: 1; // Take remaining space
     display: flex;
     flex-direction: column;
+    margin: 20px;
     min-height: 0; // Important for Firefox
 
     .MuiTableContainer-root {
