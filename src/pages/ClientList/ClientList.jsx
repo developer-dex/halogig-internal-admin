@@ -35,13 +35,14 @@ const ClientList = () => {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const statusOptions = ['Pending', 'Approved', 'Rejected', 'Under Review'];
   const pageLimit = 10;
 
   // Get data from Redux store
-  const totalEntries = 10;
+  const totalEntries = totalCount;
 
   const fetchClients = async () => {
     setIsLoading(true)
@@ -51,6 +52,7 @@ const ClientList = () => {
     }));
     console.log('res', response.payload.data.data)
     setClients(response.payload.data.data.clients);
+    setTotalCount(response.payload.data.data.total_count);
     setIsLoading(false)
 
   };

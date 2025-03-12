@@ -32,6 +32,7 @@ const FreeLancerList = () => {
   const [freelancers, setFreelancers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const statusOptions = ['Pending', 'Approved', 'Rejected', 'Under Review'];
@@ -39,7 +40,7 @@ const FreeLancerList = () => {
 
   // Get data from Redux store
   // const { isLoading, responseData } = useSelector((state) => state.clientData);
-  const totalEntries = 10;
+  const totalEntries = totalCount;
 
   const fetchFreelancers = async () => {
     setIsLoading(true)
@@ -49,6 +50,7 @@ const FreeLancerList = () => {
     }));
     console.log('res', response.payload.data.data)
     setFreelancers(response.payload.data.data.freelancers);
+    setTotalCount(response.payload.data.data.total_count);
     setIsLoading(false)
   };
 

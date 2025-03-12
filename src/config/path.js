@@ -5,5 +5,6 @@ export const apiEndPoints = {
   STATUS_UPDATE:"admin/user",
   GET_ENROLL_AS: "designation",
   GET_COUNTRIES: "country",
-  ADD_CLIENT:"admin/add-client"
+  ADD_CLIENT:"admin/add-client",
+  GET_SITE_ANALYTICS:"admin/page-analytics"
 };
