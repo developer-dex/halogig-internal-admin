@@ -30,7 +30,7 @@ const Header = ({ toggleSidebar }) => {
         </div>
 
         <div className="header-right">
-          <div className="search-box">
+          {/* <div className="search-box">
             <SearchIcon />
             <InputBase
               placeholder="Search Products, Orders and Clients"
@@ -42,7 +42,7 @@ const Header = ({ toggleSidebar }) => {
           </IconButton>
           <IconButton className="icon-button">
             <SettingsOutlinedIcon />
-          </IconButton>
+          </IconButton> */}
           <div className="user-info">
             <Avatar sx={{ bgcolor: '#1976d2' }}>AG</Avatar>
             <span>Ankur Gupta</span>

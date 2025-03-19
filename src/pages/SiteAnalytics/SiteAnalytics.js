@@ -21,7 +21,7 @@ const SiteAnalytics = () => {
     const [pageAnalytics, setpageAnalytics] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
-    const pageLimit = 10;
+    const pageLimit = 50;
 
     // Get data from Redux store
     const totalEntries = totalCount;
@@ -59,12 +59,12 @@ const SiteAnalytics = () => {
 
     return (
         <div className="partner-list">
-            <div className="search-container">
-                {/* <div className="search-box">
+            {/* <div className="search-container">
+                <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
-        </div> */}
-            </div>
+        </div>
+            </div> */}
 
             <h2>Site Analytics</h2>
 
@@ -73,32 +73,44 @@ const SiteAnalytics = () => {
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell width="15%">Time Spent</TableCell>
-                                <TableCell width="25%">IP Address</TableCell>
-                                <TableCell width="25%">Location</TableCell>
-                                <TableCell width="35%">URL</TableCell>
+                                <TableCell>IP Address</TableCell>
+                                <TableCell>Location</TableCell>
+                                <TableCell>In Time</TableCell>
+                                <TableCell>Out Time</TableCell>
+                                <TableCell>Time Spent</TableCell>
+                                <TableCell>Device Type</TableCell>
+                                <TableCell width="30%">URL</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {pageAnalytics.map((pageAnalytics) => (
                                 <TableRow key={pageAnalytics.id}>
-                                    <TableCell width="15%">
-                                    {pageAnalytics.time_spent 
+                                    <TableCell>
+                                        {pageAnalytics.ip_address ? pageAnalytics.ip_address : '--'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.location ? pageAnalytics.location : '--'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.start_time ? moment(pageAnalytics.start_time).format('DD-MM-YYYY h:mm A') : '--'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.end_time ? moment(pageAnalytics.end_time).format('DD-MM-YYYY h:mm A') : '--'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.time_spent
                                             ? moment.duration(pageAnalytics.time_spent, 'seconds').format('m [min] s [sec]')
                                             : '--'
                                         }                                    </TableCell>
-                                    <TableCell width="25%">
-                                        {pageAnalytics.ip_address ? pageAnalytics.ip_address : '--'}
+                                    <TableCell>
+                                        {pageAnalytics.device_type ? pageAnalytics.device_type : '--'}
                                     </TableCell>
-                                    <TableCell width="25%">
-                                        {pageAnalytics.location ? pageAnalytics.location : '--'}
-                                    </TableCell>
-                                    <TableCell width="35%">
-                                            {pageAnalytics.url ? (
-                                                <a href={pageAnalytics.url} target="_blank" rel="noopener noreferrer">
-                                                    {pageAnalytics.url}
-                                                </a>
-                                            ) : '--'}
+                                    <TableCell width="30%">
+                                        {pageAnalytics.url ? (
+                                            <a href={pageAnalytics.url} target="_blank" rel="noopener noreferrer">
+                                                {pageAnalytics.url}
+                                            </a>
+                                        ) : '--'}
                                     </TableCell>
 
                                 </TableRow>

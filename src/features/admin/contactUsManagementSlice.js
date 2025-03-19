@@ -40,6 +40,17 @@ export const getEnrollAsData = createAsyncThunk(
         }
     }
 );
+export const getIndustryData = createAsyncThunk(
+    "/getIndustryData",
+    async () => {
+        try {
+            const payload = await getApi(apiEndPoints.GET_INDUSTRY);
+            return payload;
+        } catch (e) {
+            showError(e.response.data.message);
+        }
+    }
+);
 
 export const getCountryData = createAsyncThunk(
     "/getCountryData",
@@ -124,6 +135,19 @@ export const contactDataSlice = createSlice({
             state.isLoading = false;
             state.isError = true;
         })
+        .addCase(getIndustryData.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(getIndustryData.fulfilled, (state, { payload }) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.industryData = payload?.data?.data || [];
+        })
+        .addCase(getIndustryData.rejected, (state) => {
+            state.isLoading = false;
+            state.isError = true;
+        })
+        
     },
 });
 
