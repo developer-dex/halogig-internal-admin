@@ -125,13 +125,9 @@ const ClientList = () => {
                     {client.email ? client.email : '--'}
                   </TableCell>
                   <TableCell>
-                    {client.is_client_added == true ? (
-                        <div className="added-text">Added</div>
-                    ) : (
-                      <Button variant="outlined" onClick={() => handleOpenModal(client)}>
-                        {client.status}
-                      </Button>
-                    )}
+                    <Button variant="outlined" onClick={() => handleOpenModal(client)}>
+                      {client.status}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

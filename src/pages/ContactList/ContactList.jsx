@@ -145,14 +145,14 @@ const ContactList = () => {
         id: selectedContact.id,
         registration_social: "0",
         freelancer_referral: "0",
-        register_as: "2", 
+        register_as: "2",
         gst_number: "",
         status: "complete",
         pseudoName: formData.first_name,
         role: "user",
         password: "Test@123",
       };
-      
+
       const response = await dispatch(addClient(enhancedFormData));
       if (response.payload?.status === 200) {
         handleCloseModal();
@@ -174,7 +174,7 @@ const ContactList = () => {
   return (
     <div className="partner-list">
       {/* <div className="search-container"> */}
-        {/* <div className="search-box">
+      {/* <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
         </div> */}
@@ -218,9 +218,13 @@ const ContactList = () => {
                     {contact.requirements ? contact.requirements : '--'}
                   </TableCell>
                   <TableCell>
-                    <Button variant="outlined" onClick={() => handleOpenModal(contact)}>
-                      ADD
-                    </Button>
+                    {contact.is_client_added == true ? (
+                      <span className="added-text">Added</span>
+                    ) : (
+                      <Button variant="outlined" onClick={() => handleOpenModal(contact)}>
+                        ADD
+                      </Button>)
+                    }
                   </TableCell>
                 </TableRow>
               ))}
@@ -329,7 +333,7 @@ const ContactList = () => {
                       ))}
                     </Select>
                   </FormControl>
-                
+
                 </Box>
               </Grid>
 
@@ -350,7 +354,7 @@ const ContactList = () => {
                     value={formData.mobile}
                     onChange={handleFormChange}
                   />
-                  <FormControl style={{paddingTop: '5px'}}>
+                  <FormControl style={{ paddingTop: '5px' }}>
                     <FormLabel>Gender</FormLabel>
                     <RadioGroup
                       row
@@ -363,17 +367,17 @@ const ContactList = () => {
                       <FormControlLabel value="other" control={<Radio />} label="Other" />
                     </RadioGroup>
                   </FormControl>
-              
+
                 </Box>
               </Grid>
 
               {/* Button - Full Width */}
               <Grid item >
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    onClick={handleFormSubmit} 
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleFormSubmit}
                     fullWidth
                   >
                     Add
