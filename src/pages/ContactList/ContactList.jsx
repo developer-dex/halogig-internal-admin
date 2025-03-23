@@ -229,11 +229,26 @@ const ContactList = () => {
                   </TableCell>
                   <TableCell>
                     {contact.requirements ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {contact.requirements.slice(0, 10)}
-                        {contact.requirements.length > 10 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        maxWidth: '200px'
+                      }}>
+                        <div style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          flex: 1
+                        }}>
+                          {contact.requirements}
+                        </div>
+                        {contact.requirements.length > 20 && (
                           <MoreHoriz 
-                            style={{ cursor: 'pointer' }}
+                            style={{ 
+                              cursor: 'pointer',
+                              flexShrink: 0
+                            }}
                             onClick={() => handleOpenReqModal(contact.requirements)}
                           />
                         )}
@@ -425,20 +440,56 @@ const ContactList = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 400,
+          width: '80%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
           bgcolor: 'background.paper',
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <Typography id="requirements-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+          <Typography 
+            id="requirements-modal-title" 
+            variant="h6" 
+            component="h2" 
+            sx={{ 
+              mb: 2,
+              borderBottom: '1px solid #e0e0e0',
+              pb: 1
+            }}
+          >
             Requirements
           </Typography>
-          <Typography sx={{ whiteSpace: 'pre-wrap' }}>
-            {selectedReq}
-          </Typography>
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" onClick={handleCloseReqModal}>
+          <Box sx={{ 
+            flex: 1,
+            overflowY: 'auto',
+            mb: 2
+          }}>
+            <Typography sx={{ 
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              fontSize: '14px',
+              lineHeight: 1.6,
+              color: '#333'
+            }}>
+              {selectedReq}
+            </Typography>
+          </Box>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end',
+            borderTop: '1px solid #e0e0e0',
+            pt: 2
+          }}>
+            <Button 
+              variant="contained" 
+              onClick={handleCloseReqModal}
+              sx={{
+                minWidth: '100px'
+              }}
+            >
               Close
             </Button>
           </Box>
