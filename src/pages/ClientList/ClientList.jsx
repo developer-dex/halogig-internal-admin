@@ -39,7 +39,7 @@ const ClientList = () => {
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const statusOptions = ['Pending', 'Approved', 'Rejected', 'Under Review'];
-  const pageLimit = 10;
+  const pageLimit = 50;
 
   // Get data from Redux store
   const totalEntries = totalCount;
@@ -99,13 +99,6 @@ const ClientList = () => {
 
   return (
     <div className="partner-list">
-      <div className="search-container">
-        {/* <div className="search-box">
-          <SearchIcon />
-          <input type="text" placeholder="Search Tasks" />
-        </div> */}
-      </div>
-
       <h2>Client List</h2>
 
       <div className="table-wrapper">

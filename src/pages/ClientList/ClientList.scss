@@ -1,10 +1,10 @@
 .partner-list {
-  background-color: #f8f9fa;
+  // background-color: #f8f9fa;
   height: calc(100vh - 120px); // Subtract header height
   display: flex;
   flex-direction: column;
-  border: 2px solid #EDEFF2  ;
-  border-radius: 15px;
+  // border: 2px solid #EDEFF2  ;
+  // border-radius: 15px;
 
   .search-container {
     margin: 20px;
@@ -50,28 +50,29 @@
 
   
   h2 {
-    padding-left: 28px;
+    // padding-left: 28px;
     font-size: 20px;
-    padding-top: 20px;
+    padding-bottom: 10px;
+    // padding-top: 20px;
     // padding-bottom: 20px;
     font-weight: 500;
     color: #333;
     // margin-bottom: 16px;
     // margin-top: 20px;
-    border-top: 2px solid #EDEFF2;
+    // border-top: 2px solid #EDEFF2;
     flex-shrink: 0; // Prevent heading from shrinking
   }
 
 
   .table-wrapper {
-    padding: 20px;
+    padding: 10px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     flex: 1; // Take remaining space
     display: flex;
     flex-direction: column;
-    margin: 20px;
+    // margin: 20px;
     min-height: 0; // Important for Firefox
 
     .MuiTableContainer-root {
@@ -124,6 +125,10 @@
               border-bottom: 1px solid #eee;
               color: #333;
               font-size: 14px;
+              .added-text{
+                color: #4CAF50;
+                font-weight: 500;
+              }
             }
           }
         }

@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import { MoreHoriz } from '@mui/icons-material';
 import '../ClientList/ClientList.scss';
-import { contactData, getEnrollAsData, getCountryData, addClient } from '../../features/admin/contactUsManagementSlice';
+import { contactData, getEnrollAsData, getCountryData, addClient, getIndustryData } from '../../features/admin/contactUsManagementSlice';
 
 const ContactList = () => {
   const dispatch = useDispatch();
@@ -36,6 +36,7 @@ const ContactList = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [enrollAsData, setEnrollAsData] = useState([]);
   const [countryData, setCountryData] = useState([]);
+  const [industryData, setIndustryData] = useState([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -43,14 +44,16 @@ const ContactList = () => {
     mobile: '',
     company_name: '',
     gender: 'male',
-    dob: '',
     designation: '',
-    anonymous: 'no',
     country: ''
   });
+<<<<<<< HEAD
   const [openReqModal, setOpenReqModal] = useState(false);
   const [selectedReq, setSelectedReq] = useState('');
   const pageLimit = 10;
+=======
+  const pageLimit = 50;
+>>>>>>> 05d0c75c25536113d65f4eeff57d86c607e16be7
 
   // Get data from Redux store using useSelector
   // const { enrollAsData, countryData } = useSelector((state) => state.contactData);
@@ -100,6 +103,11 @@ const ContactList = () => {
     console.log('response', response)
     setCountryData(response.payload.data.data)
   }
+  const industryGetData = async () => {
+    const response = await dispatch(getIndustryData());
+    console.log('response', response)
+    setIndustryData(response.payload.data.data)
+  }
 
   useEffect(() => {
     fetchClients();
@@ -126,9 +134,7 @@ const ContactList = () => {
       mobile: contact?.mobile || '',
       company_name: contact?.company_name || '',
       gender: contact?.gender || 'male',
-      dob: contact?.dob || '',
       designation: contact?.designation || '',
-      anonymous: contact?.anonymous || 'no',
       country: contact?.country || ''
     });
     setOpenModal(true);
@@ -143,7 +149,7 @@ const ContactList = () => {
     try {
       const enhancedFormData = {
         ...formData,
-        anonymous: formData.anonymous === 'yes' ? '1' : '0',
+        id: selectedContact.id,
         registration_social: "0",
         freelancer_referral: "0",
         register_as: "2",
@@ -153,7 +159,7 @@ const ContactList = () => {
         role: "user",
         password: "Test@123",
       };
-      
+
       const response = await dispatch(addClient(enhancedFormData));
       if (response.payload?.status === 200) {
         handleCloseModal();
@@ -184,12 +190,12 @@ const ContactList = () => {
 
   return (
     <div className="partner-list">
-      <div className="search-container">
-        {/* <div className="search-box">
+      {/* <div className="search-container"> */}
+      {/* <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
         </div> */}
-      </div>
+      {/* </div> */}
 
       <h2>Contact List</h2>
 
@@ -239,9 +245,13 @@ const ContactList = () => {
                     ) : '--'}
                   </TableCell>
                   <TableCell>
-                    <Button variant="outlined" onClick={() => handleOpenModal(contact)}>
-                      ADD
-                    </Button>
+                    {contact.is_client_added == true ? (
+                      <span className="added-text">Added</span>
+                    ) : (
+                      <Button variant="outlined" onClick={() => handleOpenModal(contact)}>
+                        ADD
+                      </Button>)
+                    }
                   </TableCell>
                 </TableRow>
               ))}
@@ -350,6 +360,7 @@ const ContactList = () => {
                       ))}
                     </Select>
                   </FormControl>
+
                 </Box>
               </Grid>
 
@@ -370,18 +381,7 @@ const ContactList = () => {
                     value={formData.mobile}
                     onChange={handleFormChange}
                   />
-                  <TextField
-                    label="Date of Birth"
-                    type="date"
-                    fullWidth
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleFormChange}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                  <FormControl style={{paddingTop: '5px'}}>
+                  <FormControl style={{ paddingTop: '5px' }}>
                     <FormLabel>Gender</FormLabel>
                     <RadioGroup
                       row
@@ -394,18 +394,6 @@ const ContactList = () => {
                       <FormControlLabel value="other" control={<Radio />} label="Other" />
                     </RadioGroup>
                   </FormControl>
-                  <FormControl style={{paddingTop: '10px'}}>
-                    <FormLabel>Do you want to keep your profile anonymous?</FormLabel>
-                    <RadioGroup
-                      row
-                      name="anonymous"
-                      value={formData.anonymous}
-                      onChange={handleFormChange}
-                    >
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  </FormControl>
 
                 </Box>
               </Grid>
@@ -413,10 +401,10 @@ const ContactList = () => {
               {/* Button - Full Width */}
               <Grid item >
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    onClick={handleFormSubmit} 
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleFormSubmit}
                     fullWidth
                   >
                     Add
