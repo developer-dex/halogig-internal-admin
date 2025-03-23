@@ -47,13 +47,9 @@ const ContactList = () => {
     designation: '',
     country: ''
   });
-<<<<<<< HEAD
   const [openReqModal, setOpenReqModal] = useState(false);
   const [selectedReq, setSelectedReq] = useState('');
   const pageLimit = 10;
-=======
-  const pageLimit = 50;
->>>>>>> 05d0c75c25536113d65f4eeff57d86c607e16be7
 
   // Get data from Redux store using useSelector
   // const { enrollAsData, countryData } = useSelector((state) => state.contactData);
