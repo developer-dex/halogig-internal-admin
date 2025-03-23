@@ -22,6 +22,7 @@ import {
   MenuItem,
   Grid
 } from '@mui/material';
+import { MoreHoriz } from '@mui/icons-material';
 import '../ClientList/ClientList.scss';
 import { contactData, getEnrollAsData, getCountryData, addClient } from '../../features/admin/contactUsManagementSlice';
 
@@ -47,6 +48,8 @@ const ContactList = () => {
     anonymous: 'no',
     country: ''
   });
+  const [openReqModal, setOpenReqModal] = useState(false);
+  const [selectedReq, setSelectedReq] = useState('');
   const pageLimit = 10;
 
   // Get data from Redux store using useSelector
@@ -161,6 +164,16 @@ const ContactList = () => {
     }
   };
 
+  const handleOpenReqModal = (requirements) => {
+    setSelectedReq(requirements);
+    setOpenReqModal(true);
+  };
+
+  const handleCloseReqModal = () => {
+    setOpenReqModal(false);
+    setSelectedReq('');
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -213,7 +226,17 @@ const ContactList = () => {
                     {contact.company_name ? contact.company_name : '--'}
                   </TableCell>
                   <TableCell>
-                    {contact.requirements ? contact.requirements : '--'}
+                    {contact.requirements ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {contact.requirements.slice(0, 10)}
+                        {contact.requirements.length > 10 && (
+                          <MoreHoriz 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => handleOpenReqModal(contact.requirements)}
+                          />
+                        )}
+                      </div>
+                    ) : '--'}
                   </TableCell>
                   <TableCell>
                     <Button variant="outlined" onClick={() => handleOpenModal(contact)}>
@@ -404,6 +427,36 @@ const ContactList = () => {
                 </Box>
               </Grid>
             </Grid>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openReqModal}
+        onClose={handleCloseReqModal}
+        aria-labelledby="requirements-modal-title"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+        }}>
+          <Typography id="requirements-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+            Requirements
+          </Typography>
+          <Typography sx={{ whiteSpace: 'pre-wrap' }}>
+            {selectedReq}
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button variant="contained" onClick={handleCloseReqModal}>
+              Close
+            </Button>
           </Box>
         </Box>
       </Modal>
