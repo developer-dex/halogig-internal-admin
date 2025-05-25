@@ -17,7 +17,10 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route 
+        path="/login" 
+        element={isAdminLoggedIn ? <Navigate to="/clients" replace /> : <LoginPage />}
+      />
       <Route 
         path="/" 
         element={isAdminLoggedIn ? <Navigate to="/clients" replace /> : <Navigate to="/login" replace />}
