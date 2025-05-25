@@ -1,14 +1,30 @@
-import React from 'react';
-import { AppBar, Toolbar, InputBase, IconButton, Avatar } from '@mui/material';
+import React, { useState } from 'react';
+import { AppBar, Toolbar, InputBase, IconButton, Avatar, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Header.scss';
 
 const Header = ({ toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAdminLogIn');
+    navigate('/login');
+    handleMenuClose();
+  };
 
   return (
     <AppBar position="static" className="header">
@@ -43,10 +59,26 @@ const Header = ({ toggleSidebar }) => {
           <IconButton className="icon-button">
             <SettingsOutlinedIcon />
           </IconButton> */}
-          <div className="user-info">
+          <div className="user-info" onClick={handleMenuOpen} style={{ cursor: 'pointer' }}>
             <Avatar sx={{ bgcolor: '#1976d2' }}>AG</Avatar>
             <span>Ankur Gupta</span>
           </div>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            getContentAnchorEl={null}
+          >
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
         </div>
       </Toolbar>
     </AppBar>
