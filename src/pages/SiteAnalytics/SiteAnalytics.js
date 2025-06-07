@@ -104,6 +104,9 @@ const SiteAnalytics = () => {
                                             : '--'
                                         }                                    </TableCell>
                                     <TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.page_load_time ? `${pageAnalytics.page_load_time} sec` : '--'}
+                                    </TableCell>
                                         {pageAnalytics.device_type ? pageAnalytics.device_type : '--'}
                                     </TableCell>
                                     <TableCell width="30%">
@@ -113,10 +116,6 @@ const SiteAnalytics = () => {
                                             </a>
                                         ) : '--'}
                                     </TableCell>
-                                    <TableCell>
-                                        {pageAnalytics.page_load_time ? `${pageAnalytics.page_load_time} sec` : '--'}
-                                    </TableCell>
-
                                 </TableRow>
                             ))}
                         </TableBody>
