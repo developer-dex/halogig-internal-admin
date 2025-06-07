@@ -102,11 +102,12 @@ const SiteAnalytics = () => {
                                         {pageAnalytics.time_spent
                                             ? moment.duration(pageAnalytics.time_spent, 'seconds').format('m [min] s [sec]')
                                             : '--'
-                                        }                                    </TableCell>
-                                    <TableCell>
+                                        }
+                                    </TableCell>
                                     <TableCell>
                                         {pageAnalytics.page_load_time ? `${pageAnalytics.page_load_time} sec` : '--'}
                                     </TableCell>
+                                    <TableCell>
                                         {pageAnalytics.device_type ? pageAnalytics.device_type : '--'}
                                     </TableCell>
                                     <TableCell width="30%">
