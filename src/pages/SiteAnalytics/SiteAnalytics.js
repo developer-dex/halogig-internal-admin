@@ -78,6 +78,7 @@ const SiteAnalytics = () => {
                                 <TableCell>In Time</TableCell>
                                 <TableCell>Out Time</TableCell>
                                 <TableCell>Time Spent</TableCell>
+                                <TableCell>Page Load Time</TableCell>
                                 <TableCell>Device Type</TableCell>
                                 <TableCell width="30%">URL</TableCell>
                             </TableRow>
@@ -111,6 +112,9 @@ const SiteAnalytics = () => {
                                                 {pageAnalytics.url}
                                             </a>
                                         ) : '--'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {pageAnalytics.page_load_time ? `${pageAnalytics.page_load_time} sec` : '--'}
                                     </TableCell>
 
                                 </TableRow>
