@@ -26,11 +26,9 @@ const StyledTableCell = styled(TableCell)({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     '&.location-cell': {
-        maxWidth: '180px',
-        cursor: 'pointer',
-        '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)'
-        }
+        minWidth: '180px',
+        whiteSpace: 'normal',
+        wordBreak: 'break-word'
     },
     '&.time-cell': {
         minWidth: '180px',
@@ -188,13 +186,7 @@ const SiteAnalytics = () => {
                                         {pageAnalytics.ip_address ? pageAnalytics.ip_address : '--'}
                                     </StyledTableCell>
                                     <StyledTableCell className="location-cell">
-                                        <StyledTooltip 
-                                            title={pageAnalytics.location || '--'}
-                                            placement="top"
-                                            arrow
-                                        >
-                                            <div>{pageAnalytics.location ? pageAnalytics.location : '--'}</div>
-                                        </StyledTooltip>
+                                        {pageAnalytics.location ? pageAnalytics.location : '--'}
                                     </StyledTableCell>
                                     <StyledTableCell className="time-cell">
                                         {pageAnalytics.start_time ? moment(pageAnalytics.start_time).format('DD-MM-YYYY h:mm:ss A') : '--'}
