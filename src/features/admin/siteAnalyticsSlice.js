@@ -27,6 +27,18 @@ export const siteAnalytics = createAsyncThunk(
     }
 );
 
+// Export all analytics data without pagination
+export const exportSiteAnalytics = createAsyncThunk(
+    "/exportSiteAnalytics",
+    async () => {
+        try {
+            const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?export=true`);
+            return payload;
+        } catch (e) {
+            showError(e.response.data.message);
+        }
+    }
+);
 
 export const siteAnalyticsSlice = createSlice({
     name: "siteAnalytics",
@@ -47,6 +59,17 @@ export const siteAnalyticsSlice = createSlice({
             state.isLoading = false;
             state.isError = true;
         })
+        .addCase(exportSiteAnalytics.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(exportSiteAnalytics.fulfilled, (state, { payload }) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+        })
+        .addCase(exportSiteAnalytics.rejected, (state) => {
+            state.isLoading = false;
+            state.isError = true;
+        });
     },
 });
 
