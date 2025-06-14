@@ -8,4 +8,5 @@ export const apiEndPoints = {
   GET_INDUSTRY:"industry",
   ADD_CLIENT:"admin/add-client",
   GET_SITE_ANALYTICS:"admin/page-analytics",
+  GET_IP_ANALYTICS:"admin/ip-analytics",
 };

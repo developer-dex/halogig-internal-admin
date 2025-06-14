@@ -4,7 +4,7 @@ import Sidebar from '../Sidebar/Sidebar';
 import './Layout.scss';
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
     <div className="layout">
       <Header toggleSidebar={toggleSidebar} />
       <div className="layout-container">
-        <Sidebar isOpen={sidebarOpen} />
+        {/* <Sidebar isOpen={sidebarOpen} /> */}
         <main className={`main-content ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
           {children}
         </main>

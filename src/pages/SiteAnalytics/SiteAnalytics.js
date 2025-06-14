@@ -10,14 +10,22 @@ import {
     CircularProgress,
     styled,
     Tooltip,
-    Button
+    Button,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField
 } from '@mui/material';
 import moment from 'moment';
 import 'moment-duration-format';
-import { siteAnalytics, exportSiteAnalytics } from '../../features/admin/siteAnalyticsSlice';
+import { siteAnalytics, ipAnalytics, exportSiteAnalytics } from '../../features/admin/siteAnalyticsSlice';
 import '../ClientList/ClientList.scss';
 import * as XLSX from 'xlsx';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Custom styled table cells
 const StyledTableCell = styled(TableCell)({
@@ -71,36 +79,71 @@ const SiteAnalytics = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
     const [isExporting, setIsExporting] = useState(false);
+    const [selectedIpAddress, setSelectedIpAddress] = useState(null);
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
     const pageLimit = 50;
 
     // Get data from Redux store
     const totalEntries = totalCount;
 
-    const fetchpageAnalytics = async () => {
-        setIsLoading(true)
-        const response = await dispatch(siteAnalytics({
-            page: currentPage,
-            pageLimit
-        }));
-        console.log('res', response.payload.data.data)
-        setpageAnalytics(response.payload.data.data.userActivities);
-        setTotalCount(response.payload.data.data.total_count);
-        setIsLoading(false)
-
-    };
-
     useEffect(() => {
-        fetchpageAnalytics();
-    }, [dispatch, currentPage]);
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                if (selectedIpAddress) {
+                    const response = await dispatch(ipAnalytics({
+                        page: currentPage,
+                        pageLimit,
+                        ipAddress: selectedIpAddress
+                    }));
+                    setpageAnalytics(response.payload.data.data.userActivities);
+                    setTotalCount(response.payload.data.data.total_count);
+                } else {
+                    const response = await dispatch(siteAnalytics({
+                        page: currentPage,
+                        pageLimit
+                    }));
+                    setpageAnalytics(response.payload.data.data.userActivities);
+                    setTotalCount(response.payload.data.data.total_count);
+                }
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+        // eslint-disable-next-line
+    }, [dispatch, currentPage, selectedIpAddress]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
+    const handleExportClick = () => {
+        setIsExportDialogOpen(true);
+    };
+
+    const handleExportDialogClose = () => {
+        setIsExportDialogOpen(false);
+        setFromDate('');
+        setToDate('');
+    };
+
     const handleExport = async () => {
+        if (!fromDate || !toDate) {
+            alert('Please select both from and to dates');
+            return;
+        }
+
         setIsExporting(true);
         try {
-            const response = await dispatch(exportSiteAnalytics());
+            const response = await dispatch(exportSiteAnalytics({
+                fromDate: moment(fromDate).format('YYYY-MM-DD'),
+                toDate: moment(toDate).format('YYYY-MM-DD')
+            }));
             const data = response.payload.data.data.userActivities;
             
             // Transform data for Excel
@@ -122,16 +165,41 @@ const SiteAnalytics = () => {
             // Add worksheet to workbook
             XLSX.utils.book_append_sheet(wb, ws, 'Site Analytics');
 
-            // Generate filename with current date
-            const fileName = `site_analytics_${moment().format('YYYY-MM-DD')}.xlsx`;
+            // Generate filename with date range
+            const fileName = `site_analytics_${moment(fromDate).format('YYYY-MM-DD')}_to_${moment(toDate).format('YYYY-MM-DD')}.xlsx`;
 
             // Save file
             XLSX.writeFile(wb, fileName);
+            handleExportDialogClose();
         } catch (error) {
             console.error('Export failed:', error);
         } finally {
             setIsExporting(false);
         }
+    };
+
+    const handleViewIpAnalytics = async (ipAddress) => {
+        setIsLoading(true);
+        setSelectedIpAddress(ipAddress);
+        try {
+            const response = await dispatch(ipAnalytics({
+                page: currentPage,
+                pageLimit,
+                ipAddress
+            }));
+            setpageAnalytics(response.payload.data.data.userActivities);
+            setTotalCount(response.payload.data.data.total_count);
+        } catch (error) {
+            console.error('Error fetching IP analytics:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleBackToList = () => {
+        console.log("handleBackToList");
+        setSelectedIpAddress(null);
+        setCurrentPage(currentPage);
     };
 
     if (isLoading) {
@@ -145,11 +213,24 @@ const SiteAnalytics = () => {
     return (
         <div className="partner-list">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2>Site Analytics</h2>
+                {selectedIpAddress && 
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleBackToList}
+                    startIcon={<ArrowBackIcon />}
+                >
+                    Back to List
+                </Button>
+                }
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{paddingTop: '10px'}}>{selectedIpAddress ? `Analytics for IP: ${selectedIpAddress}` : 'Site Analytics'}</h2>
+                </div>
+              
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleExport}
+                    onClick={handleExportClick}
                     disabled={isExporting}
                     startIcon={<FileDownloadIcon />}
                 >
@@ -157,12 +238,45 @@ const SiteAnalytics = () => {
                 </Button>
             </div>
 
-            {/* <div className="search-container">
-                <div className="search-box">
-          <SearchIcon />
-          <input type="text" placeholder="Search Tasks" />
-        </div>
-            </div> */}
+            {/* Export Dialog */}
+            <Dialog open={isExportDialogOpen} onClose={handleExportDialogClose}>
+                <DialogTitle>Select Date Range for Export</DialogTitle>
+                <DialogContent>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px', minWidth: '300px' }}>
+                        <TextField
+                            label="From Date"
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                        <TextField
+                            label="To Date"
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleExportDialogClose}>Cancel</Button>
+                    <Button 
+                        onClick={handleExport} 
+                        variant="contained" 
+                        color="primary"
+                        disabled={!fromDate || !toDate || isExporting}
+                    >
+                        {isExporting ? 'Exporting...' : 'Download'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <div className="table-wrapper">
                 <TableContainer sx={{ maxHeight: 'calc(100vh - 250px)' }}>
@@ -177,6 +291,7 @@ const SiteAnalytics = () => {
                                 <StyledTableCell>Page Load Time</StyledTableCell>
                                 <StyledTableCell>Device Type</StyledTableCell>
                                 <StyledTableCell className="url-cell">URL</StyledTableCell>
+                                {!selectedIpAddress && <StyledTableCell>Actions</StyledTableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -213,6 +328,18 @@ const SiteAnalytics = () => {
                                             </a>
                                         ) : '--'}
                                     </StyledTableCell>
+                                    {!selectedIpAddress && (
+                                    <StyledTableCell>
+                                        <IconButton
+                                            onClick={() => handleViewIpAnalytics(pageAnalytics.ip_address)}
+                                            disabled={!pageAnalytics.ip_address}
+                                            color="primary"
+                                            size="small"
+                                        >
+                                            <VisibilityIcon />
+                                        </IconButton>
+                                    </StyledTableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -16,13 +16,24 @@ const initialState = {
 // Removed TypeScript type annotations
 export const siteAnalytics = createAsyncThunk(
     "/siteAnalytics",
-    async ({ category, page, pageLimit }) => { // Updated to accept page and pageLimit
+    async ({ page, pageLimit }) => {
         try {
-            const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?page=${page}&limit=${pageLimit}`); // Updated API call
+            const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?page=${page}&limit=${pageLimit}`);
             return payload;
         } catch (e) {
             showError(e.response.data.message);
-            // return e;
+        }
+    }
+);
+
+export const ipAnalytics = createAsyncThunk(
+    "/ipAnalytics",
+    async ({ page, pageLimit, ipAddress }) => {
+        try {
+            const payload = await getApi(`${apiEndPoints.GET_IP_ANALYTICS}?page=${page}&limit=${pageLimit}&ipAddress=${ipAddress}`);
+            return payload;
+        } catch (e) {
+            showError(e.response.data.message);
         }
     }
 );
@@ -30,10 +41,15 @@ export const siteAnalytics = createAsyncThunk(
 // Export all analytics data without pagination
 export const exportSiteAnalytics = createAsyncThunk(
     "/exportSiteAnalytics",
-    async () => {
+    async ({ fromDate, toDate }) => {
         try {
-            const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?export=true`);
-            return payload;
+            if(fromDate && toDate){
+                const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?export=true&fromDate=${fromDate}&toDate=${toDate}`);
+                return payload;
+            }else{
+                const payload = await getApi(`${apiEndPoints.GET_SITE_ANALYTICS}?export=true`);
+                return payload;
+            }
         } catch (e) {
             showError(e.response.data.message);
         }
@@ -56,6 +72,19 @@ export const siteAnalyticsSlice = createSlice({
             state.responseData = payload?.data?.data || {};
         })
         .addCase(siteAnalytics.rejected, (state) => {
+            state.isLoading = false;
+            state.isError = true;
+        })
+        .addCase(ipAnalytics.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(ipAnalytics.fulfilled, (state, { payload }) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.responseCode = payload?.status;
+            state.responseData = payload?.data?.data || {};
+        })
+        .addCase(ipAnalytics.rejected, (state) => {
             state.isLoading = false;
             state.isError = true;
         })
