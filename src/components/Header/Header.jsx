@@ -41,6 +41,7 @@ const Header = ({ toggleSidebar }) => {
             <Link to="/clients" className={location.pathname === '/clients' ? 'active' : ''}>Client</Link>
             <Link to="/freelancer" className={location.pathname === '/freelancer' ? 'active' : ''}>FreeLancer</Link>
             <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contacts</Link>
+            <Link to="/chat" className={location.pathname === '/chat' ? 'active' : ''}>Chat Rooms</Link>
             <Link to="/site-analytics" className={location.pathname === '/site-analytics' ? 'active' : ''}>Site Analytics</Link>
           </nav>
         </div>

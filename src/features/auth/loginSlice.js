@@ -13,16 +13,25 @@ const initialState = {
   token: "",
 };
 
-export const loginData = createAsyncThunk(
-  "/loginData",
+export const adminLogin = createAsyncThunk(
+  "/adminLogin",
   async (values) => {
+    console.log('=== ADMIN LOGIN THUNK STARTED ==='); // Debug log
+    console.log('Login values received:', values); // Debug log
+    console.log('API endpoint:', apiEndPoints.ADMIN_LOGIN); // Debug log
+    
     try {
       const valuesData = { ...values };
-      const payload = await authPostApi(apiEndPoints.LOGIN_PATH, valuesData);
-      console.log("payload:::", payload);
+      console.log('About to call authPostApi with:', valuesData); // Debug log
+      
+      const payload = await authPostApi(apiEndPoints.ADMIN_LOGIN, valuesData);
+      console.log("Admin login payload received:", payload); // Debug log
       return payload;
     } catch (e) {
-      showError(e.response.data.message);
+      console.error('Admin login error:', e); // Debug log
+      console.error('Error response:', e.response); // Debug log
+      showError(e.response?.data?.message || "Login failed");
+      throw e;
     }
   }
 );
@@ -34,7 +43,8 @@ export const fetchDataStatus = createAsyncThunk(
       const payload = await getApiClient(apiEndPoints.GET_SOFTWARE_STATUS);
       return payload;
     } catch (e) {
-      showError(e.response.data.message);
+      showError(e.response?.data?.message || "Failed to fetch data");
+      throw e;
     }
   }
 );
@@ -46,7 +56,8 @@ export const profilePicture = createAsyncThunk(
       const payload = await patchApi(apiEndPoints.PROFILE_PICTURE, values);
       return payload;
     } catch (e) {
-      showError(e.response.data.message);
+      showError(e.response?.data?.message || "Failed to update profile picture");
+      throw e;
     }
   }
 );
@@ -54,21 +65,37 @@ export const profilePicture = createAsyncThunk(
 export const loginDataSlice = createSlice({
   name: "loginData",
   initialState,
-  reducers: {},
+  reducers: {
+    clearLoginState: (state) => {
+      state.isLoading = false;
+      state.isSuccess = false;
+      state.isError = false;
+      state.responseCode = 0;
+      state.responseData = {};
+      state.token = "";
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(loginData.pending, (state) => {
+      .addCase(adminLogin.pending, (state) => {
+        console.log('adminLogin.pending - Setting loading to true'); // Debug log
         state.isLoading = true;
+        state.isError = false;
+        state.isSuccess = false;
       })
-      .addCase(loginData.fulfilled, (state, { payload }) => {
+      .addCase(adminLogin.fulfilled, (state, { payload }) => {
+        console.log('adminLogin.fulfilled - Success!', payload); // Debug log
         state.isLoading = false;
         state.isSuccess = true;
         state.responseCode = payload && payload.status;
         state.responseData = payload && payload.data.data;
+        state.token = payload && payload.data.data.token;
       })
-      .addCase(loginData.rejected, (state) => {
+      .addCase(adminLogin.rejected, (state, action) => {
+        console.log('adminLogin.rejected - Failed!', action.error); // Debug log
         state.isLoading = false;
         state.isError = true;
+        state.isSuccess = false;
       })
       .addCase(fetchDataStatus.pending, (state) => {
         state.isLoading = true;
@@ -99,4 +126,5 @@ export const loginDataSlice = createSlice({
   },
 });
 
+export const { clearLoginState } = loginDataSlice.actions;
 export const loginDataReducer = loginDataSlice.reducer;

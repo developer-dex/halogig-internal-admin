@@ -1,66 +1,64 @@
 import ApiInstance from "./http";
 import { config } from "../config/config";
-import { getAuthHeader, getHeader, getHeaderClient } from "../utils/utils";
 
 // Removed TypeScript interfaces
 
 export const getApi = async (url) => {
-  const headers = getHeader();
   const data = await ApiInstance.get(`${url}`);
   return data;
 };
 
 export const getApiClient = async (url) => {
-  const headers = getHeaderClient();
-  const data = await ApiInstance.get(`${url}`, headers);
+  const data = await ApiInstance.get(`${url}`);
   return data;
 };
 
 export const postApi = (url, apiData) => {
-  const headers = getHeader();
-  return ApiInstance.post(`${url}`, apiData, headers);
+  return ApiInstance.post(`${url}`, apiData);
 };
+
 export const postClientApi = (url, apiData) => {
-  const headers = getHeaderClient();
-  return ApiInstance.post(`${url}`, apiData, headers);
+  return ApiInstance.post(`${url}`, apiData);
 };
 
 export const authPostApi = async (url, apiData) => {
-  const headers = getHeader();
+  console.log('=== AUTH POST API CALLED ==='); // Debug log
+  console.log('URL:', url); // Debug log
+  console.log('API Data:', apiData); // Debug log
+  
   try {
-    const data = await ApiInstance.post(`${url}`, apiData, headers);
+    console.log('About to call ApiInstance.post with:', { url, apiData }); // Debug log
+    const data = await ApiInstance.post(`${url}`, apiData);
+    console.log('API Response received:', data); // Debug log
     return data;
   } catch (error) {
+    console.error('API Error:', error); // Debug log
+    console.error('Error response:', error.response); // Debug log
     throw error;
   }
 };
 
 export const patchApi = (url, apiData) => {
-  const headers = getHeader();
   return ApiInstance.patch(`${url}`, apiData);
 };
+
 export const patchClientApi = (url, apiData) => {
-  const headers = getHeaderClient();
-  return ApiInstance.patch(`${url}`, apiData, headers);
+  return ApiInstance.patch(`${url}`, apiData);
 };
 
 export const putApi = (url, apiData) => {
-  const headers = getHeader();
-  return ApiInstance.put(`${url}`, apiData, headers);
+  return ApiInstance.put(`${url}`, apiData);
 };
 
 export const putClientApi = (url, apiData) => {
-  const headers = getHeaderClient();
-  return ApiInstance.put(`${url}`, apiData, headers);
+  return ApiInstance.put(`${url}`, apiData);
 };
 
 export const deleteApi = (url) => {
-  const headers = getHeader();
-  return ApiInstance.delete(`${config.apiBaseUrl}${url}`, headers);
+  return ApiInstance.delete(`${config.apiBaseUrl}${url}`);
 };
 
 export const deleteApiClient = (url) => {
-  const headers = getHeaderClient();
-  return ApiInstance.delete(`${config.apiBaseUrl}${url}`, headers);
+  return ApiInstance.delete(`${config.apiBaseUrl}${url}`);
 };
 

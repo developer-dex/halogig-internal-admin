@@ -8,17 +8,44 @@ const instance = axios.create({
   baseURL: config.apiBaseUrl,
 });
 
+// Request interceptor to add authorization header
+instance.interceptors.request.use(
+  (config) => {
+    const adminToken = localStorage.getItem('adminToken');
+    
+    // Don't add authorization header for login requests
+    if (config.url && !config.url.includes('/login') && adminToken) {
+      config.headers.authorization = `Bearer ${adminToken}`;
+    }
+    
+    // Set default headers
+    config.headers.Accept = "application/json";
+    config.headers["Accept-Language"] = "en";
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 instance.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
     const { response } = error;
-    if (response.status === UNAUTHORIZED) {
+    if (response && response.status === UNAUTHORIZED) {
+      // Clear all session data including admin data
       clearSession();
-      window.location.href = config.appBaseUrl || '';
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminData');
+      localStorage.removeItem('isAdminLogIn');
+      
+      // Redirect to login page
+      window.location.href = '/login';
     }
-    if (response.status === 409) { // Changed from HttpStatusCode.Conflict
+    if (response && response.status === 409) {
       window.location.href = config.baseName || '';
     }
     throw error;

@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Layout from './components/Layout/Layout';
 import AppRoutes from './routes';
 import './assets/styles/global.scss';
+import 'react-toastify/dist/ReactToastify.css';
 import { Provider } from 'react-redux';
 import store from './app/store';
 
@@ -30,6 +32,17 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <AppContent />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </BrowserRouter>
     </Provider>
   );

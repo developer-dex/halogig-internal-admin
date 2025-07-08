@@ -5,6 +5,7 @@ import ContactList from './pages/ContactList/ContactList';
 import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
 import SiteAnalytics from './pages/SiteAnalytics/SiteAnalytics';
 import LoginPage from './pages/Login/Login';
+import ChatRoom from './pages/ChatRoom/ChatRoom';
 
 // Helper component for protected routes
 const ProtectedRoute = () => {
@@ -32,6 +33,7 @@ const AppRoutes = () => {
         <Route path="/contact" element={<ContactList />} />
         <Route path="/site-analytics" element={<SiteAnalytics />} />
       </Route>
+      <Route path="/chat" element={<ChatRoom />} />
     </Routes>
   );
 };

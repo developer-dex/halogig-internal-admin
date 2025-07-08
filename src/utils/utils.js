@@ -13,20 +13,34 @@ export function getAuthHeader() {
 }
 
 export function getHeader() {
+    const adminToken = localStorage.getItem('adminToken');
     return {
       headers: {
         Accept: "application/json",
         "Accept-Language": "en",
-        authorization: `${getSession()}`,
+        authorization: adminToken ? `Bearer ${adminToken}` : '',
       },
     };
 }
+
 export function getHeaderClient() {
+    const adminToken = localStorage.getItem('adminToken');
     return {
       headers: {
         Accept: "application/json",
         "Accept-Language": "en",
-        authorization: `${getSessionClient()}`,
+        authorization: adminToken ? `Bearer ${adminToken}` : '',
+      },
+    };
+}
+
+export function getAdminHeader() {
+    const adminToken = localStorage.getItem('adminToken');
+    return {
+      headers: {
+        Accept: "application/json",
+        "Accept-Language": "en",
+        authorization: adminToken ? `Bearer ${adminToken}` : '',
       },
     };
 }
