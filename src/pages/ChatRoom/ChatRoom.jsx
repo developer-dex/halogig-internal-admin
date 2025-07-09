@@ -158,7 +158,8 @@ const ChatRoom = () => {
     };
 
     const result = await dispatch(createChatRoom(roomData));
-    if (result.type === 'chat/createChatRoom/fulfilled') {
+    console.log('result', result);
+    if (result.type === '/chat/createChatRoom/fulfilled') {
       handleCloseCreateModal();
       // Refresh room list
       dispatch(getAdminChatRooms({ page: 1, limit: 50 }));
@@ -187,10 +188,10 @@ const ChatRoom = () => {
       roomId: currentChatRoom.id, 
       messageData 
     }));
+    console.log('result', result);
     
-    if (result.type === 'chat/sendMessage/fulfilled') {
+    if (result.type === '/chat/sendMessage/fulfilled') {
       setNewMessage('');
-      
       // Scroll to bottom after sending message
       setTimeout(() => {
         scrollToBottom();
@@ -341,14 +342,14 @@ const ChatRoom = () => {
                 onClick={() => dispatch(clearCurrentChatRoom())}
                 className="back-btn"
               >
-                ← Back to Rooms
+                ← Back
               </Button>
-              <Typography variant="h6" className="chat-title">
-                {currentChatRoom.name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
+                  {/* <Typography variant="h6" className="chat-title">
+                    {currentChatRoom.name}
+                  </Typography> */}
+              {/* <Typography variant="body2" color="textSecondary">
                 {currentChatRoom.memberCount || 0} members
-              </Typography>
+              </Typography> */}
             </div>
 
             <div className="messages-container">

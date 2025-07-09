@@ -1,5 +1,5 @@
 .chat-room-container {
-  padding: 24px;
+  padding: 0px;
   height: calc(100vh - 120px);
   background-color: #f8f9fa;
   overflow: hidden;
@@ -131,7 +131,7 @@
     display: flex;
     flex-direction: row;
     height: 100%;
-    gap: 24px;
+    // gap: 24px;
     flex: 1;
 
     .chat-window {
@@ -139,7 +139,7 @@
       order: 2;
       margin-left: auto;
       background: white;
-      border-radius: 12px;
+      border-radius: 0px;
       border: 1px solid #e0e0e0;
       display: flex;
       flex-direction: column;
@@ -147,7 +147,7 @@
       min-height: 0;
 
       .chat-header {
-        padding: 20px 24px;
+        padding: 10px 10px;
         border-bottom: 1px solid #e0e0e0;
         background: #f8f9fa;
         display: flex;
@@ -285,7 +285,7 @@
       margin-right: auto;
       flex-shrink: 0;
       background: white;
-      border-radius: 12px;
+      border-radius: 0px;
       border: 1px solid #e0e0e0;
       overflow: hidden;
       display: flex;
