@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -33,7 +33,9 @@ import {
   deleteMessage,
   setCurrentChatRoom,
   clearCurrentChatRoom,
+  addMessage,
 } from '../../features/admin/chatManagementSlice';
+import socketService from '../../services/socket.service';
 import './ChatRoom.scss';
 
 const ChatRoom = () => {
@@ -54,11 +56,80 @@ const ChatRoom = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentAdmin, setCurrentAdmin] = useState(null);
+  
+  // Socket-related refs
+  const unsubscribeRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     // Fetch initial data
     dispatch(getAdminChatRooms({ page: currentPage, limit: 50 }));
   }, [dispatch, currentPage]);
+
+  // Initialize socket connection for admin
+  useEffect(() => {
+    const adminJson = localStorage.getItem('adminData');
+    if (adminJson) {
+      try {
+        const admin = JSON.parse(adminJson);
+        setCurrentAdmin(admin);
+        
+        // Initialize socket connection
+        socketService.connect(admin.id);
+      } catch (error) {
+        console.error('Error parsing admin data:', error);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      socketService.disconnect();
+    };
+  }, []);
+
+  // Setup socket listeners for the current chat room
+  useEffect(() => {
+    console.log('currentChatRoom', currentChatRoom);
+    console.log('currentAdmin', currentAdmin);
+    if (currentChatRoom && currentAdmin) {
+      // Join the room
+      socketService.joinRoom(currentChatRoom.id);
+
+      // Listen for messages in this room
+      const unsubscribe = socketService.onRoomMessage(currentChatRoom.id, (incomingMessage) => {
+        // Only add message if it's not from current admin (to avoid duplicates)
+        if (incomingMessage.sender_id !== currentAdmin.id) {
+          // Add the incoming message directly to state for better performance
+          dispatch(addMessage(incomingMessage));
+        }
+      });
+
+      // Store unsubscribe function
+      unsubscribeRef.current = unsubscribe;
+
+      // Cleanup when room changes
+      return () => {
+        if (unsubscribeRef.current) {
+          unsubscribeRef.current();
+        }
+        socketService.leaveRoom(currentChatRoom.id);
+      };
+    }
+  }, [currentChatRoom, currentAdmin, dispatch]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleCreateRoom = () => {
     setOpenCreateModal(true);
@@ -97,6 +168,11 @@ const ChatRoom = () => {
   const handleRoomClick = (room) => {
     dispatch(setCurrentChatRoom(room));
     dispatch(getChatRoomMessages({ roomId: room.id, page: 1, limit: 100 }));
+    
+    // Scroll to bottom after loading messages
+    setTimeout(() => {
+      scrollToBottom();
+    }, 200);
   };
 
   const handleSendMessage = async () => {
@@ -114,6 +190,11 @@ const ChatRoom = () => {
     
     if (result.type === 'chat/sendMessage/fulfilled') {
       setNewMessage('');
+      
+      // Scroll to bottom after sending message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   };
 
@@ -316,6 +397,7 @@ const ChatRoom = () => {
                   </div>
                 ))
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             <div className="message-input-container">
