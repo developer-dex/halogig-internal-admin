@@ -38,9 +38,7 @@ class SocketService {
     this.adminId = adminId;
     
     // Get socket URL from environment or use default
-    const socketUrl = process.env.NODE_ENV === 'production' 
-      ? process.env.REACT_APP_SOCKET_URL || window.location.origin
-      : 'http://localhost:8080';
+    const socketUrl = process.env.REACT_APP_SOCKET_URL
 
     console.log('Admin connecting to socket server:', socketUrl);
 
