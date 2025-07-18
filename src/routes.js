@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import ClientList from './pages/ClientList/ClientList';
 import ContactList from './pages/ContactList/ContactList';
 import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
+import PostProject from './pages/PostProject/PostProject';
 import SiteAnalytics from './pages/SiteAnalytics/SiteAnalytics';
 import LoginPage from './pages/Login/Login';
 import ChatRoom from './pages/ChatRoom/ChatRoom';
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route path="/freelancer" element={<FreeLancerList />} />
         <Route path="/clients" element={<ClientList />} />
         <Route path="/contact" element={<ContactList />} />
+        <Route path="/projects" element={<PostProject />} />
         <Route path="/site-analytics" element={<SiteAnalytics />} />
       </Route>
       <Route path="/chat" element={<ChatRoom />} />

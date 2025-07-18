@@ -4,6 +4,8 @@ import { freelancerDataReducer } from "../features/admin/freelancerManagementSli
 import { contactDataReducer } from "../features/admin/contactUsManagementSlice";
 import { siteAnalyticsReducer } from "../features/admin/siteAnalyticsSlice";
 import { chatManagementReducer } from "../features/admin/chatManagementSlice";
+import { projectDataReducer } from "../features/admin/projectManagementSlice";
+import { dropdownDataReducer } from "../features/admin/dropdownDataSlice";
 import { loginDataReducer } from "../features/auth/loginSlice";
 
 const store = configureStore({
@@ -13,6 +15,8 @@ const store = configureStore({
     contactDataReducer:contactDataReducer,
     siteAnalyticsReducer:siteAnalyticsReducer,
     chatManagementReducer:chatManagementReducer,
+    projectDataReducer:projectDataReducer,
+    dropdownDataReducer:dropdownDataReducer,
     loginDataReducer:loginDataReducer,
   },
   middleware: getDefaultMiddleware =>

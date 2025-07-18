@@ -12,6 +12,13 @@ export const apiEndPoints = {
   ADD_CLIENT:"admin/add-client",
   GET_SITE_ANALYTICS:"admin/page-analytics",
   GET_IP_ANALYTICS:"admin/ip-analytics",
+  GET_CLIENT_PROJECTS: "admin/projects",
+  GET_CATEGORIES: "category",
+  GET_SUBCATEGORIES: "user/sub-category",
+  GET_TECHNOLOGIES: "technology",
+  GET_INDUSTRIES: "industry",
+  UPDATE_PROJECT: "admin/project",
+  UPDATE_PROJECT_STATUS: "admin/project",
   
   // Chat endpoints
   GET_ALL_USERS: "admin/user",
