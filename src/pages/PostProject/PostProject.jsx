@@ -387,9 +387,9 @@ const PostProject = () => {
             <TableHead>
               <TableRow>
                 <TableCell width="20%">PROJECT TITLE</TableCell>
-                <TableCell width="15%">FIRST NAME</TableCell>
-                <TableCell width="15%">LAST NAME</TableCell>
-                <TableCell width="15%">EMAIL</TableCell>
+                <TableCell width="12%">FIRST NAME</TableCell>
+                <TableCell width="10%">LAST NAME</TableCell>
+                <TableCell width="20%">EMAIL</TableCell>
                 <TableCell width="15%">PRICING MODEL</TableCell>
                 <TableCell width="10%">STATUS</TableCell>
                 <TableCell width="15%">ACTION</TableCell>
@@ -402,10 +402,10 @@ const PostProject = () => {
                     <TableCell width="20%">
                       {project.project_title ? project.project_title : '--'}
                     </TableCell>
-                    <TableCell width="15%">
+                    <TableCell width="12%">
                       {project.User?.first_name ? project.User.first_name : '--'}
                     </TableCell>
-                    <TableCell width="15%">
+                    <TableCell width="10%">
                       {project.User?.last_name ? project.User.last_name : '--'}
                     </TableCell>
                       <TableCell width="20%">
