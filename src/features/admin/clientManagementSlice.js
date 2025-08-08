@@ -42,10 +42,23 @@ export const statusChange = createAsyncThunk(
     }
 );
 
+// API function for getting client details (not stored in Redux)
+export const getClientDetailsApi = async (clientId) => {
+    try {
+        const payload = await getApi(`${apiEndPoints.GET_CLIENT_DETAILS}/${clientId}/details`);
+        return payload;
+    } catch (e) {
+        showError(e.response?.data?.message || "Failed to fetch client details");
+        throw e;
+    }
+};
+
 export const clientDataSlice = createSlice({
     name: "clientData",
     initialState,
-    reducers: {},
+    reducers: {
+        // No reducers needed for client details since we're using local state
+    },
     extraReducers: (builder) => {
         builder
         .addCase(clientData.pending, (state) => {
@@ -60,7 +73,7 @@ export const clientDataSlice = createSlice({
         .addCase(clientData.rejected, (state) => {
             state.isLoading = false;
             state.isError = true;
-        })
+        });
     },
 });
 

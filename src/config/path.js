@@ -3,6 +3,7 @@ export const apiEndPoints = {
   ADMIN_LOGIN: "admin/auth/login",
   
   GET_CLIENT_DATA: "admin/clients",
+  GET_CLIENT_DETAILS: "admin/user",
   GET_FRELANCER_DATA:"admin/freelancers",
   GET_CONTACT_US:"admin/contact-us",
   STATUS_UPDATE:"admin/user",

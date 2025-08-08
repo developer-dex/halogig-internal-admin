@@ -1,5 +1,6 @@
 import React, { useEffect, useState, version } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -7,13 +8,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   IconButton,
-  Avatar,
   CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
   Button,
   Dialog,
   DialogTitle,
@@ -22,16 +18,13 @@ import {
   Checkbox,
   DialogActions,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import LockIcon from '@mui/icons-material/Lock';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { clientData, statusChange } from '../../features/admin/clientManagementSlice';
 import './ClientList.scss';
 
 const ClientList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,9 +85,8 @@ const ClientList = () => {
   };
 
   const handleViewClient = (client) => {
-    // Add functionality for viewing client details
-    console.log('View client:', client);
-    // You can add navigation to client details page or open a modal here
+    // Navigate to client detail page
+    navigate(`/clients/${client.id}`);
   };
 
   const getStatusButtonStyle = (status) => {
@@ -170,23 +162,23 @@ const ClientList = () => {
                 <TableCell width="20%">FIRST NAME</TableCell>
                 <TableCell width="20%">LAST NAME</TableCell>
                 <TableCell width="25%">EMAIL</TableCell>
-                <TableCell width="15%" align="center">VIEW</TableCell>
+                <TableCell width="15%" >VIEW</TableCell>
                 <TableCell width="20%">ACTION</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {clients.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell>
+                  <TableCell  width="20%">
                     {client.first_name ? client.first_name : '--'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="20%">
                     {client.last_name ? client.last_name : '--'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="25%">
                     {client.email ? client.email : '--'}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell width="15%">
                     <IconButton 
                       className="action-btn"
                       onClick={() => handleViewClient(client)}
@@ -195,7 +187,7 @@ const ClientList = () => {
                       <VisibilityIcon />
                     </IconButton>
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="20%">
                     <Button 
                       variant="outlined" 
                       onClick={() => handleOpenModal(client)}

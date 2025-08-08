@@ -1,0 +1,172 @@
+.client-detail {
+  padding: 20px;
+
+  .header-client-detail {
+    margin-bottom: 24px;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    text-align: center;
+  }
+
+  .MuiCard-root {
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .MuiCardContent-root {
+    padding: 24px;
+  }
+
+  .MuiAvatar-root {
+    border: 2px solid #e0e0e0;
+  }
+
+  .MuiChip-root {
+    font-weight: 500;
+  }
+
+  .MuiListItem-root {
+    padding: 8px 0;
+  }
+
+  .MuiListItemIcon-root {
+    min-width: 40px;
+    color: #666;
+  }
+
+  .MuiPaper-root {
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .MuiTypography-h6 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .MuiTypography-subtitle2 {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .MuiTypography-body2 {
+    color: #666;
+    line-height: 1.5;
+  }
+
+  // Responsive adjustments
+  @media (max-width: 960px) {
+    .header {
+      text-align: center;
+    }
+
+    .MuiGrid-item {
+      margin-bottom: 16px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: 16px;
+
+    .MuiCardContent-root {
+      padding: 16px;
+    }
+
+    .MuiTypography-h4 {
+      font-size: 1.5rem;
+    }
+
+    .MuiTypography-h6 {
+      font-size: 1.1rem;
+    }
+  }
+
+  // Custom scrollbar for long content
+  .MuiCard-root {
+    overflow-y: auto;
+    max-height: 600px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+  }
+
+  // Status chip colors
+  .MuiChip-colorSuccess {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .MuiChip-colorWarning {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+
+  .MuiChip-colorError {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+
+  .MuiChip-colorInfo {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+
+  // Image styling
+  img {
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  // Back button styling
+  .MuiButton-outlined {
+    border-color: #1976d2;
+    color: #1976d2;
+
+    &:hover {
+      background-color: rgba(25, 118, 210, 0.04);
+      border-color: #1565c0;
+    }
+  }
+} 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import ClientList from './pages/ClientList/ClientList';
+import ClientDetail from './pages/ClientDetail/ClientDetail';
 import ContactList from './pages/ContactList/ContactList';
 import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
 import PostProject from './pages/PostProject/PostProject';
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/freelancer" element={<FreeLancerList />} />
         <Route path="/clients" element={<ClientList />} />
+        <Route path="/clients/:clientId" element={<ClientDetail />} />
         <Route path="/contact" element={<ContactList />} />
         <Route path="/projects" element={<PostProject />} />
         <Route path="/site-analytics" element={<SiteAnalytics />} />
