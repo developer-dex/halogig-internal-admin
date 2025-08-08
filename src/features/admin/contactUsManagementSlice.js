@@ -77,6 +77,19 @@ export const addClient = createAsyncThunk(
     }
 );
 
+export const createUserByAdmin = createAsyncThunk(
+    "/createUserByAdmin",
+    async (data) => {
+        try {
+            const payload = await postApi(apiEndPoints.CREATE_USER_BY_ADMIN, data);
+            return payload;
+        } catch (e) {
+            // Let the component handle the error display
+            throw e;
+        }
+    }
+);
+
 export const contactDataSlice = createSlice({
     name: "contactData",
     initialState,
@@ -144,6 +157,20 @@ export const contactDataSlice = createSlice({
             state.industryData = payload?.data?.data || [];
         })
         .addCase(getIndustryData.rejected, (state) => {
+            state.isLoading = false;
+            state.isError = true;
+        })
+        .addCase(createUserByAdmin.pending, (state) => {
+            state.isLoading = true;
+            state.isError = false;
+        })
+        .addCase(createUserByAdmin.fulfilled, (state, { payload }) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.responseCode = payload?.status;
+            state.responseData = payload?.data?.data || {};
+        })
+        .addCase(createUserByAdmin.rejected, (state) => {
             state.isLoading = false;
             state.isError = true;
         })

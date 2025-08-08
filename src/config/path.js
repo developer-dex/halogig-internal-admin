@@ -10,6 +10,7 @@ export const apiEndPoints = {
   GET_COUNTRIES: "country",
   GET_INDUSTRY:"industry",
   ADD_CLIENT:"admin/add-client",
+  CREATE_USER_BY_ADMIN:"admin/create-user",
   GET_SITE_ANALYTICS:"admin/page-analytics",
   GET_IP_ANALYTICS:"admin/ip-analytics",
   GET_CLIENT_PROJECTS: "admin/projects",

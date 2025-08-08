@@ -20,11 +20,15 @@ import {
   FormLabel,
   Select,
   MenuItem,
-  Grid
+  Grid,
+  InputLabel
 } from '@mui/material';
-import { MoreHoriz } from '@mui/icons-material';
+import { MoreHoriz, Add as AddIcon } from '@mui/icons-material';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/material.css';
 import '../ClientList/ClientList.scss';
-import { contactData, getEnrollAsData, getCountryData, addClient, getIndustryData } from '../../features/admin/contactUsManagementSlice';
+import { contactData, getEnrollAsData, getCountryData, addClient, getIndustryData, createUserByAdmin } from '../../features/admin/contactUsManagementSlice';
+import { showSuccess, showError } from '../../helpers/messageHelper';
 
 const ContactList = () => {
   const dispatch = useDispatch();
@@ -49,6 +53,16 @@ const ContactList = () => {
   });
   const [openReqModal, setOpenReqModal] = useState(false);
   const [selectedReq, setSelectedReq] = useState('');
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    mobile: '',
+    country: 'IN',
+    notes: ''
+  });
   const pageLimit = 10;
 
   // Get data from Redux store using useSelector
@@ -176,6 +190,73 @@ const ContactList = () => {
     setSelectedReq('');
   };
 
+  const handleOpenCreateModal = () => {
+    setOpenCreateModal(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setOpenCreateModal(false);
+    setCreateFormData({
+      first_name: '',
+      last_name: '',
+      email: '',
+      mobile: '',
+      country: 'IN',
+      notes: ''
+    });
+  };
+
+  const handleCreateFormChange = (event) => {
+    const { name, value } = event.target;
+    setCreateFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePhoneChange = (phone, countryData, e, formattedValue) => {
+    setCreateFormData(prev => ({
+      ...prev,
+      mobile: phone,
+      country: countryData.name
+    }));
+  };
+
+  const handleCreateFormSubmit = async () => {
+    try {
+      setIsCreatingUser(true);
+      
+      // Prepare data for API call
+      const userData = {
+        first_name: createFormData.first_name,
+        last_name: createFormData.last_name,
+        email: createFormData.email,
+        mobile: createFormData.mobile,
+        country: createFormData.country,
+        notes: createFormData.notes
+      };
+      
+      console.log('Creating user with data:', userData);
+      
+      // Call the API to create user
+      const response = await dispatch(createUserByAdmin(userData));
+      
+      if (response.payload && response.payload.data && response.payload.data.success) {
+        showSuccess('User created successfully!');
+        handleCloseCreateModal();
+        fetchClients(); // Refresh the contact list
+      } else {
+        const errorMessage = response.payload?.data?.message || 'Failed to create user. Please try again.';
+        showError(errorMessage);
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      showError(error.message || 'Failed to create user. Please try again.');
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -186,27 +267,43 @@ const ContactList = () => {
 
   return (
     <div className="partner-list">
-      {/* <div className="search-container"> */}
-      {/* <div className="search-box">
-          <SearchIcon />
-          <input type="text" placeholder="Search Tasks" />
-        </div> */}
-      {/* </div> */}
-
-      <h2>Contact List</h2>
+      {/* Header with title and create button */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '20px' 
+      }}>
+        <h2 style={{ margin: 0 }}>Contact List</h2>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenCreateModal}
+          startIcon={<AddIcon />}
+          sx={{
+            backgroundColor: '#1976d2',
+            '&:hover': {
+              backgroundColor: '#1565c0'
+            }
+          }}
+        >
+          Create User
+        </Button>
+      </div>
 
       <div className="table-wrapper">
         <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell width="25%">First Name</TableCell>
-                <TableCell width="25%">Last Name</TableCell>
-                <TableCell width="25%">Email</TableCell>
-                <TableCell width="25%">Phone Number</TableCell>
-                <TableCell width="25%">Company Name</TableCell>
-                <TableCell width="25%">Requirements</TableCell>
-                <TableCell width="25%">Action</TableCell>
+                <TableCell width="15%">First Name</TableCell>
+                <TableCell width="15%">Last Name</TableCell>
+                <TableCell width="20%">Email</TableCell>
+                <TableCell width="15%">Phone Number</TableCell>
+                <TableCell width="15%">Company Name</TableCell>
+                <TableCell width="20%">Requirements</TableCell>
+                <TableCell width="15%">Notes</TableCell>
+                <TableCell width="15%">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -250,6 +347,34 @@ const ContactList = () => {
                               flexShrink: 0
                             }}
                             onClick={() => handleOpenReqModal(contact.requirements)}
+                          />
+                        )}
+                      </div>
+                    ) : '--'}
+                  </TableCell>
+                  <TableCell>
+                    {contact.notes ? (
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        maxWidth: '200px'
+                      }}>
+                        <div style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          flex: 1
+                        }}>
+                          {contact.notes}
+                        </div>
+                        {contact.notes.length > 20 && (
+                          <MoreHoriz 
+                            style={{ 
+                              cursor: 'pointer',
+                              flexShrink: 0
+                            }}
+                            onClick={() => handleOpenReqModal(contact.notes)}
                           />
                         )}
                       </div>
@@ -492,6 +617,144 @@ const ContactList = () => {
             >
               Close
             </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Create Contact Modal */}
+      <Modal
+        open={openCreateModal}
+        onClose={handleCloseCreateModal}
+        aria-labelledby="create-contact-modal-title"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 600,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          maxHeight: '90vh',
+          overflow: 'auto'
+        }}>
+          <Typography id="create-contact-modal-title" variant="h6" component="h2" sx={{ mb: 3 }}>
+            Create New Contact
+          </Typography>
+          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Grid container spacing={2}>
+              {/* First Name */}
+              <Grid item xs={6}>
+                <TextField
+                  label="First Name"
+                  fullWidth
+                  name="first_name"
+                  value={createFormData.first_name}
+                  onChange={handleCreateFormChange}
+                  required
+                />
+              </Grid>
+              
+              {/* Last Name */}
+              <Grid item xs={6}>
+                <TextField
+                  label="Last Name"
+                  fullWidth
+                  name="last_name"
+                  value={createFormData.last_name}
+                  onChange={handleCreateFormChange}
+                  required
+                />
+              </Grid>
+
+              {/* Email */}
+              <Grid item xs={12}>
+                <TextField
+                  label="Email"
+                  fullWidth
+                  type="email"
+                  name="email"
+                  value={createFormData.email}
+                  onChange={handleCreateFormChange}
+                  required
+                />
+              </Grid>
+
+              {/* Mobile Number with Country Code */}
+              <Grid item xs={12}>
+                <Box sx={{ '& .react-tel-input': { width: '100%' } }}>
+                  <PhoneInput
+                    required
+                    country={'in'}
+                    value={createFormData.mobile}
+                    onChange={handlePhoneChange}
+                    inputProps={{
+                      name: 'mobile',
+                      required: true,
+                      autoFocus: false
+                    }}
+                    containerStyle={{
+                      width: '100%'
+                    }}
+                    inputStyle={{
+                      width: '100%',
+                      height: '56px',
+                      fontSize: '16px',
+                      border: '1px solid #c4c4c4',
+                      borderRadius: '4px'
+                    }}
+                    buttonStyle={{
+                      border: '1px solid #c4c4c4',
+                      borderRadius: '4px 0 0 4px'
+                    }}
+                  />
+                </Box>
+              </Grid>
+
+              {/* Notes */}
+              <Grid item xs={12}>
+                <TextField
+                  label="Notes"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  name="notes"
+                  value={createFormData.notes}
+                  onChange={handleCreateFormChange}
+                  placeholder="Add any additional notes..."
+                />
+              </Grid>
+
+              {/* Buttons */}
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleCloseCreateModal}
+                    disabled={isCreatingUser}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCreateFormSubmit}
+                    disabled={
+                      !createFormData.first_name || 
+                      !createFormData.last_name || 
+                      !createFormData.email || 
+                      !createFormData.mobile || 
+                      isCreatingUser
+                    }
+                    startIcon={isCreatingUser ? <CircularProgress size={16} color="inherit" /> : null}
+                  >
+                    {isCreatingUser ? 'Creating...' : 'Create'}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
         </Box>
       </Modal>
