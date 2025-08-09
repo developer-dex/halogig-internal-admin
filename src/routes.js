@@ -5,6 +5,7 @@ import ClientDetail from './pages/ClientDetail/ClientDetail';
 import ContactList from './pages/ContactList/ContactList';
 import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
 import PostProject from './pages/PostProject/PostProject';
+import CreateClientProject from './pages/CreateClientProject/CreateClientProject';
 import SiteAnalytics from './pages/SiteAnalytics/SiteAnalytics';
 import LoginPage from './pages/Login/Login';
 import ChatRoom from './pages/ChatRoom/ChatRoom';
@@ -35,6 +36,8 @@ const AppRoutes = () => {
         <Route path="/clients/:clientId" element={<ClientDetail />} />
         <Route path="/contact" element={<ContactList />} />
         <Route path="/projects" element={<PostProject />} />
+        <Route path="/post-project" element={<PostProject />} />
+        <Route path="/create-client-project" element={<CreateClientProject />} />
         <Route path="/site-analytics" element={<SiteAnalytics />} />
       </Route>
       <Route path="/chat" element={<ChatRoom />} />

@@ -89,6 +89,17 @@ const ClientList = () => {
     navigate(`/clients/${client.id}`);
   };
 
+  const handlePostProject = (client) => {
+    // Navigate to create client project page with client information
+    navigate(`/create-client-project`, { 
+      state: { 
+        clientId: client.id,
+        clientName: `${client.first_name} ${client.last_name}`,
+        clientEmail: client.email
+      }
+    });
+  };
+
   const getStatusButtonStyle = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
@@ -159,26 +170,27 @@ const ClientList = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell width="20%">FIRST NAME</TableCell>
-                <TableCell width="20%">LAST NAME</TableCell>
-                <TableCell width="25%">EMAIL</TableCell>
-                <TableCell width="15%" >VIEW</TableCell>
+                <TableCell width="15%">FIRST NAME</TableCell>
+                <TableCell width="15%">LAST NAME</TableCell>
+                <TableCell width="20%">EMAIL</TableCell>
+                <TableCell width="10%" >VIEW</TableCell>
                 <TableCell width="20%">ACTION</TableCell>
+                <TableCell width="20%">POST PROJECT</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {clients.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell  width="20%">
+                  <TableCell  width="15%">
                     {client.first_name ? client.first_name : '--'}
                   </TableCell>
-                  <TableCell width="20%">
+                  <TableCell width="15%">
                     {client.last_name ? client.last_name : '--'}
                   </TableCell>
-                  <TableCell width="25%">
+                  <TableCell width="20%">
                     {client.email ? client.email : '--'}
                   </TableCell>
-                  <TableCell width="15%">
+                  <TableCell width="10%">
                     <IconButton 
                       className="action-btn"
                       onClick={() => handleViewClient(client)}
@@ -196,6 +208,24 @@ const ClientList = () => {
                     >
                       {client.status}
                     </Button>
+                  </TableCell>
+                  <TableCell width="20%">
+                    {client.created_by_admin && (
+                      <Button 
+                        variant="contained" 
+                        onClick={() => handlePostProject(client)}
+                        sx={{
+                          backgroundColor: '#1976d2',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#1565c0'
+                          }
+                        }}
+                        size="small"
+                      >
+                        Post A Project
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
