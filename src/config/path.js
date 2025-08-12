@@ -10,7 +10,7 @@ export const apiEndPoints = {
   GET_ENROLL_AS: "designation",
   GET_COUNTRIES: "country",
   GET_INDUSTRY:"industry",
-  ADD_CLIENT:"admin/add-client",
+  UPDATE_CLIENT_STATUS_IN_CONTACT_US_BY_ADMIN:"admin/update-client-status",
   CREATE_USER_BY_ADMIN:"admin/create-user",
   GET_SITE_ANALYTICS:"admin/page-analytics",
   GET_IP_ANALYTICS:"admin/ip-analytics",

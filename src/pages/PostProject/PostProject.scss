@@ -49,6 +49,12 @@
             text-transform: uppercase;
             padding: 16px;
             border: none;
+            
+            // Ensure project link column doesn't break layout
+            &:nth-child(7) {
+              min-width: 120px;
+              max-width: 150px;
+            }
           }
         }
 
@@ -70,6 +76,46 @@
               border-bottom: 1px solid #eee;
               color: #333;
               font-size: 14px;
+              
+              // Ensure project link column displays properly
+              &:nth-child(7) {
+                min-width: 120px;
+                max-width: 150px;
+                
+                .MuiChip-root {
+                  cursor: pointer;
+                  transition: all 0.2s ease;
+                  max-width: 200px;
+                  
+                  &:hover {
+                    background-color: #e3f2fd;
+                    border-color: #1976d2;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+                  }
+                  
+                  // Styling for copied state
+                  &.MuiChip-colorSuccess {
+                    background-color: #4caf50;
+                    color: white;
+                    
+                    .MuiChip-icon {
+                      color: white;
+                    }
+                  }
+                  
+                  .MuiChip-label {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 150px;
+                  }
+                  
+                  .MuiChip-icon {
+                    color: #1976d2;
+                  }
+                }
+              }
             }
           }
         }
@@ -161,4 +207,41 @@
   justify-content: center;
   align-items: center;
   height: calc(100vh - 120px);
+}
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .project-list {
+    padding: 5px;
+    
+    .table-wrapper {
+      .MuiTableContainer-root {
+        .MuiTable-root {
+          .MuiTableHead-root {
+            .MuiTableCell-head {
+              padding: 8px 4px;
+              font-size: 10px;
+              
+              &:nth-child(7) {
+                min-width: 80px;
+                max-width: 100px;
+              }
+            }
+          }
+          
+          .MuiTableBody-root {
+            .MuiTableCell-body {
+              padding: 8px 4px;
+              font-size: 12px;
+              
+              &:nth-child(7) {
+                min-width: 80px;
+                max-width: 100px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 } 

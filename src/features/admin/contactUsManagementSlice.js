@@ -64,11 +64,11 @@ export const getCountryData = createAsyncThunk(
     }
 );
 
-export const addClient = createAsyncThunk(
-    "/addClient",
+export const updateClientStatusInContactUsByAdmin = createAsyncThunk(
+    "/updateClientStatusInContactUsByAdmin",
     async (data) => {
         try {
-            const payload = await postApi(apiEndPoints.ADD_CLIENT, data);
+            const payload = await postApi(apiEndPoints.UPDATE_CLIENT_STATUS_IN_CONTACT_US_BY_ADMIN, data);
             return payload;
         } catch (e) {
             showError(e.response.data.message);
@@ -135,16 +135,16 @@ export const contactDataSlice = createSlice({
             state.isLoading = false;
             state.isError = true;
         })
-        .addCase(addClient.pending, (state) => {
+        .addCase(updateClientStatusInContactUsByAdmin.pending, (state) => {
             state.isLoading = true;
         })
-        .addCase(addClient.fulfilled, (state, { payload }) => {
+        .addCase(updateClientStatusInContactUsByAdmin.fulfilled, (state, { payload }) => {
             state.isLoading = false;
             state.isSuccess = true;
             state.responseCode = payload?.status;
             state.responseData = payload?.data?.data || {};
         })
-        .addCase(addClient.rejected, (state) => {
+        .addCase(updateClientStatusInContactUsByAdmin.rejected, (state) => {
             state.isLoading = false;
             state.isError = true;
         })

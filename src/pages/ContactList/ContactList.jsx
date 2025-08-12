@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -27,8 +27,9 @@ import { MoreHoriz, Add as AddIcon } from '@mui/icons-material';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/material.css';
 import '../ClientList/ClientList.scss';
-import { contactData, getEnrollAsData, getCountryData, addClient, getIndustryData, createUserByAdmin } from '../../features/admin/contactUsManagementSlice';
+import { contactData, getEnrollAsData, getCountryData, getIndustryData, createUserByAdmin, updateClientStatusInContactUsByAdmin } from '../../features/admin/contactUsManagementSlice';
 import { showSuccess, showError } from '../../helpers/messageHelper';
+import { Country, State, City } from 'country-state-city';
 
 const ContactList = () => {
   const dispatch = useDispatch();
@@ -60,10 +61,25 @@ const ContactList = () => {
     last_name: '',
     email: '',
     mobile: '',
+    company_name: '',
+    designation: '',
     country: 'IN',
+    state: '',
+    city: '',
+    gender: 'male',
     notes: ''
   });
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [stateOptions, setStateOptions] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
   const pageLimit = 10;
+
+  const isIndividual = useMemo(() => {
+    const selected = enrollAsData.find((o) => String(o.id) === String(createFormData.designation));
+    const byName = (selected?.name || '').toLowerCase() === 'individual';
+    const byId = String(createFormData.designation) === '2';
+    return byName || byId;
+  }, [enrollAsData, createFormData.designation]);
 
   // Get data from Redux store using useSelector
   // const { enrollAsData, countryData } = useSelector((state) => state.contactData);
@@ -123,6 +139,41 @@ const ContactList = () => {
     fetchClients();
   }, [currentPage]);
 
+  // Initialize country list options for Create modal
+  useEffect(() => {
+    const options = Country.getAllCountries().map((c) => ({ label: c.name, value: c.isoCode }));
+    setCountryOptions(options);
+    // Preload states for default country if any
+    if (createFormData.country) {
+      const states = State.getStatesOfCountry(createFormData.country).map((s) => ({ label: s.name, value: s.isoCode }));
+      setStateOptions(states);
+      if (createFormData.state) {
+        const cities = City.getCitiesOfState(createFormData.country, createFormData.state).map((ci) => ({ label: ci.name, value: ci.name }));
+        setCityOptions(cities);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update states when country changes
+  useEffect(() => {
+    if (createFormData.country) {
+      const states = State.getStatesOfCountry(createFormData.country).map((s) => ({ label: s.name, value: s.isoCode }));
+      setStateOptions(states);
+      setCreateFormData((prev) => ({ ...prev, state: '', city: '' }));
+      setCityOptions([]);
+    }
+  }, [createFormData.country]);
+
+  // Update cities when state changes
+  useEffect(() => {
+    if (createFormData.country && createFormData.state) {
+      const cities = City.getCitiesOfState(createFormData.country, createFormData.state).map((ci) => ({ label: ci.name, value: ci.name }));
+      setCityOptions(cities);
+      setCreateFormData((prev) => ({ ...prev, city: '' }));
+    }
+  }, [createFormData.country, createFormData.state]);
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -136,18 +187,77 @@ const ContactList = () => {
   };
 
   const handleOpenModal = (contact) => {
+    // Open the same Create form, prefilled with contact values
     setSelectedContact(contact);
-    setFormData({
+
+    // Prefill designation by mapping name -> id if needed
+    const contactDesignation = String(contact?.designation || '').toLowerCase();
+    const matchedRole = enrollAsData.find((o) => (o.name || '').toLowerCase() === contactDesignation);
+    const designationId = matchedRole ? String(matchedRole.id) : '';
+
+    // Prefill country/state/city using country-state-city
+    let isoCountry = '';
+    let isoState = '';
+    let cityName = '';
+
+    if (contact?.country) {
+      const foundCountry = Country.getAllCountries().find((c) => (c.name || '').toLowerCase() === String(contact.country).toLowerCase());
+      if (foundCountry) {
+        isoCountry = foundCountry.isoCode;
+        // Populate state options
+        const states = State.getStatesOfCountry(isoCountry).map((s) => ({ label: s.name, value: s.isoCode }));
+        setStateOptions(states);
+
+        if (contact?.city) {
+          // Try to find the state containing this city
+          let locatedState = '';
+          for (const st of states) {
+            const cityList = City.getCitiesOfState(isoCountry, st.value);
+            if (cityList && cityList.some((ct) => (ct.name || '').toLowerCase() === String(contact.city).toLowerCase())) {
+              locatedState = st.value;
+              break;
+            }
+          }
+          if (locatedState) {
+            isoState = locatedState;
+            const cities = City.getCitiesOfState(isoCountry, isoState).map((ci) => ({ label: ci.name, value: ci.name }));
+            setCityOptions(cities);
+            cityName = contact.city;
+          }
+        }
+      }
+    }
+
+    setCreateFormData((prev) => ({
+      ...prev,
       first_name: contact?.first_name || '',
       last_name: contact?.last_name || '',
       email: contact?.email || '',
       mobile: contact?.mobile || '',
       company_name: contact?.company_name || '',
       gender: contact?.gender || 'male',
-      designation: contact?.designation || '',
-      country: contact?.country || ''
-    });
-    setOpenModal(true);
+      designation: designationId,
+      country: isoCountry || prev.country,
+      state: isoState || '',
+      city: cityName || '',
+      notes: contact?.notes || prev.notes,
+    }));
+
+    // Set dependent select values for country/state/city dropdowns in Create modal
+    if (isoCountry) {
+      const states = State.getStatesOfCountry(isoCountry).map((s) => ({ label: s.name, value: s.isoCode }));
+      setStateOptions(states);
+      if (isoState) {
+        const cities = City.getCitiesOfState(isoCountry, isoState).map((ci) => ({ label: ci.name, value: ci.name }));
+        setCityOptions(cities);
+      } else {
+        setCityOptions([]);
+      }
+    }
+
+    // Open Create User modal with prefilled data
+    setOpenCreateModal(true);
+    setOpenModal(false);
   };
 
   const handleCloseModal = () => {
@@ -158,19 +268,11 @@ const ContactList = () => {
   const handleFormSubmit = async () => {
     try {
       const enhancedFormData = {
-        ...formData,
         id: selectedContact.id,
-        registration_social: "0",
-        freelancer_referral: "0",
-        register_as: "2",
-        gst_number: "",
-        status: "complete",
-        pseudoName: formData.first_name,
-        role: "user",
-        password: "Test@123",
+        is_client_added: true,
       };
 
-      const response = await dispatch(addClient(enhancedFormData));
+      const response = await dispatch(updateClientStatusInContactUsByAdmin(enhancedFormData));
       if (response.payload?.status === 200) {
         handleCloseModal();
         fetchClients(); // Refresh the list after successful addition
@@ -191,6 +293,7 @@ const ContactList = () => {
   };
 
   const handleOpenCreateModal = () => {
+    setSelectedContact(null);
     setOpenCreateModal(true);
   };
 
@@ -201,7 +304,12 @@ const ContactList = () => {
       last_name: '',
       email: '',
       mobile: '',
+      company_name: '',
+      designation: '',
       country: 'IN',
+      state: '',
+      city: '',
+      gender: 'male',
       notes: ''
     });
   };
@@ -214,11 +322,10 @@ const ContactList = () => {
     }));
   };
 
-  const handlePhoneChange = (phone, countryData, e, formattedValue) => {
+  const handlePhoneChange = (phone) => {
     setCreateFormData(prev => ({
       ...prev,
-      mobile: phone,
-      country: countryData.name
+      mobile: phone
     }));
   };
 
@@ -232,14 +339,27 @@ const ContactList = () => {
         last_name: createFormData.last_name,
         email: createFormData.email,
         mobile: createFormData.mobile,
+        company_name: createFormData.company_name,
+        designation: createFormData.designation,
         country: createFormData.country,
+        state: createFormData.state,
+        city: createFormData.city,
+        gender: createFormData.gender,
         notes: createFormData.notes
       };
       
       console.log('Creating user with data:', userData);
+
+      const enhancedFormData = {
+        id: selectedContact.id,
+        is_client_added: true,
+      };
+
+     
       
       // Call the API to create user
-      const response = await dispatch(createUserByAdmin(userData));
+      const response = dispatch(createUserByAdmin(userData));
+      await dispatch(updateClientStatusInContactUsByAdmin(enhancedFormData));
       
       if (response.payload && response.payload.data && response.payload.data.success) {
         showSuccess('User created successfully!');
@@ -682,6 +802,58 @@ const ContactList = () => {
                 />
               </Grid>
 
+              {/* Company Name */}
+              <Grid item xs={12}>
+                <TextField
+                  label="Company Name"
+                  fullWidth
+                  name="company_name"
+                  value={createFormData.company_name}
+                  onChange={handleCreateFormChange}
+                />
+              </Grid>
+
+              {/* Legal Entity Type */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <FormLabel>Legal Entity Type</FormLabel>
+                  <Select
+                    value={createFormData.designation}
+                    name="designation"
+                    onChange={handleCreateFormChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Legal Entity Type
+                    </MenuItem>
+                    {enrollAsData.map((option) => (
+                      <MenuItem key={option.id} value={String(option.id)}>
+                        {option.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Select Gender (visible only for Individual) */}
+              {isIndividual && (
+                <Grid item xs={12}>
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">Select Gender</FormLabel>
+                    <RadioGroup
+                      row
+                      name="gender"
+                      value={createFormData.gender}
+                      onChange={handleCreateFormChange}
+                    >
+                      <FormControlLabel value="male" control={<Radio />} label="Male" />
+                      <FormControlLabel value="female" control={<Radio />} label="Female" />
+                      <FormControlLabel value="Other" control={<Radio />} label="Other" />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+              )}
+
               {/* Mobile Number with Country Code */}
               <Grid item xs={12}>
                 <Box sx={{ '& .react-tel-input': { width: '100%' } }}>
@@ -711,6 +883,62 @@ const ContactList = () => {
                     }}
                   />
                 </Box>
+              </Grid>
+
+              {/* Country */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <FormLabel>Country</FormLabel>
+                  <Select
+                    value={createFormData.country}
+                    name="country"
+                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, country: e.target.value }))}
+                  >
+                    {countryOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* State */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <FormLabel>State</FormLabel>
+                  <Select
+                    value={createFormData.state}
+                    name="state"
+                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, state: e.target.value }))}
+                    disabled={!createFormData.country || stateOptions.length === 0}
+                  >
+                    {stateOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* City */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <FormLabel>City</FormLabel>
+                  <Select
+                    value={createFormData.city}
+                    name="city"
+                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, city: e.target.value }))}
+                    disabled={!createFormData.state || cityOptions.length === 0}
+                  >
+                    {cityOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
               {/* Notes */}
@@ -745,7 +973,12 @@ const ContactList = () => {
                       !createFormData.first_name || 
                       !createFormData.last_name || 
                       !createFormData.email || 
-                      !createFormData.mobile || 
+                      !createFormData.mobile ||
+                      !createFormData.designation ||
+                      !createFormData.company_name ||
+                      !createFormData.country ||
+                      !createFormData.state ||
+                      !createFormData.city ||
                       isCreatingUser
                     }
                     startIcon={isCreatingUser ? <CircularProgress size={16} color="inherit" /> : null}

@@ -24,7 +24,13 @@ import {
   RadioGroup,
   FormLabel,
   Switch,
+  Chip,
+  Snackbar,
+  Alert,
+  Tooltip,
 } from '@mui/material';
+import LaunchIcon from '@mui/icons-material/Launch';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { projectData, updateProject, updateProjectStatus } from '../../features/admin/projectManagementSlice';
 import { 
   fetchCategories, 
@@ -46,6 +52,10 @@ const PostProject = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [statusProject, setStatusProject] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('info');
+  const [copiedLinkId, setCopiedLinkId] = useState(null);
   
   // Get dropdown data from Redux store
   const dropdownData = useSelector((state) => state.dropdownDataReducer);
@@ -331,6 +341,17 @@ const PostProject = () => {
     return approvedByAdmin ? 'Approved' : 'Pending';
   };
 
+  // Helper function to format project link display
+  const formatProjectLink = (url) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname + urlObj.pathname.substring(0, 20) + (urlObj.pathname.length > 20 ? '...' : '');
+    } catch (error) {
+      // If URL parsing fails, return truncated version
+      return url.length > 30 ? `${url.substring(0, 30)}...` : url;
+    }
+  };
+
   // Handle approval status toggle
   const handleApprovalToggle = (project) => {
     setStatusProject(project);
@@ -369,6 +390,76 @@ const PostProject = () => {
     setStatusProject(null);
   };
 
+  const handleCopyLink = (url, projectId) => {
+    // Try using the modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(() => {
+        setSnackbarMessage('Project link copied to clipboard!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        setCopiedLinkId(projectId);
+        
+        // Reset copied state after 2 seconds
+        setTimeout(() => {
+          setCopiedLinkId(null);
+        }, 2000);
+      }).catch(() => {
+        // Fallback to older method
+        fallbackCopyTextToClipboard(url, projectId);
+      });
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      fallbackCopyTextToClipboard(url, projectId);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text, projectId) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    
+    // Avoid scrolling to bottom
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setSnackbarMessage('Project link copied to clipboard!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        setCopiedLinkId(projectId);
+        
+        // Reset copied state after 2 seconds
+        setTimeout(() => {
+          setCopiedLinkId(null);
+        }, 2000);
+      } else {
+        setSnackbarMessage('Failed to copy project link.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+    } catch (err) {
+      setSnackbarMessage('Failed to copy project link.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+    
+    document.body.removeChild(textArea);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -392,6 +483,7 @@ const PostProject = () => {
                 <TableCell width="20%">EMAIL</TableCell>
                 <TableCell width="15%">PRICING MODEL</TableCell>
                 <TableCell width="10%">STATUS</TableCell>
+                <TableCell width="15%">PROJECT LINK</TableCell>
                 <TableCell width="15%">ACTION</TableCell>
               </TableRow>
             </TableHead>
@@ -428,6 +520,24 @@ const PostProject = () => {
                         </div>
                       </TableCell>
                       <TableCell width="15%">
+                        {project.client_project_link ? (
+                          <Tooltip title={copiedLinkId === project.id ? "Link copied!" : "Click to copy link"}>
+                            <Chip 
+                              label={copiedLinkId === project.id ? "Copied!" : (formatProjectLink(project.client_project_link))}
+                              icon={copiedLinkId === project.id ? <ContentCopyIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />} 
+                              variant={copiedLinkId === project.id ? "filled" : "outlined"}
+                              color={copiedLinkId === project.id ? "success" : "default"}
+                              size="small"
+                              title={project.client_project_link}
+                              onClick={() => handleCopyLink(project.client_project_link, project.id)}
+                              style={{ cursor: 'pointer' }}
+                            />
+                          </Tooltip>
+                        ) : (
+                          'N/A'
+                        )}
+                      </TableCell>
+                      <TableCell width="15%">
                         <Button 
                           variant="outlined" 
                           size="small"
@@ -440,7 +550,7 @@ const PostProject = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
+                  <TableCell colSpan={8} style={{ textAlign: 'center', padding: '20px' }}>
                     No projects found
                   </TableCell>
                 </TableRow>
@@ -718,6 +828,13 @@ const PostProject = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar for link copying */}
+      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
