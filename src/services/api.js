@@ -13,8 +13,21 @@ export const getApiClient = async (url) => {
   return data;
 };
 
-export const postApi = (url, apiData) => {
-  return ApiInstance.post(`${url}`, apiData);
+export const postApi = async (url, apiData) => {
+  console.log('=== POST API CALLED ===');
+  console.log('URL:', url);
+  console.log('API Data:', apiData);
+  
+  try {
+    console.log('About to call ApiInstance.post with:', { url, apiData });
+    const data = await ApiInstance.post(`${url}`, apiData);
+    console.log('API Response received:', data);
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    console.error('Error response:', error.response);
+    throw error;
+  }
 };
 
 export const postClientApi = (url, apiData) => {

@@ -81,9 +81,16 @@ export const createUserByAdmin = createAsyncThunk(
     "/createUserByAdmin",
     async (data) => {
         try {
+            console.log('createUserByAdmin thunk called with data:', data);
+            console.log('API endpoint:', apiEndPoints.CREATE_USER_BY_ADMIN);
+            
             const payload = await postApi(apiEndPoints.CREATE_USER_BY_ADMIN, data);
+            console.log('createUserByAdmin API response:', payload);
+            
             return payload;
         } catch (e) {
+            console.error('createUserByAdmin API error:', e);
+            console.error('Error response:', e.response);
             // Let the component handle the error display
             throw e;
         }

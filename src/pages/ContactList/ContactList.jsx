@@ -293,7 +293,27 @@ const ContactList = () => {
   };
 
   const handleOpenCreateModal = () => {
+    console.log('Opening create modal');
     setSelectedContact(null);
+    
+    // Reset form data to initial state
+    const initialFormData = {
+      first_name: '',
+      last_name: '',
+      email: '',
+      mobile: '',
+      company_name: '',
+      designation: '',
+      country: 'IN',
+      state: '',
+      city: '',
+      gender: 'male',
+      notes: ''
+    };
+    
+    console.log('Setting initial form data:', initialFormData);
+    setCreateFormData(initialFormData);
+    
     setOpenCreateModal(true);
   };
 
@@ -316,52 +336,70 @@ const ContactList = () => {
 
   const handleCreateFormChange = (event) => {
     const { name, value } = event.target;
-    setCreateFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    console.log(`Form field changed: ${name} = ${value}`);
+    
+    setCreateFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      };
+      console.log('Updated form data:', newData);
+      return newData;
+    });
   };
 
   const handlePhoneChange = (phone) => {
-    setCreateFormData(prev => ({
-      ...prev,
-      mobile: phone
-    }));
+    console.log('Phone number changed:', phone);
+    setCreateFormData(prev => {
+      const newData = {
+        ...prev,
+        mobile: phone
+      };
+      console.log('Updated form data with phone:', newData);
+      return newData;
+    });
   };
 
   const handleCreateFormSubmit = async () => {
     try {
+      console.log('Form submission started');
+      console.log('Form data:', createFormData);
+      
+      // Validate required fields
+      if (!createFormData.first_name || !createFormData.last_name || !createFormData.email || 
+          !createFormData.mobile || !createFormData.designation || !createFormData.company_name || 
+          !createFormData.country || !createFormData.state || !createFormData.city) {
+        console.log('Validation failed - missing required fields');
+        showError('Please fill in all required fields');
+        return;
+      }
+
+      console.log('Validation passed, proceeding with API call');
       setIsCreatingUser(true);
       
       // Prepare data for API call
       const userData = {
-        first_name: createFormData.first_name,
-        last_name: createFormData.last_name,
-        email: createFormData.email,
+        first_name: createFormData.first_name.trim(),
+        last_name: createFormData.last_name.trim(),
+        email: createFormData.email.trim(),
         mobile: createFormData.mobile,
-        company_name: createFormData.company_name,
+        company_name: createFormData.company_name.trim(),
         designation: createFormData.designation,
         country: createFormData.country,
         state: createFormData.state,
         city: createFormData.city,
         gender: createFormData.gender,
-        notes: createFormData.notes
+        notes: createFormData.notes.trim()
       };
       
       console.log('Creating user with data:', userData);
 
-      const enhancedFormData = {
-        id: selectedContact.id,
-        is_client_added: true,
-      };
-
-     
-      
       // Call the API to create user
-      const response = dispatch(createUserByAdmin(userData));
-      await dispatch(updateClientStatusInContactUsByAdmin(enhancedFormData));
+      const response = await dispatch(createUserByAdmin(userData));
       
-      if (response.payload && response.payload.data && response.payload.data.success) {
+      console.log('Create user response:', response);
+      
+      if (response.payload && response.payload.status === 200) {
         showSuccess('User created successfully!');
         handleCloseCreateModal();
         fetchClients(); // Refresh the contact list
@@ -371,7 +409,8 @@ const ContactList = () => {
       }
     } catch (error) {
       console.error('Error creating user:', error);
-      showError(error.message || 'Failed to create user. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create user. Please try again.';
+      showError(errorMessage);
     } finally {
       setIsCreatingUser(false);
     }
@@ -892,7 +931,10 @@ const ContactList = () => {
                   <Select
                     value={createFormData.country}
                     name="country"
-                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, country: e.target.value }))}
+                    onChange={(e) => {
+                      console.log('Country changed:', e.target.value);
+                      setCreateFormData((prev) => ({ ...prev, country: e.target.value }));
+                    }}
                   >
                     {countryOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -910,7 +952,10 @@ const ContactList = () => {
                   <Select
                     value={createFormData.state}
                     name="state"
-                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, state: e.target.value }))}
+                    onChange={(e) => {
+                      console.log('State changed:', e.target.value);
+                      setCreateFormData((prev) => ({ ...prev, state: e.target.value }));
+                    }}
                     disabled={!createFormData.country || stateOptions.length === 0}
                   >
                     {stateOptions.map((option) => (
@@ -929,7 +974,10 @@ const ContactList = () => {
                   <Select
                     value={createFormData.city}
                     name="city"
-                    onChange={(e) => setCreateFormData((prev) => ({ ...prev, city: e.target.value }))}
+                    onChange={(e) => {
+                      console.log('City changed:', e.target.value);
+                      setCreateFormData((prev) => ({ ...prev, city: e.target.value }));
+                    }}
                     disabled={!createFormData.state || cityOptions.length === 0}
                   >
                     {cityOptions.map((option) => (
@@ -968,7 +1016,6 @@ const ContactList = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleCreateFormSubmit}
                     disabled={
                       !createFormData.first_name || 
                       !createFormData.last_name || 
@@ -982,6 +1029,22 @@ const ContactList = () => {
                       isCreatingUser
                     }
                     startIcon={isCreatingUser ? <CircularProgress size={16} color="inherit" /> : null}
+                    onClick={() => {
+                      console.log('Create button clicked');
+                      console.log('Form validation state:', {
+                        first_name: !!createFormData.first_name,
+                        last_name: !!createFormData.last_name,
+                        email: !!createFormData.email,
+                        mobile: !!createFormData.mobile,
+                        designation: !!createFormData.designation,
+                        company_name: !!createFormData.company_name,
+                        country: !!createFormData.country,
+                        state: !!createFormData.state,
+                        city: !!createFormData.city,
+                        isCreatingUser
+                      });
+                      handleCreateFormSubmit();
+                    }}
                   >
                     {isCreatingUser ? 'Creating...' : 'Create'}
                   </Button>
