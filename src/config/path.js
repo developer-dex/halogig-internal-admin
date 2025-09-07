@@ -22,6 +22,10 @@ export const apiEndPoints = {
   UPDATE_PROJECT: "admin/project",
   UPDATE_PROJECT_STATUS: "admin/project",
   
+  // Project Bids endpoints
+  GET_ALL_PROJECT_BIDS: "admin/project-bids",
+  GET_PROJECT_BID_DETAILS: "admin/project-bids",
+  
   // Chat endpoints
   GET_ALL_USERS: "admin/user",
   CREATE_CHAT_ROOM: "admin/chat/rooms",
@@ -30,4 +34,13 @@ export const apiEndPoints = {
   SEND_MESSAGE: "chat/rooms",
   DELETE_MESSAGE: "chat/messages",
   GET_CHAT_ROOM_DETAILS: "chat/rooms",
+  
+  // Website Data endpoints
+  WEBSITE_DATA_UPLOAD_EXCEL: "admin/website-data/upload-excel",
+  GET_WEBSITE_DATA: "admin/website-data",
+  GET_WEBSITE_DATA_BY_ID: "admin/website-data",
+  DELETE_WEBSITE_DATA: "admin/website-data",
+  DELETE_ALL_WEBSITE_DATA: "admin/website-data",
+  CREATE_WEBSITE_DATA: "admin/website-data",
+  UPDATE_WEBSITE_DATA: "admin/website-data",
 };

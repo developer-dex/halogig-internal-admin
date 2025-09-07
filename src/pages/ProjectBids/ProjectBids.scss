@@ -1,0 +1,186 @@
+.project-bids-list {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px; // Add margin for fixed header
+
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .table-wrapper {
+    .MuiTableContainer-root {
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .MuiTableHead-root {
+      .MuiTableRow-root {
+        background-color: #f5f5f5;
+        
+        .MuiTableCell-head {
+          font-weight: 600;
+          color: #333;
+          border-bottom: 2px solid #e0e0e0;
+        }
+      }
+    }
+
+    .MuiTableBody-root {
+      .MuiTableRow-root {
+        &:hover {
+          background-color: #f8f9fa;
+        }
+
+        .MuiTableCell-body {
+          border-bottom: 1px solid #e0e0e0;
+          padding: 12px 16px;
+        }
+      }
+    }
+  }
+
+  .project-info {
+    .project-title {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .project-category {
+      font-size: 0.875rem;
+      color: #666;
+    }
+  }
+
+  .freelancer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .freelancer-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 0.875rem;
+    }
+
+    .freelancer-details {
+      .freelancer-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 2px;
+      }
+
+      .freelancer-email {
+        font-size: 0.875rem;
+        color: #666;
+      }
+    }
+  }
+
+  .bid-amount {
+    font-weight: 600;
+    color: #1976d2;
+  }
+
+  .delivery-time {
+    color: #666;
+  }
+
+  .status-chip {
+    font-weight: 500;
+  }
+
+  .action-btn {
+    color: #1976d2;
+    
+    &:hover {
+      background-color: #e3f2fd;
+    }
+  }
+
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 16px 0;
+
+    .entries-info {
+      color: #666;
+      font-size: 0.875rem;
+
+      span {
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      button {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 0.875rem;
+
+        &:hover:not(:disabled) {
+          background: #f5f5f5;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        &.prev, &.next {
+          font-weight: bold;
+        }
+      }
+
+      .page-numbers {
+        display: flex;
+        gap: 4px;
+
+        span {
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          background: #fff;
+          color: #333;
+          cursor: pointer;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          min-width: 32px;
+          text-align: center;
+
+          &:hover {
+            background: #f5f5f5;
+          }
+
+          &.active {
+            background: #1976d2;
+            color: #fff;
+            border-color: #1976d2;
+          }
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+}

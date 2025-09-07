@@ -9,6 +9,10 @@ import CreateClientProject from './pages/CreateClientProject/CreateClientProject
 import SiteAnalytics from './pages/SiteAnalytics/SiteAnalytics';
 import LoginPage from './pages/Login/Login';
 import ChatRoom from './pages/ChatRoom/ChatRoom';
+import ProjectBids from './pages/ProjectBids/ProjectBids';
+import ProjectBidDetail from './pages/ProjectBidDetail/ProjectBidDetail';
+import LogManager from './pages/LogManager/LogManager';
+import WebsiteData from './pages/WebsiteData/WebsiteData';
 
 // Helper component for protected routes
 const ProtectedRoute = () => {
@@ -37,8 +41,12 @@ const AppRoutes = () => {
         <Route path="/contact" element={<ContactList />} />
         <Route path="/projects" element={<PostProject />} />
         <Route path="/post-project" element={<PostProject />} />
+        <Route path="/project-bids" element={<ProjectBids />} />
+        <Route path="/project-bids/:bidId" element={<ProjectBidDetail />} />
         <Route path="/create-client-project" element={<CreateClientProject />} />
         <Route path="/site-analytics" element={<SiteAnalytics />} />
+        <Route path="/logs" element={<LogManager />} />
+        <Route path="/website-data" element={<WebsiteData />} />
       </Route>
       <Route path="/chat" element={<ChatRoom />} />
     </Routes>

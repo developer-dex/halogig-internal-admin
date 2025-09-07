@@ -27,35 +27,44 @@
       font-family: 'Roboto', sans-serif;
     }
 
-    .top-nav {
-      display: flex;
-      gap: 20px;
-
-      a {
-        text-decoration: none;
+    .navigation-dropdown {
+      .navigation-button {
         color: #666;
         font-size: 0.9rem;
-        padding: 5px 0;
-        position: relative;
-        font-family: 'Roboto', sans-serif;
         font-weight: 500;
-
-        &.active {
-          color: #1976d2;
-
-          &:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: #1976d2;
-          }
-        }
+        font-family: 'Roboto', sans-serif;
+        text-transform: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        min-width: 160px; // Ensure consistent width
 
         &:hover {
+          background-color: #f5f7fa;
           color: #1976d2;
+        }
+
+        .MuiButton-endIcon {
+          margin-left: 8px;
+        }
+      }
+
+      .navigation-menu {
+        .MuiMenuItem-root {
+          font-size: 0.9rem;
+          font-family: 'Roboto', sans-serif;
+          padding: 12px 20px;
+          min-width: 200px;
+
+          &.active {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            font-weight: 500;
+          }
+
+          &:hover {
+            background-color: #f5f7fa;
+          }
         }
       }
     }
@@ -114,6 +123,47 @@
         font-size: 0.9rem;
         font-weight: 500;
         font-family: 'Roboto', sans-serif;
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .MuiToolbar-root {
+      padding: 0 16px;
+    }
+
+    .header-left {
+      gap: 20px;
+
+      .navigation-dropdown {
+        .navigation-button {
+          min-width: 140px;
+          padding: 6px 12px;
+          font-size: 0.8rem;
+        }
+      }
+    }
+
+    .header-right {
+      .user-info {
+        span {
+          display: none; // Hide username on mobile
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header-left {
+      gap: 10px;
+
+      .navigation-dropdown {
+        .navigation-button {
+          min-width: 120px;
+          padding: 4px 8px;
+          font-size: 0.75rem;
+        }
       }
     }
   }

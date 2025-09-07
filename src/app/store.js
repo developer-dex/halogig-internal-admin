@@ -6,7 +6,9 @@ import { siteAnalyticsReducer } from "../features/admin/siteAnalyticsSlice";
 import { chatManagementReducer } from "../features/admin/chatManagementSlice";
 import { projectDataReducer } from "../features/admin/projectManagementSlice";
 import { dropdownDataReducer } from "../features/admin/dropdownDataSlice";
+import { projectBidsReducer } from "../features/admin/projectBidsSlice";
 import { loginDataReducer } from "../features/auth/loginSlice";
+import { websiteDataReducer } from "../features/admin/websiteDataSlice";
 
 const store = configureStore({
   reducer: {
@@ -17,7 +19,9 @@ const store = configureStore({
     chatManagementReducer:chatManagementReducer,
     projectDataReducer:projectDataReducer,
     dropdownDataReducer:dropdownDataReducer,
+    projectBidsReducer:projectBidsReducer,
     loginDataReducer:loginDataReducer,
+    websiteData:websiteDataReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

@@ -10,6 +10,7 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import ChatIcon from '@mui/icons-material/Chat';

@@ -1,33 +1,49 @@
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
-/**
- * This function is used to show success message
- * @param {*} _text
- */
-export function showSuccess(_text) {
-  toast.success(_text, { className: "success-toast" });
-}
+// Show success message
+export const showSuccess = (message) => {
+  toast.success(message, {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+  });
+};
 
-/**
- * This function is used to show error alert
- * @param {*} _text
- */
-export function showError(_text) {
-  toast.error(_text, { className: "error-toast" });
-}
+// Show error message
+export const showError = (message) => {
+  toast.error(message, {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+  });
+};
 
-/**
- * This function is used to this show info alert
- * @param {*} _text
- */
-export function showInfo(_text) {
-  toast.info(_text, { className: "info-toast" });
-}
+// Show info message
+export const showInfo = (message) => {
+  toast.info(message, {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+  });
+};
 
-/**
- * This function is used to this show info alert
- * @param {*} _text
- */
-export function showWarning(_text) {
-  toast.warning(_text, { className: "warning-toast" });
-}
+// Show warning message
+export const showWarning = (message) => {
+  toast.warning(message, {
+    position: "top-right",
+    autoClose: 4000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+  });
+};

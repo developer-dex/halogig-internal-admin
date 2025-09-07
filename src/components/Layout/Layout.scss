@@ -10,13 +10,23 @@
 
     .main-content {
       flex: 1;
-      // margin-left: 360px; // 80px + 280px for both sidebars
       padding: 20px;
       background-color: #f5f6fa;
       transition: margin-left 0.3s ease;
+      min-height: calc(100vh - 70px); // Ensure proper height
 
       &.sidebar-closed {
         margin-left: 80px; // Only the slim sidebar width
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .layout-container {
+      .main-content {
+        padding: 16px;
+        margin-left: 0 !important; // No sidebar on mobile
       }
     }
   }
