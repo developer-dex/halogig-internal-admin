@@ -129,7 +129,7 @@ const WebsiteData = () => {
       return;
     }
     
-    const previewUrl = `${process.env.REACT_APP_BACKEND_URL}/${row.category_name}${row.slug_link}`;
+    const previewUrl = `${process.env.REACT_APP_FRONTEND_URL}/${row.category_name}${row.slug_link}`;
     window.open(previewUrl, '_blank');
   };
 
