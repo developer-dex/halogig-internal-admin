@@ -238,6 +238,3 @@ export const websiteDataSlice = createSlice({
 
 export const { clearUploadResponse, resetState } = websiteDataSlice.actions;
 export const websiteDataReducer = websiteDataSlice.reducer;
-
-// Explicit export for updateWebsiteData (troubleshooting)
-export { updateWebsiteData };

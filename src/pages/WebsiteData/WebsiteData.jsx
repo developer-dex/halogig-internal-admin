@@ -33,6 +33,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import LaunchIcon from '@mui/icons-material/Launch';
 import {
   uploadWebsiteDataExcel,
   getWebsiteData,
@@ -111,6 +112,25 @@ const WebsiteData = () => {
       setWebsiteData(response.payload.data.data.data || []);
       setTotalCount(response.payload.data.data.pagination?.totalRecords || 0);
     }
+  };
+
+  // Format date helper function
+  const formatDate = (dateString, includeTime = false) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return includeTime ? date.toLocaleString() : date.toLocaleDateString();
+  };
+
+  // Handle preview URL
+  const handlePreview = (row) => {
+    if (!row.category_name || !row.slug_link) {
+      alert('Preview not available: Missing category name or slug link');
+      return;
+    }
+    
+    const previewUrl = `${process.env.REACT_APP_BACKEND_URL}/${row.category_name}${row.slug_link}`;
+    window.open(previewUrl, '_blank');
   };
 
   useEffect(() => {
@@ -715,8 +735,8 @@ const WebsiteData = () => {
                       <TableCell>Title</TableCell>
                       <TableCell>Services Count</TableCell>
                       <TableCell>Applications Count</TableCell>
-                      <TableCell>Created</TableCell>
                       <TableCell>Actions</TableCell>
+                      <TableCell>Preview</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -739,9 +759,6 @@ const WebsiteData = () => {
                         </TableCell>
                         <TableCell>
                           {row.main_application_lists ? row.main_application_lists.length : 0}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(row.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
                           <IconButton
@@ -769,6 +786,16 @@ const WebsiteData = () => {
                             color="error"
                           >
                             <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton
+                            size="small"
+                            onClick={() => handlePreview(row)}
+                            title="Preview"
+                            color="secondary"
+                          >
+                            <LaunchIcon />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1095,13 +1122,13 @@ const WebsiteData = () => {
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="textSecondary">Created At</Typography>
                   <Typography variant="body1" gutterBottom>
-                    {new Date(selectedRecord.createdAt || selectedRecord.created_at).toLocaleString()}
+                    {formatDate(selectedRecord.createdAt || selectedRecord.created_at, true)}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="textSecondary">Updated At</Typography>
                   <Typography variant="body1" gutterBottom>
-                    {new Date(selectedRecord.updatedAt || selectedRecord.updated_at).toLocaleString()}
+                    {formatDate(selectedRecord.updatedAt || selectedRecord.updated_at, true)}
                   </Typography>
                 </Grid>
               </Grid>
