@@ -1,0 +1,120 @@
+@import '../../assets/styles/theme.scss';
+
+// Professional Breadcrumb Styling
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(195, 54, 42, 0.1);
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+
+  .breadcrumb-item-wrapper {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs $spacing-sm;
+      border-radius: $radius-md;
+      transition: all $transition-normal;
+      position: relative;
+      overflow: hidden;
+
+      &.clickable {
+        cursor: pointer;
+        color: $text-secondary;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(195, 54, 42, 0.1), transparent);
+          transition: left $transition-slow;
+        }
+
+        &:hover {
+          background: rgba(195, 54, 42, 0.05);
+          color: $brand-primary;
+          transform: translateY(-1px);
+          box-shadow: $shadow-sm;
+
+          &::before {
+            left: 100%;
+          }
+
+          .MuiSvgIcon-root {
+            color: $brand-primary;
+            transform: scale(1.1);
+          }
+
+          .breadcrumb-text {
+            color: $brand-primary;
+            font-weight: $font-weight-semibold;
+          }
+        }
+
+        .MuiSvgIcon-root {
+          font-size: 18px;
+          color: $text-secondary;
+          transition: all $transition-normal;
+        }
+
+        .breadcrumb-text {
+          font-size: $font-size-sm;
+          font-weight: $font-weight-medium;
+          color: $text-secondary;
+          transition: all $transition-normal;
+        }
+      }
+
+      &.current {
+        background: linear-gradient(135deg, rgba(195, 54, 42, 0.1) 0%, rgba(195, 54, 42, 0.05) 100%);
+        color: $brand-primary;
+        border: 1px solid rgba(195, 54, 42, 0.2);
+
+        .MuiSvgIcon-root {
+          font-size: 18px;
+          color: $brand-primary;
+        }
+
+        .breadcrumb-text {
+          font-size: $font-size-sm;
+          font-weight: $font-weight-semibold;
+          color: $brand-primary;
+        }
+      }
+    }
+
+    .breadcrumb-separator {
+      font-size: 16px;
+      color: $text-muted;
+      opacity: 0.6;
+    }
+  }
+
+  // Responsive design for breadcrumbs
+  @media (max-width: $breakpoint-sm) {
+    flex-wrap: wrap;
+    
+    .breadcrumb-item {
+      .breadcrumb-text {
+        font-size: $font-size-xs;
+      }
+      
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+    }
+  }
+}

@@ -1,105 +1,295 @@
-.project-bids-list {
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 20px; // Add margin for fixed header
+@import '../../assets/styles/theme.scss';
 
-  h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 1.5rem;
-    font-weight: 600;
+.project-bids-list {
+  padding: $spacing-md;
+  height: calc(100vh - $header-height);
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-secondary;
+
+  @media (max-width: $breakpoint-lg) {
+    padding: $spacing-md;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-sm;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-xs;
   }
 
   .table-wrapper {
-    .MuiTableContainer-root {
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
-    }
-
-    .MuiTableHead-root {
-      .MuiTableRow-root {
-        background-color: #f5f5f5;
-        
-        .MuiTableCell-head {
-          font-weight: 600;
-          color: #333;
-          border-bottom: 2px solid #e0e0e0;
-        }
-      }
-    }
-
-    .MuiTableBody-root {
-      .MuiTableRow-root {
-        &:hover {
-          background-color: #f8f9fa;
-        }
-
-        .MuiTableCell-body {
-          border-bottom: 1px solid #e0e0e0;
-          padding: 12px 16px;
-        }
-      }
-    }
-  }
-
-  .project-info {
-    .project-title {
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 4px;
-    }
-
-    .project-category {
-      font-size: 0.875rem;
-      color: #666;
-    }
-  }
-
-  .freelancer-info {
+    @include theme-card;
+    padding: $spacing-md $spacing-sm;
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    min-height: 0;
+    transition: $transition-normal;
 
-    .freelancer-avatar {
-      width: 40px;
-      height: 40px;
-      font-size: 0.875rem;
-    }
-
-    .freelancer-details {
-      .freelancer-name {
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 2px;
-      }
-
-      .freelancer-email {
-        font-size: 0.875rem;
-        color: #666;
-      }
-    }
-  }
-
-  .bid-amount {
-    font-weight: 600;
-    color: #1976d2;
-  }
-
-  .delivery-time {
-    color: #666;
-  }
-
-  .status-chip {
-    font-weight: 500;
-  }
-
-  .action-btn {
-    color: #1976d2;
-    
     &:hover {
-      background-color: #e3f2fd;
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+    }
+
+    .MuiTableContainer-root {
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      
+      .MuiTable-root {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        table-layout: fixed;
+        width: 100%;
+
+        .MuiTableHead-root {
+          flex-shrink: 0;
+          background-color: $table-header-bg;
+          border-bottom: 2px solid $brand-primary;
+          
+          .MuiTableRow-root {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+          }
+
+          .MuiTableCell-head {
+            color: $text-primary;
+            font-size: $font-size-xs;
+            font-weight: $font-weight-semibold;
+            text-transform: uppercase;
+            letter-spacing: $letter-spacing-wide;
+            padding: $spacing-lg $spacing-md;
+            border: none;
+            font-family: $font-family-heading;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            
+            // Center align specific columns
+            &:nth-child(4),  // BID AMOUNT
+            &:nth-child(6),  // STATUS
+            &:nth-child(7),  // SUBMITTED  
+            &:nth-child(8) { // VIEW
+              text-align: center;
+            }
+          }
+        }
+
+        .MuiTableBody-root {
+          flex: 1;
+          overflow-y: auto;
+          
+          .MuiTableRow-root {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            transition: $transition-normal;
+
+            &:hover {
+              background-color: $bg-hover;
+              transform: translateX(2px);
+              box-shadow: inset 3px 0 0 $brand-primary;
+            }
+
+            .MuiTableCell-body {
+              padding: $spacing-lg $spacing-md;
+              border-bottom: 1px solid $border-light;
+              color: $text-primary;
+              font-size: $font-size-sm;
+              font-family: $font-family-body;
+              transition: $transition-normal;
+              vertical-align: middle;
+              text-align: left;
+              overflow: hidden;
+              text-overflow: ellipsis;
+
+              // Project Info Column
+              .project-info {
+                .project-title {
+                  font-weight: $font-weight-semibold;
+                  color: $text-primary;
+                  margin-bottom: $spacing-xs;
+                  font-size: $font-size-sm;
+                }
+
+                .project-category {
+                  font-size: $font-size-xs;
+                  color: $text-muted;
+                  background-color: rgba($brand-primary, 0.05);
+                  padding: 2px 6px;
+                  border-radius: $radius-sm;
+                  display: inline-block;
+                }
+              }
+
+              // Freelancer Info Column
+              .freelancer-info {
+                display: flex;
+                align-items: center;
+                gap: $spacing-md;
+
+                .freelancer-avatar {
+                  width: 40px;
+                  height: 40px;
+                  font-size: $font-size-sm;
+                  background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+                  color: white;
+                  font-weight: $font-weight-bold;
+                  border: 2px solid white;
+                  box-shadow: $shadow-sm;
+                }
+
+                .freelancer-details {
+                  .freelancer-name {
+                    font-weight: $font-weight-medium;
+                    color: $text-primary;
+                    margin-bottom: 2px;
+                    font-size: $font-size-sm;
+                  }
+
+                  .freelancer-email {
+                    font-size: $font-size-xs;
+                    color: $text-muted;
+                  }
+                }
+              }
+
+              // Bid Amount Column (center aligned)
+              &:nth-child(4) {
+                text-align: center;
+              }
+
+              .bid-amount {
+                font-weight: $font-weight-bold;
+                color: $brand-primary;
+                font-size: $font-size-md;
+                text-shadow: 0 1px 2px rgba($brand-primary, 0.1);
+              }
+
+              // Delivery Time Column
+              .delivery-time {
+                display: flex;
+                align-items: center;
+                gap: $spacing-sm;
+                color: $text-muted;
+                font-weight: $font-weight-medium;
+                
+                .delivery-icon {
+                  font-size: 16px;
+                  color: $brand-primary;
+                  opacity: 0.7;
+                  flex-shrink: 0;
+                }
+                
+                .delivery-text {
+                  color: $text-muted;
+                  font-size: $font-size-sm;
+                }
+              }
+
+              // Status Button Column
+              &:nth-child(6) {
+                text-align: center;
+              }
+
+              .status-button {
+                text-transform: capitalize;
+                font-weight: $font-weight-medium;
+                font-size: $font-size-xs;
+                min-width: 80px;
+                border-radius: $radius-sm;
+                transition: all $transition-normal;
+                cursor: default;
+                
+                &:hover {
+                  transform: translateY(-1px);
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                }
+                
+                &.pending {
+                  background-color: #fff3e0;
+                  color: #e65100;
+                  border: 1px solid #ffcc02;
+                  
+                  &:hover {
+                    background-color: #ffe0b2;
+                  }
+                }
+                
+                &.accepted {
+                  background-color: #e8f5e9;
+                  color: #2e7d32;
+                  border: 1px solid #4caf50;
+                  
+                  &:hover {
+                    background-color: #c8e6c9;
+                  }
+                }
+                
+                &.rejected {
+                  background-color: #ffebee;
+                  color: #c62828;
+                  border: 1px solid #f44336;
+                  
+                  &:hover {
+                    background-color: #ffcdd2;
+                  }
+                }
+                
+                &.in-progress,
+                &.in_progress {
+                  background-color: #e3f2fd;
+                  color: #1565c0;
+                  border: 1px solid #2196f3;
+                  
+                  &:hover {
+                    background-color: #bbdefb;
+                  }
+                }
+                
+                &.completed {
+                  background-color: #e8f5e9;
+                  color: #2e7d32;
+                  border: 1px solid #4caf50;
+                  
+                  &:hover {
+                    background-color: #c8e6c9;
+                  }
+                }
+              }
+
+              // Submitted Column (center aligned)
+              &:nth-child(7) {
+                text-align: center;
+              }
+
+              // View Button Column (center aligned)
+              &:nth-child(8) {
+                text-align: center;
+              }
+
+              // View Button Column
+              .view-btn {
+                @include theme-button-primary;
+                font-size: $font-size-xs;
+                padding: 6px 12px;
+                min-width: 70px;
+                
+                .MuiSvgIcon-root {
+                  font-size: 16px;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -107,70 +297,92 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
-    padding: 16px 0;
+    padding: $spacing-lg;
+    border-top: 1px solid $border-light;
+    background: white;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    flex-shrink: 0;
+    margin-top: auto;
 
     .entries-info {
-      color: #666;
-      font-size: 0.875rem;
+      color: $text-muted;
+      font-size: $font-size-sm;
+      font-family: $font-family-body;
 
       span {
-        font-weight: 600;
-        color: #333;
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        margin: 0 $spacing-xs;
       }
     }
 
     .pagination {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: $spacing-xs;
 
       button {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        background: #fff;
-        color: #333;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid $border-light;
+        background: white;
+        color: $text-muted;
+        font-size: $font-size-lg;
         cursor: pointer;
-        border-radius: 4px;
-        font-size: 0.875rem;
+        border-radius: $radius-md;
+        font-weight: $font-weight-medium;
+        transition: $transition-normal;
 
         &:hover:not(:disabled) {
-          background: #f5f5f5;
+          background: $brand-primary;
+          color: white;
+          border-color: $brand-primary;
+          transform: translateY(-1px);
+          box-shadow: $shadow-sm;
         }
 
         &:disabled {
-          opacity: 0.5;
+          opacity: 0.4;
           cursor: not-allowed;
-        }
-
-        &.prev, &.next {
-          font-weight: bold;
+          background: $bg-muted;
         }
       }
 
       .page-numbers {
         display: flex;
-        gap: 4px;
+        align-items: center;
+        gap: $spacing-xs;
 
         span {
-          padding: 8px 12px;
-          border: 1px solid #ddd;
-          background: #fff;
-          color: #333;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: $font-size-sm;
+          color: $text-muted;
           cursor: pointer;
-          border-radius: 4px;
-          font-size: 0.875rem;
-          min-width: 32px;
-          text-align: center;
+          border-radius: $radius-md;
+          font-weight: $font-weight-medium;
+          border: 1px solid $border-light;
+          background: white;
+          transition: $transition-normal;
 
           &:hover {
-            background: #f5f5f5;
+            background: $bg-hover;
+            color: $text-primary;
+            border-color: $brand-primary;
+            transform: translateY(-1px);
           }
 
           &.active {
-            background: #1976d2;
-            color: #fff;
-            border-color: #1976d2;
+            background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+            color: white;
+            border-color: $brand-primary;
+            box-shadow: $shadow-sm;
           }
         }
       }
@@ -181,6 +393,78 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 200px;
+    height: calc(100vh - $header-height);
+    background-color: $bg-secondary;
+
+    .MuiCircularProgress-root {
+      color: $brand-primary;
+    }
+  }
+}
+
+// Mobile responsive styles
+@media (max-width: $breakpoint-md) {
+  .project-bids-list {
+    .table-wrapper {
+      .MuiTableContainer-root {
+        .MuiTable-root {
+          .MuiTableHead-root {
+            .MuiTableCell-head {
+              padding: $spacing-md $spacing-xs;
+              font-size: $font-size-2xs;
+            }
+          }
+          
+          .MuiTableBody-root {
+            .MuiTableCell-body {
+              padding: $spacing-md $spacing-xs;
+              font-size: $font-size-xs;
+              
+              .freelancer-info {
+                gap: $spacing-sm;
+                
+                .freelancer-avatar {
+                  width: 32px;
+                  height: 32px;
+                  font-size: $font-size-xs;
+                }
+              }
+              
+              .delivery-time {
+                gap: $spacing-xs;
+                
+                .delivery-icon {
+                  font-size: 14px;
+                }
+                
+                .delivery-text {
+                  font-size: $font-size-xs;
+                }
+              }
+              
+              .view-btn {
+                padding: 4px 8px;
+                font-size: $font-size-2xs;
+                min-width: 60px;
+                
+                .MuiSvgIcon-root {
+                  font-size: 14px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    .table-footer {
+      padding: $spacing-md;
+      flex-direction: column;
+      gap: $spacing-md;
+      
+      .entries-info {
+        font-size: $font-size-xs;
+      }
+    }
   }
 }

@@ -2,20 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Card,
-  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Typography,
   Grid,
-  Chip,
-  Avatar,
-  Divider,
   Button,
+  Avatar,
   CircularProgress,
   Box,
   Paper,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+  ExpandMore,
+  Home,
+  Assignment,
+  Info,
+  Person,
+  Work,
+  Description,
+  CalendarToday,
+  Money
+} from '@mui/icons-material';
 import { getProjectBidDetails, clearCurrentBid } from '../../features/admin/projectBidsSlice';
+import Breadcrumb from '../../components/Breadcrumb';
 import './ProjectBidDetail.scss';
 
 const ProjectBidDetail = () => {
@@ -23,6 +33,7 @@ const ProjectBidDetail = () => {
   const navigate = useNavigate();
   const { bidId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedPanel, setExpandedPanel] = useState('bid');
 
   // Get data from Redux store
   const { currentBid } = useSelector((state) => state.projectBidsReducer);
@@ -49,25 +60,74 @@ const ProjectBidDetail = () => {
     };
   }, [dispatch, bidId]);
 
-  const handleBackToList = () => {
-    navigate('/project-bids');
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpandedPanel(isExpanded ? panel : false);
   };
 
-  const getStatusColor = (status) => {
+  // Helper function to get status button style (matching other pages)
+  const getStatusButtonStyle = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return 'warning';
+        return {
+          backgroundColor: '#fff3e0',
+          color: '#e65100',
+          border: '1px solid #ffcc02',
+        };
       case 'accepted':
-        return 'success';
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          border: '1px solid #4caf50',
+        };
       case 'rejected':
-        return 'error';
+        return {
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          border: '1px solid #f44336',
+        };
       case 'in_progress':
-        return 'info';
+        return {
+          backgroundColor: '#e3f2fd',
+          color: '#1565c0',
+          border: '1px solid #2196f3',
+        };
       case 'completed':
-        return 'success';
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          border: '1px solid #4caf50',
+        };
       default:
-        return 'default';
+        return {
+          backgroundColor: '#fff3e0',
+          color: '#e65100',
+          border: '1px solid #ffcc02',
+        };
     }
+  };
+
+  // Helper function to render professional field
+  const renderProfessionalField = (icon, label, value, isAmount = false) => {
+    if (!value && value !== 0) return null;
+    
+    return (
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper className="professional-field">
+          <Box className="field-header">
+            {icon && <Box className="field-icon">{icon}</Box>}
+            <Typography variant="subtitle2" className="field-label">
+              {label}
+            </Typography>
+          </Box>
+          <Typography 
+            variant="body1" 
+            className={`field-value ${isAmount ? 'amount-value' : ''}`}
+          >
+            {value}
+          </Typography>
+        </Paper>
+      </Grid>
+    );
   };
 
   const formatDate = (dateString) => {
@@ -97,320 +157,370 @@ const ProjectBidDetail = () => {
     );
   }
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Project Bids', path: '/project-bids', icon: <Assignment /> },
+    { label: `Bid #${bidId}`, path: null, icon: <Info /> }
+  ];
+
   if (!currentBid) {
     return (
-      <div className="error-container">
-        <Typography variant="h6" color="error">
-          Bid not found
-        </Typography>
-        <Button onClick={handleBackToList} variant="outlined" sx={{ mt: 2 }}>
-          Back to List
-        </Button>
+      <div className="project-bid-detail">
+        <Breadcrumb items={breadcrumbItems} />
+        <div className="error-container">
+          <Typography variant="h6" color="error">
+            Bid not found
+          </Typography>
+          <Button onClick={() => navigate('/project-bids')} className="gradient-secondary">
+            Back to Project Bids
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="project-bid-detail">
-      <div >
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBackToList}
-          className="back-button"
-        >
-          Back to Project Bids
-        </Button>
-      </div>
+      <Breadcrumb items={breadcrumbItems} />
 
-      <div className="content-area">
-        <Grid container spacing={3} sx={{ mt: 0 }}>
-          {/* Bid Information */}
-          <Grid item xs={12} md={6}>
-            <Card className="bid-card">
-              <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Bid Information
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Bid ID:</Typography>
-                  <Typography variant="body1" className="value">#{currentBid.id}</Typography>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Status:</Typography>
-                  <Chip
-                    label={currentBid.status || 'Pending'}
-                    color={getStatusColor(currentBid.status)}
-                    size="small"
-                  />
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Bid Amount:</Typography>
-                  <Typography variant="body1" className="value bid-amount">
-                    {formatCurrency(currentBid.bid_amount)}
-                  </Typography>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Delivery Time:</Typography>
-                  <Typography variant="body1" className="value">
-                    {currentBid.delivery_time ? `${currentBid.delivery_time} days` : '--'}
-                  </Typography>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Submitted:</Typography>
-                  <Typography variant="body1" className="value">
-                    {formatDate(currentBid.created_at)}
-                  </Typography>
-                </Box>
-                
-                {currentBid.bid_description && (
-                  <Box className="info-row">
-                    <Typography variant="subtitle2" className="label">Description:</Typography>
-                    <Typography variant="body1" className="value description">
+      <div className="accordion-container">
+        {/* Bid Information Accordion */}
+        <Accordion 
+          expanded={expandedPanel === 'bid'} 
+          onChange={handleAccordionChange('bid')}
+          className="bid-accordion"
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMore />}
+            className="accordion-header"
+          >
+            <Box className="accordion-title-container">
+              <Info className="accordion-icon" />
+              <Typography variant="h6" className="accordion-title">
+                Bid Information
+              </Typography>
+              <Button
+                variant="contained"
+                size="small"
+                sx={getStatusButtonStyle(currentBid.status)}
+                className={`status-button ${(currentBid.status || 'pending').toLowerCase().replace(' ', '-')}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {currentBid.status || 'Pending'}
+              </Button>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails className="accordion-content">
+            <Grid container spacing={2}>
+              {renderProfessionalField(
+                <Info />, 
+                'Bid ID', 
+                `#${currentBid.id}`
+              )}
+              {renderProfessionalField(
+                <Money />, 
+                'Bid Amount', 
+                formatCurrency(currentBid.bid_amount),
+                true
+              )}
+              {renderProfessionalField(
+                <CalendarToday />, 
+                'Delivery Time', 
+                currentBid.delivery_time ? `${currentBid.delivery_time} days` : '--'
+              )}
+              {renderProfessionalField(
+                <CalendarToday />, 
+                'Submitted', 
+                formatDate(currentBid.created_at)
+              )}
+              
+              {currentBid.bid_description && (
+                <Grid item xs={12}>
+                  <Paper className="professional-field description-field">
+                    <Box className="field-header">
+                      <Description className="field-icon" />
+                      <Typography variant="subtitle2" className="field-label">
+                        Bid Description
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" className="field-value description-text">
                       {currentBid.bid_description}
                     </Typography>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+                  </Paper>
+                </Grid>
+              )}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
 
-          {/* Freelancer Information */}
-          <Grid item xs={12} md={6}>
-            <Card className="freelancer-card">
-              <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Freelancer Information
+        {/* Freelancer Information Accordion */}
+        <Accordion 
+          expanded={expandedPanel === 'freelancer'} 
+          onChange={handleAccordionChange('freelancer')}
+          className="freelancer-accordion"
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMore />}
+            className="accordion-header"
+          >
+            <Box className="accordion-title-container">
+              <Person className="accordion-icon" />
+              <Typography variant="h6" className="accordion-title">
+                Freelancer Information
+              </Typography>
+              <Box className="freelancer-preview">
+                <Avatar 
+                  className="preview-avatar"
+                  src={currentBid.freelancer?.profile_image}
+                >
+                  {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
+                </Avatar>
+                <Typography variant="body2" className="preview-name">
+                  {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
                 </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <Box className="freelancer-header">
-                  <Avatar 
-                    className="freelancer-avatar"
-                    src={currentBid.freelancer?.profile_image}
-                  >
-                    {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
-                  </Avatar>
-                  <Box className="freelancer-info">
-                    <Typography variant="h6" className="freelancer-name">
-                      {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
-                    </Typography>
-                    <Typography variant="body2" className="freelancer-email">
-                      {currentBid.freelancer?.email || '--'}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Phone:</Typography>
-                  <Typography variant="body1" className="value">
-                    {currentBid.freelancer?.mobile || '--'}
-                  </Typography>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Location:</Typography>
-                  <Typography variant="body1" className="value">
-                    {currentBid.freelancer?.city && currentBid.freelancer?.country 
-                      ? `${currentBid.freelancer.city}, ${currentBid.freelancer.country}`
-                      : '--'
-                    }
-                  </Typography>
-                </Box>
-                
-                <Box className="info-row">
-                  <Typography variant="subtitle2" className="label">Experience:</Typography>
-                  <Typography variant="body1" className="value">
-                    {currentBid.freelancer?.experience ? `${currentBid.freelancer.experience} years` : '--'}
-                  </Typography>
-                </Box>
-                
-                {currentBid.freelancer?.key_skills && (
-                  <Box className="info-row">
-                    <Typography variant="subtitle2" className="label">Skills:</Typography>
-                    <Typography variant="body1" className="value skills">
+              </Box>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails className="accordion-content">
+            <Box className="profile-header">
+              <Avatar 
+                className="freelancer-avatar"
+                src={currentBid.freelancer?.profile_image}
+              >
+                {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
+              </Avatar>
+              <Box className="freelancer-info">
+                <Typography variant="h6" className="freelancer-name">
+                  {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
+                </Typography>
+                <Typography variant="body2" className="freelancer-email">
+                  {currentBid.freelancer?.email || '--'}
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Grid container spacing={2}>
+              {renderProfessionalField(
+                <Person />, 
+                'Phone', 
+                currentBid.freelancer?.mobile || '--'
+              )}
+              {renderProfessionalField(
+                <Work />, 
+                'Location', 
+                currentBid.freelancer?.city && currentBid.freelancer?.country 
+                  ? `${currentBid.freelancer.city}, ${currentBid.freelancer.country}`
+                  : '--'
+              )}
+              {renderProfessionalField(
+                <CalendarToday />, 
+                'Experience', 
+                currentBid.freelancer?.experience ? `${currentBid.freelancer.experience} years` : '--'
+              )}
+              
+              {currentBid.freelancer?.key_skills && (
+                <Grid item xs={12}>
+                  <Paper className="professional-field description-field">
+                    <Box className="field-header">
+                      <Work className="field-icon" />
+                      <Typography variant="subtitle2" className="field-label">
+                        Skills
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" className="field-value">
                       {currentBid.freelancer.key_skills}
                     </Typography>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Project Information */}
-          <Grid item xs={12}>
-            <Card className="project-card">
-              <CardContent>
-                <Typography variant="h6" className="card-title">
-                  Project Information
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Project Title:</Typography>
-                      <Typography variant="body1" className="value project-title">
-                        {currentBid.ClientProject?.project_title || '--'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Category:</Typography>
-                      <Typography variant="body1" className="value">
-                        {currentBid.ClientProject?.Category?.name || '--'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Budget Range:</Typography>
-                      <Typography variant="body1" className="value">
-                        {currentBid.ClientProject?.project_amount_min && currentBid.ClientProject?.project_amount_max
-                          ? `${formatCurrency(currentBid.ClientProject.project_amount_min)} - ${formatCurrency(currentBid.ClientProject.project_amount_max)}`
-                          : '--'
-                        }
-                      </Typography>
-                    </Box>
-                    
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Posted:</Typography>
-                      <Typography variant="body1" className="value">
-                        {formatDate(currentBid.ClientProject?.created_at)}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={6}>
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Project Status:</Typography>
-                      <Chip
-                        label={currentBid.ClientProject?.status === 1 ? 'Active' : 'Inactive'}
-                        color={currentBid.ClientProject?.status === 1 ? 'primary' : 'default'}
-                        size="small"
-                      />
-                    </Box>
-                    
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Client:</Typography>
-                      <Typography variant="body1" className="value">
-                        {currentBid.ClientProject?.User?.first_name && currentBid.ClientProject?.User?.last_name
-                          ? `${currentBid.ClientProject.User.first_name} ${currentBid.ClientProject.User.last_name}`
-                          : '--'
-                        }
-                      </Typography>
-                    </Box>
-                    
-                    <Box className="info-row">
-                      <Typography variant="subtitle2" className="label">Client Email:</Typography>
-                      <Typography variant="body1" className="value">
-                        {currentBid.ClientProject?.User?.email || '--'}
-                      </Typography>
-                    </Box>
-                  </Grid>
+                  </Paper>
                 </Grid>
-                
-                {currentBid.ClientProject?.project_summary && (
-                  <Box className="info-row full-width">
-                    <Typography variant="subtitle2" className="label">Project Description:</Typography>
-                    <Typography variant="body1" className="value description">
+              )}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Project Information Accordion */}
+        <Accordion 
+          expanded={expandedPanel === 'project'} 
+          onChange={handleAccordionChange('project')}
+          className="project-accordion"
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMore />}
+            className="accordion-header"
+          >
+            <Box className="accordion-title-container">
+              <Work className="accordion-icon" />
+              <Typography variant="h6" className="accordion-title">
+                Project Information
+              </Typography>
+              <Button
+                variant="contained"
+                size="small"
+                className={`status-button ${currentBid.ClientProject?.status === 1 ? 'accepted' : 'rejected'}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {currentBid.ClientProject?.status === 1 ? 'Active' : 'Inactive'}
+              </Button>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails className="accordion-content">
+            <Grid container spacing={2}>
+              {renderProfessionalField(
+                <Work />, 
+                'Project Title', 
+                currentBid.ClientProject?.project_title || '--'
+              )}
+              {renderProfessionalField(
+                <Work />, 
+                'Category', 
+                currentBid.ClientProject?.Category?.name || '--'
+              )}
+              {renderProfessionalField(
+                <Money />, 
+                'Budget Range', 
+                currentBid.ClientProject?.project_amount_min && currentBid.ClientProject?.project_amount_max
+                  ? `${formatCurrency(currentBid.ClientProject.project_amount_min)} - ${formatCurrency(currentBid.ClientProject.project_amount_max)}`
+                  : '--',
+                true
+              )}
+              {renderProfessionalField(
+                <CalendarToday />, 
+                'Posted', 
+                formatDate(currentBid.ClientProject?.created_at)
+              )}
+              {renderProfessionalField(
+                <Person />, 
+                'Client', 
+                currentBid.ClientProject?.User?.first_name && currentBid.ClientProject?.User?.last_name
+                  ? `${currentBid.ClientProject.User.first_name} ${currentBid.ClientProject.User.last_name}`
+                  : '--'
+              )}
+              {renderProfessionalField(
+                <Person />, 
+                'Client Email', 
+                currentBid.ClientProject?.User?.email || '--'
+              )}
+              
+              {currentBid.ClientProject?.project_summary && (
+                <Grid item xs={12}>
+                  <Paper className="professional-field description-field">
+                    <Box className="field-header">
+                      <Description className="field-icon" />
+                      <Typography variant="subtitle2" className="field-label">
+                        Project Description
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" className="field-value description-text">
                       {currentBid.ClientProject.project_summary}
                     </Typography>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+                  </Paper>
+                </Grid>
+              )}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
 
-          {/* SOW Information - Only show if SOW exists */}
-          {currentBid.sow && (
-            <Grid item xs={12}>
-              <Card className="sow-card">
-                <CardContent>
-                  <Typography variant="h6" className="card-title">
-                    Statement of Work (SOW)
-                  </Typography>
-                  <Divider sx={{ my: 2 }} />
-                  
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <Box className="info-row">
-                        <Typography variant="subtitle2" className="label">SOW ID:</Typography>
-                        <Typography variant="body1" className="value">
-                          #{currentBid.sow.id}
+        {/* SOW Information Accordion - Only show if SOW exists */}
+        {currentBid.sow && (
+          <Accordion 
+            expanded={expandedPanel === 'sow'} 
+            onChange={handleAccordionChange('sow')}
+            className="sow-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <Description className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Statement of Work (SOW)
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={getStatusButtonStyle(currentBid.sow.status)}
+                  className={`status-button ${(currentBid.sow.status || 'pending').toLowerCase().replace(' ', '-')}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {currentBid.sow.status || 'Draft'}
+                </Button>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={2}>
+                {renderProfessionalField(
+                  <Info />, 
+                  'SOW ID', 
+                  `#${currentBid.sow.id}`
+                )}
+                {renderProfessionalField(
+                  <Info />, 
+                  'Version', 
+                  currentBid.sow.version || '1.0'
+                )}
+                {renderProfessionalField(
+                  <CalendarToday />, 
+                  'Created', 
+                  formatDate(currentBid.sow.created_at)
+                )}
+                {renderProfessionalField(
+                  <CalendarToday />, 
+                  'Last Updated', 
+                  formatDate(currentBid.sow.updated_at)
+                )}
+                
+                {currentBid.sow.description && (
+                  <Grid item xs={12}>
+                    <Paper className="professional-field description-field">
+                      <Box className="field-header">
+                        <Description className="field-icon" />
+                        <Typography variant="subtitle2" className="field-label">
+                          SOW Description
                         </Typography>
                       </Box>
-                      
-                      <Box className="info-row">
-                        <Typography variant="subtitle2" className="label">Status:</Typography>
-                        <Chip
-                          label={currentBid.sow.status || 'Draft'}
-                          color={getStatusColor(currentBid.sow.status)}
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Box className="info-row">
-                        <Typography variant="subtitle2" className="label">Created:</Typography>
-                        <Typography variant="body1" className="value">
-                          {formatDate(currentBid.sow.created_at)}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12} md={6}>
-                      <Box className="info-row">
-                        <Typography variant="subtitle2" className="label">Version:</Typography>
-                        <Typography variant="body1" className="value">
-                          {currentBid.sow.version || '1.0'}
-                        </Typography>
-                      </Box>
-                      
-                      <Box className="info-row">
-                        <Typography variant="subtitle2" className="label">Last Updated:</Typography>
-                        <Typography variant="body1" className="value">
-                          {formatDate(currentBid.sow.updated_at)}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  
-                  {currentBid.sow.description && (
-                    <Box className="info-row full-width">
-                      <Typography variant="subtitle2" className="label">SOW Description:</Typography>
-                      <Typography variant="body1" className="value description">
+                      <Typography variant="body1" className="field-value description-text">
                         {currentBid.sow.description}
                       </Typography>
-                    </Box>
-                  )}
-                  
-                  {currentBid.sow.deliverables && (
-                    <Box className="info-row full-width">
-                      <Typography variant="subtitle2" className="label">Deliverables:</Typography>
-                      <Typography variant="body1" className="value description">
+                    </Paper>
+                  </Grid>
+                )}
+                
+                {currentBid.sow.deliverables && (
+                  <Grid item xs={12}>
+                    <Paper className="professional-field description-field">
+                      <Box className="field-header">
+                        <Work className="field-icon" />
+                        <Typography variant="subtitle2" className="field-label">
+                          Deliverables
+                        </Typography>
+                      </Box>
+                      <Typography variant="body1" className="field-value description-text">
                         {currentBid.sow.deliverables}
                       </Typography>
-                    </Box>
-                  )}
-                  
-                  {currentBid.sow.timeline && (
-                    <Box className="info-row full-width">
-                      <Typography variant="subtitle2" className="label">Timeline:</Typography>
-                      <Typography variant="body1" className="value description">
+                    </Paper>
+                  </Grid>
+                )}
+                
+                {currentBid.sow.timeline && (
+                  <Grid item xs={12}>
+                    <Paper className="professional-field description-field">
+                      <Box className="field-header">
+                        <CalendarToday className="field-icon" />
+                        <Typography variant="subtitle2" className="field-label">
+                          Timeline
+                        </Typography>
+                      </Box>
+                      <Typography variant="body1" className="field-value description-text">
                         {currentBid.sow.timeline}
                       </Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-        </Grid>
+                    </Paper>
+                  </Grid>
+                )}
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        )}
       </div>
     </div>
   );

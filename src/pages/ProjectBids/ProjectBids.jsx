@@ -8,13 +8,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
+  Button,
   CircularProgress,
-  Chip,
   Avatar,
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Home, Assignment, Visibility, CalendarToday } from '@mui/icons-material';
 import { getAllProjectBids } from '../../features/admin/projectBidsSlice';
+import Breadcrumb from '../../components/Breadcrumb';
 import './ProjectBids.scss';
 
 const ProjectBids = () => {
@@ -23,6 +23,12 @@ const ProjectBids = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const pageLimit = 50;
+
+  // Breadcrumb items for project bids page
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Project Bids', path: null, icon: <Assignment /> }
+  ];
 
   // Get data from Redux store
   const { bids, totalCount } = useSelector((state) => state.projectBidsReducer);
@@ -54,20 +60,60 @@ const ProjectBids = () => {
     navigate(`/project-bids/${bid.id}`);
   };
 
-  const getStatusColor = (status) => {
+  // Helper function to get status button style
+  const getStatusButtonStyle = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return 'warning';
+        return {
+          backgroundColor: '#fff3e0',
+          color: '#e65100',
+          border: '1px solid #ffcc02',
+          '&:hover': {
+            backgroundColor: '#ffe0b2',
+          }
+        };
       case 'accepted':
-        return 'success';
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          border: '1px solid #4caf50',
+          '&:hover': {
+            backgroundColor: '#c8e6c9',
+          }
+        };
       case 'rejected':
-        return 'error';
+        return {
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          border: '1px solid #f44336',
+          '&:hover': {
+            backgroundColor: '#ffcdd2',
+          }
+        };
       case 'in_progress':
-        return 'info';
+        return {
+          backgroundColor: '#e3f2fd',
+          color: '#1565c0',
+          border: '1px solid #2196f3',
+          '&:hover': {
+            backgroundColor: '#bbdefb',
+          }
+        };
       case 'completed':
-        return 'success';
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          border: '1px solid #4caf50',
+          '&:hover': {
+            backgroundColor: '#c8e6c9',
+          }
+        };
       default:
-        return 'default';
+        return {
+          backgroundColor: '#f5f5f5',
+          color: '#757575',
+          border: '1px solid #e0e0e0',
+        };
     }
   };
 
@@ -98,30 +144,30 @@ const ProjectBids = () => {
 
   return (
     <div className="project-bids-list">
-      <h2>Project Bids</h2>
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="table-wrapper">
         <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell width="10%">BID ID</TableCell>
-                <TableCell width="15%">PROJECT</TableCell>
-                <TableCell width="15%">FREELANCER</TableCell>
-                <TableCell width="10%">BID AMOUNT</TableCell>
-                <TableCell width="10%">DELIVERY TIME</TableCell>
+                <TableCell width="8%">BID ID</TableCell>
+                <TableCell width="22%">PROJECT</TableCell>
+                <TableCell width="20%">FREELANCER</TableCell>
+                <TableCell width="12%">BID AMOUNT</TableCell>
+                <TableCell width="12%">DELIVERY TIME</TableCell>
                 <TableCell width="10%">STATUS</TableCell>
-                <TableCell width="10%">SUBMITTED</TableCell>
-                <TableCell width="10%">VIEW</TableCell>
+                <TableCell width="8%">SUBMITTED</TableCell>
+                <TableCell width="8%">VIEW</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {bids.map((bid) => (
                 <TableRow key={bid.id}>
-                  <TableCell>
+                  <TableCell width="8%">
                     #{bid.id}
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="22%">
                     <div className="project-info">
                       <div className="project-title">
                         {bid.ClientProject?.project_title || '--'}
@@ -131,7 +177,7 @@ const ProjectBids = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="20%">
                     <div className="freelancer-info">
                       <Avatar 
                         className="freelancer-avatar"
@@ -149,35 +195,42 @@ const ProjectBids = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="12%">
                     <div className="bid-amount">
                       {formatCurrency(bid.bid_amount)}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="12%">
                     <div className="delivery-time">
-                      {bid.delivery_time ? `${bid.delivery_time} days` : '--'}
+                      <CalendarToday className="delivery-icon" />
+                      <span className="delivery-text">
+                        {bid.delivery_time ? `${bid.delivery_time} days` : '--'}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={bid.status || 'Pending'}
-                      color={getStatusColor(bid.status)}
+                  <TableCell width="10%">
+                    <Button
+                      variant="contained"
                       size="small"
-                      className="status-chip"
-                    />
+                      sx={getStatusButtonStyle(bid.status)}
+                      className={`status-button ${(bid.status || 'pending').toLowerCase().replace(' ', '-')}`}
+                    >
+                      {bid.status || 'Pending'}
+                    </Button>
                   </TableCell>
-                  <TableCell>
+                  <TableCell width="8%">
                     {formatDate(bid.created_at)}
                   </TableCell>
-                  <TableCell>
-                    <IconButton 
-                      className="action-btn"
+                  <TableCell width="8%">
+                    <Button 
+                      variant="contained"
+                      size="small"
+                      className="gradient-primary view-btn"
                       onClick={() => handleViewBidDetails(bid)}
-                      title="View Bid Details"
+                      startIcon={<Visibility />}
                     >
-                      <VisibilityIcon />
-                    </IconButton>
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

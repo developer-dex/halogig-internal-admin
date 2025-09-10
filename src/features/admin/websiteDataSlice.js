@@ -32,10 +32,9 @@ export const uploadWebsiteDataExcel = createAsyncThunk(
 // Get all website data with pagination
 export const getWebsiteData = createAsyncThunk(
     "/getWebsiteData",
-    async ({ page = 1, limit = 10, categoryName, serviceName }) => {
+    async ({ page = 1, limit = 10, serviceName }) => {
         try {
             let url = `${apiEndPoints.GET_WEBSITE_DATA}?page=${page}&limit=${limit}`;
-            if (categoryName) url += `&categoryName=${categoryName}`;
             if (serviceName) url += `&serviceName=${serviceName}`;
             
             const payload = await getApi(url);
@@ -116,6 +115,44 @@ export const deleteAllWebsiteData = createAsyncThunk(
             return payload;
         } catch (e) {
             showError(e.response?.data?.message || "Failed to delete all website data");
+            throw e;
+        }
+    }
+);
+
+// Download website data as Excel
+export const downloadWebsiteDataExcel = createAsyncThunk(
+    "/downloadWebsiteDataExcel",
+    async (filters = {}) => {
+        try {
+            let url = apiEndPoints.WEBSITE_DATA_DOWNLOAD_EXCEL;
+            const params = new URLSearchParams();
+            
+            if (filters.serviceName) params.append('serviceName', filters.serviceName);
+            
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
+            
+            // Use fetch instead of axios for blob download
+            const adminToken = localStorage.getItem('adminToken');
+            const response = await fetch(`${process.env.REACT_APP_WEBSITE_API_URL}/${url}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to download Excel file');
+            }
+
+            const blob = await response.blob();
+            showSuccess("Excel file downloaded successfully");
+            return { blob };
+        } catch (e) {
+            showError(e.message || "Failed to download Excel file");
             throw e;
         }
     }
@@ -230,6 +267,20 @@ export const websiteDataSlice = createSlice({
                 state.responseCode = payload?.status;
             })
             .addCase(deleteAllWebsiteData.rejected, (state) => {
+                state.isLoading = false;
+                state.isError = true;
+            })
+            
+            // Download website data as Excel
+            .addCase(downloadWebsiteDataExcel.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(downloadWebsiteDataExcel.fulfilled, (state, { payload }) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.responseCode = payload?.status;
+            })
+            .addCase(downloadWebsiteDataExcel.rejected, (state) => {
                 state.isLoading = false;
                 state.isError = true;
             });

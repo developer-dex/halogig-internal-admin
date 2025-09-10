@@ -19,13 +19,21 @@ import {
   DialogActions,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Home, People } from '@mui/icons-material';
 import { clientData, statusChange } from '../../features/admin/clientManagementSlice';
+import Breadcrumb from '../../components/Breadcrumb';
 import './ClientList.scss';
 
 const ClientList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Breadcrumb items for client list page
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Clients', path: null, icon: <People /> }
+  ];
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -163,7 +171,7 @@ const ClientList = () => {
 
   return (
     <div className="partner-list">
-      <h2>Client List</h2>
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="table-wrapper">
         <TableContainer>
@@ -214,13 +222,7 @@ const ClientList = () => {
                       <Button 
                         variant="contained" 
                         onClick={() => handlePostProject(client)}
-                        sx={{
-                          backgroundColor: '#1976d2',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: '#1565c0'
-                          }
-                        }}
+                        className="gradient-primary"
                         size="small"
                       >
                         Post A Project
@@ -286,8 +288,8 @@ const ClientList = () => {
           ))}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Cancel</Button>
-          <Button onClick={handleStatusChange} color="primary" variant="contained">
+          <Button onClick={handleCloseModal} className="gradient-secondary">Cancel</Button>
+          <Button onClick={handleStatusChange} className="gradient-primary" variant="contained">
             OK
           </Button>
         </DialogActions>

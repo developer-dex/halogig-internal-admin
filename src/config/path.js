@@ -37,6 +37,7 @@ export const apiEndPoints = {
   
   // Website Data endpoints
   WEBSITE_DATA_UPLOAD_EXCEL: "admin/website-data/upload-excel",
+  WEBSITE_DATA_DOWNLOAD_EXCEL: "admin/website-data/download-excel",
   GET_WEBSITE_DATA: "admin/website-data",
   GET_WEBSITE_DATA_BY_ID: "admin/website-data",
   DELETE_WEBSITE_DATA: "admin/website-data",

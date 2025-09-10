@@ -1,7 +1,229 @@
 @import './fonts.scss';
+@import './theme.scss';
 
-// Define primary color variable
-$primary-color: #1976d2;
+// Legacy support (will be removed in future updates)
+$primary-color: $brand-primary;
+
+// Gradient button mixins using centralized theme
+@mixin gradient-button-primary {
+  @include theme-button-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left $transition-slow;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:disabled {
+    background: rgba(200, 200, 200, 0.3);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+@mixin gradient-button-secondary {
+  @include theme-button-secondary;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(195, 54, 42, 0.1), transparent);
+    transition: left $transition-slow;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+@mixin gradient-button-success {
+  background: $gradient-success;
+  background-size: 300% 300%;
+  color: $brand-secondary;
+  border: none;
+  border-radius: $radius-lg;
+  cursor: pointer;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-normal;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left $transition-slow;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, $color-success-light 0%, $color-success 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(40, 167, 69, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+  }
+}
+
+@mixin gradient-button-danger {
+  background: $gradient-danger;
+  background-size: 300% 300%;
+  color: $brand-secondary;
+  border: none;
+  border-radius: $radius-lg;
+  cursor: pointer;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-normal;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left $transition-slow;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, $color-danger-light 0%, $color-danger 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(220, 53, 69, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+  }
+}
+
+// Global gradient button classes
+.btn-gradient-primary {
+  @include gradient-button-primary;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+.btn-gradient-secondary {
+  @include gradient-button-secondary;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+.btn-gradient-success {
+  @include gradient-button-success;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+.btn-gradient-danger {
+  @include gradient-button-danger;
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+// Small button variants
+.btn-gradient-primary-sm {
+  @include gradient-button-primary;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.btn-gradient-secondary-sm {
+  @include gradient-button-secondary;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+// Large button variants
+.btn-gradient-primary-lg {
+  @include gradient-button-primary;
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+.btn-gradient-secondary-lg {
+  @include gradient-button-secondary;
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+// MUI Button overrides for gradient styles
+.MuiButton-root {
+  &.gradient-primary {
+    @include gradient-button-primary;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-transform: none;
+    letter-spacing: 0.5px;
+  }
+
+  &.gradient-secondary {
+    @include gradient-button-secondary;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-transform: none;
+  }
+
+  &.gradient-success {
+    @include gradient-button-success;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-transform: none;
+  }
+
+  &.gradient-danger {
+    @include gradient-button-danger;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-transform: none;
+  }
+}
 
 * {
   margin: 0;

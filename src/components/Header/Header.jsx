@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, InputBase, IconButton, Avatar, Menu, MenuItem, Button } from '@mui/material';
+import { AppBar, Toolbar, InputBase, IconButton, Avatar, Menu, MenuItem, Button, Divider } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import WorkIcon from '@mui/icons-material/Work';
+import FolderIcon from '@mui/icons-material/Folder';
+import ContactsIcon from '@mui/icons-material/Contacts';
+import WebIcon from '@mui/icons-material/Web';
+import ChatIcon from '@mui/icons-material/Chat';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+import GavelIcon from '@mui/icons-material/Gavel';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Header.scss';
 
@@ -41,19 +51,78 @@ const Header = ({ toggleSidebar }) => {
     handleNavigationMenuClose();
   };
 
-  // Navigation menu items
+  // Professional navigation menu items with icons and grouping
   const navigationItems = [
-    { label: 'Access Dashboard', path: '/dashboard' },
-    { label: 'Client', path: '/clients' },
-    { label: 'FreeLancer', path: '/freelancer' },
-    { label: 'Projects', path: '/projects' },
-    { label: 'Project Bids', path: '/project-bids' },
-    { label: 'Contacts', path: '/contact' },
-    { label: 'Website Data', path: '/website-data' },
-    { label: 'Chat Rooms', path: '/chat' },
-    { label: 'Site Analytics', path: '/site-analytics' },
-    { label: 'Log Manager', path: '/logs' },
+    { 
+      label: 'Access Dashboard', 
+      path: '/dashboard', 
+      icon: <DashboardIcon />,
+      group: 'main'
+    },
+    { 
+      label: 'Clients', 
+      path: '/clients', 
+      icon: <PeopleIcon />,
+      group: 'management'
+    },
+    { 
+      label: 'Freelancers', 
+      path: '/freelancer', 
+      icon: <WorkIcon />,
+      group: 'management'
+    },
+    { 
+      label: 'Projects', 
+      path: '/projects', 
+      icon: <FolderIcon />,
+      group: 'management'
+    },
+    { 
+      label: 'Project Bids', 
+      path: '/project-bids', 
+      icon: <GavelIcon />,
+      group: 'management'
+    },
+    { 
+      label: 'Contacts', 
+      path: '/contact', 
+      icon: <ContactsIcon />,
+      group: 'communication'
+    },
+    { 
+      label: 'Website Data', 
+      path: '/website-data', 
+      icon: <WebIcon />,
+      group: 'data'
+    },
+    { 
+      label: 'Chat Rooms', 
+      path: '/chat', 
+      icon: <ChatIcon />,
+      group: 'communication'
+    },
+    { 
+      label: 'Site Analytics', 
+      path: '/site-analytics', 
+      icon: <AnalyticsIcon />,
+      group: 'data'
+    },
+    { 
+      label: 'Log Manager', 
+      path: '/logs', 
+      icon: <ManageHistoryIcon />,
+      group: 'system'
+    },
   ];
+
+  // Group navigation items for better organization
+  const groupedNavigation = {
+    main: navigationItems.filter(item => item.group === 'main'),
+    management: navigationItems.filter(item => item.group === 'management'),
+    communication: navigationItems.filter(item => item.group === 'communication'),
+    data: navigationItems.filter(item => item.group === 'data'),
+    system: navigationItems.filter(item => item.group === 'system'),
+  };
 
   // Get current active navigation item
   const getCurrentActiveItem = () => {
@@ -97,13 +166,69 @@ const Header = ({ toggleSidebar }) => {
               getContentAnchorEl={null}
               className="navigation-menu"
             >
-              {navigationItems.map((item) => (
+              {/* Main Section */}
+              {groupedNavigation.main.map((item) => (
                 <MenuItem
                   key={item.path}
                   onClick={() => handleNavigationClick(item.path)}
                   className={location.pathname === item.path ? 'active' : ''}
                 >
-                  {item.label}
+                  {item.icon}
+                  <span>{item.label}</span>
+                </MenuItem>
+              ))}
+              
+              <Divider className="menu-divider" />
+              
+              {/* Management Section */}
+              {groupedNavigation.management.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  onClick={() => handleNavigationClick(item.path)}
+                  className={location.pathname === item.path ? 'active' : ''}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </MenuItem>
+              ))}
+              
+              <Divider className="menu-divider" />
+              
+              {/* Communication Section */}
+              {groupedNavigation.communication.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  onClick={() => handleNavigationClick(item.path)}
+                  className={location.pathname === item.path ? 'active' : ''}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </MenuItem>
+              ))}
+              
+              {/* Data & Analytics Section */}
+              {groupedNavigation.data.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  onClick={() => handleNavigationClick(item.path)}
+                  className={location.pathname === item.path ? 'active' : ''}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </MenuItem>
+              ))}
+              
+              <Divider className="menu-divider" />
+              
+              {/* System Section */}
+              {groupedNavigation.system.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  onClick={() => handleNavigationClick(item.path)}
+                  className={location.pathname === item.path ? 'active' : ''}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
                 </MenuItem>
               ))}
             </Menu>
@@ -111,21 +236,27 @@ const Header = ({ toggleSidebar }) => {
         </div>
 
         <div className="header-right">
-          {/* <div className="search-box">
+          <div className="search-box">
             <SearchIcon />
             <InputBase
-              placeholder="Search Products, Orders and Clients"
+              placeholder="Search admin panel..."
               className="search-input"
             />
           </div>
-          <IconButton className="icon-button">
+          <IconButton className="icon-button" title="Notifications">
             <NotificationsOutlinedIcon />
           </IconButton>
-          <IconButton className="icon-button">
+          <IconButton className="icon-button" title="Settings">
             <SettingsOutlinedIcon />
-          </IconButton> */}
+          </IconButton>
           <div className="user-info" onClick={handleMenuOpen} style={{ cursor: 'pointer' }}>
-            <Avatar sx={{ bgcolor: '#1976d2' }}>AG</Avatar>
+            <Avatar sx={{ 
+              bgcolor: '#c3362a',
+              width: 36,
+              height: 36,
+              fontWeight: 600,
+              fontSize: '14px'
+            }}>AG</Avatar>
             <span>Ankur Gupta</span>
           </div>
           <Menu

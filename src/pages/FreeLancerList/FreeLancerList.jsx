@@ -23,12 +23,21 @@ import {
   Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { Home, Work } from '@mui/icons-material';
 import { freelancerData } from '../../features/admin/freelancerManagementSlice';
 import { statusChange } from '../../features/admin/clientManagementSlice';
+import Breadcrumb from '../../components/Breadcrumb';
+import './FreeLancerList.scss';
 
 const FreeLancerList = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Breadcrumb items for freelancer list page
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Freelancers', path: null, icon: <Work /> }
+  ];
   const [freelancers, setFreelancers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -87,6 +96,59 @@ const FreeLancerList = () => {
     fetchFreelancers();
   };
 
+  const getStatusButtonStyle = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return {
+          backgroundColor: '#fff3e0',
+          color: '#f57c00',
+          borderColor: '#f57c00',
+          '&:hover': {
+            backgroundColor: '#ffe0b2',
+            borderColor: '#ef6c00'
+          }
+        };
+      case 'approved':
+      case 'otpverified':
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          borderColor: '#4caf50',
+          '&:hover': {
+            backgroundColor: '#c8e6c9',
+            borderColor: '#388e3c'
+          }
+        };
+      case 'rejected':
+        return {
+          backgroundColor: '#ffebee',
+          color: '#d32f2f',
+          borderColor: '#f44336',
+          '&:hover': {
+            backgroundColor: '#ffcdd2',
+            borderColor: '#c62828'
+          }
+        };
+      case 'under review':
+      case 'incomplete':
+        return {
+          backgroundColor: '#e3f2fd',
+          color: '#1565c0',
+          borderColor: '#2196f3',
+          '&:hover': {
+            backgroundColor: '#bbdefb',
+            borderColor: '#1976d2'
+          }
+        };
+      default:
+        return {
+          backgroundColor: '#f5f5f5',
+          color: '#666',
+          borderColor: '#ccc'
+        };
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -97,14 +159,13 @@ const FreeLancerList = () => {
 
   return (
     <div className="partner-list">
+      <Breadcrumb items={breadcrumbItems} />
       {/* <div className="search-container"> */}
         {/* <div className="search-box">
           <SearchIcon />
           <input type="text" placeholder="Search Tasks" />
         </div> */}
       {/* </div> */}
-
-      <h2>FreeLancer List</h2>
 
       <div className="table-wrapper">
         <TableContainer>
@@ -130,10 +191,14 @@ const FreeLancerList = () => {
                     {freelancer.email ? freelancer.email : '--'}
                   </TableCell>
                   <TableCell>
-                  <Button variant="outlined" onClick={() => handleOpenModal(freelancer)}>
-                    {freelancer.status}
-                  </Button>                 
-                   </TableCell>
+                    <Button 
+                      variant="outlined" 
+                      onClick={() => handleOpenModal(freelancer)}
+                      className={`status-button ${freelancer.status?.toLowerCase().replace(' ', '-')}`}
+                    >
+                      {freelancer.status}
+                    </Button>                 
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -193,8 +258,8 @@ const FreeLancerList = () => {
           ))}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal}>Cancel</Button>
-          <Button onClick={handleStatusChange} color="primary" variant="contained">
+          <Button onClick={handleCloseModal} className="gradient-secondary">Cancel</Button>
+          <Button onClick={handleStatusChange} className="gradient-primary" variant="contained">
             OK
           </Button>
         </DialogActions>

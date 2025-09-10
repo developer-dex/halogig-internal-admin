@@ -1,3 +1,5 @@
+@import '../../assets/styles/theme.scss';
+
 .layout {
   display: flex;
   flex-direction: column;
@@ -6,14 +8,14 @@
   .layout-container {
     display: flex;
     flex: 1;
-    margin-top: 70px; // Add top margin to account for fixed header
+    margin-top: $header-height; // Add top margin to account for fixed header
 
     .main-content {
       flex: 1;
-      padding: 20px;
-      background-color: #f5f6fa;
-      transition: margin-left 0.3s ease;
-      min-height: calc(100vh - 70px); // Ensure proper height
+      padding: $spacing-sm;
+      background-color: $bg-secondary;
+      transition: margin-left $transition-normal;
+      min-height: calc(100vh - #{$header-height});
 
       &.sidebar-closed {
         margin-left: 80px; // Only the slim sidebar width
@@ -22,10 +24,10 @@
   }
 
   // Responsive design
-  @media (max-width: 768px) {
+  @media (max-width: $breakpoint-md) {
     .layout-container {
       .main-content {
-        padding: 16px;
+        padding: $spacing-xs;
         margin-left: 0 !important; // No sidebar on mobile
       }
     }

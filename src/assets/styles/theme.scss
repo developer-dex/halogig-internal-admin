@@ -1,0 +1,275 @@
+// ================================
+// HALOGIG ADMIN THEME CONFIGURATION
+// ================================
+// This is the centralized theme configuration file.
+// Change colors here to update the entire admin panel theme.
+
+// ================================
+// BRAND COLORS (Primary Theme)
+// ================================
+$brand-primary: #c3362a;           // Main brand red
+$brand-primary-dark: #92150d;      // Darker red for depth
+$brand-primary-light: #e74c3c;     // Lighter red for hover states
+$brand-primary-lighter: #ff6b7a;   // Very light red for accents
+
+$brand-secondary: #ffffff;         // Pure white
+$brand-secondary-light: #f8f9fa;   // Light gray-white
+$brand-secondary-dark: #e9ecef;    // Darker gray-white
+
+// ================================
+// SEMANTIC COLORS
+// ================================
+$color-success: #28a745;           // Green for success states
+$color-success-light: #34ce57;     // Light green for hover
+$color-success-bg: #e8f5e9;        // Success background
+
+$color-warning: #ffc107;           // Yellow for warning states
+$color-warning-light: #ffed4e;     // Light yellow for hover
+$color-warning-bg: #fff3cd;        // Warning background
+
+$color-danger: #dc3545;            // Red for danger states
+$color-danger-light: #e74c3c;      // Light red for hover
+$color-danger-bg: #ffebee;         // Danger background
+
+$color-info: #17a2b8;              // Blue for info states
+$color-info-light: #20c997;        // Light blue for hover
+$color-info-bg: #e3f2fd;           // Info background
+
+// ================================
+// NEUTRAL COLORS
+// ================================
+$text-primary: #2d3748;            // Main text color
+$text-secondary: #4a5568;          // Secondary text color
+$text-muted: #718096;              // Muted text color
+$text-light: #a0aec0;              // Light text color
+
+$bg-primary: #ffffff;              // Main background
+$bg-secondary: #f7fafc;            // Secondary background
+$bg-tertiary: #edf2f7;             // Tertiary background
+$bg-dark: #2d3748;                 // Dark background
+$bg-hover: #f8f9fa;                // Hover background
+$bg-muted: #e9ecef;                // Muted background
+$bg-card: #ffffff;                 // Card background
+
+// Table specific colors
+$table-header-bg: #f8f9fa;         // Table header background
+
+// Layout variables
+$header-height: 64px;              // Header height
+
+// ================================
+// BREAKPOINTS
+// ================================
+$breakpoint-sm: 576px;             // Small devices
+$breakpoint-md: 768px;             // Medium devices  
+$breakpoint-lg: 992px;             // Large devices
+$breakpoint-xl: 1200px;            // Extra large devices
+
+// Semantic color aliases
+$success: $color-success;          // Success color alias
+
+$border-light: #e2e8f0;            // Light border
+$border-medium: #cbd5e0;           // Medium border
+$border-dark: #a0aec0;             // Dark border
+
+// ================================
+// BORDER RADIUS
+// ================================
+$radius-sm: 4px;                   // Small radius
+$radius-md: 8px;                   // Medium radius
+$radius-lg: 12px;                  // Large radius
+$radius-xl: 16px;                  // Extra large radius
+$radius-full: 50px;                // Full radius (pill shape)
+
+// ================================
+// GRADIENT DEFINITIONS
+// ================================
+$gradient-primary: linear-gradient(135deg, #{$brand-primary} 0%, #{$brand-primary-dark} 74%);
+$gradient-primary-hover: linear-gradient(135deg, #{$brand-primary-light} 0%, #{$brand-primary} 74%);
+$gradient-secondary: linear-gradient(135deg, #{$brand-secondary} 0%, #{$brand-secondary-light} 50%, #{$brand-secondary-dark} 100%);
+$gradient-success: linear-gradient(135deg, #{$color-success} 0%, #{$color-info-light} 100%);
+$gradient-danger: linear-gradient(135deg, #{$color-danger} 0%, #{$brand-primary} 100%);
+
+// Background gradients
+$gradient-page-bg: linear-gradient(135deg, #{$brand-primary} 0%, #{$brand-secondary} 100%);
+$gradient-card-bg: linear-gradient(135deg, #{$brand-secondary} 0%, #{$brand-secondary-light} 100%);
+
+// ================================
+// SPACING SYSTEM
+// ================================
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+$spacing-3xl: 64px;
+
+// ================================
+// BORDER RADIUS
+// ================================
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-2xl: 20px;
+$radius-full: 50%;
+
+// ================================
+// SHADOWS
+// ================================
+$shadow-sm: 0 2px 4px rgba(195, 54, 42, 0.1);
+$shadow-md: 0 4px 8px rgba(195, 54, 42, 0.15);
+$shadow-lg: 0 8px 20px rgba(195, 54, 42, 0.2);
+$shadow-xl: 0 12px 30px rgba(195, 54, 42, 0.25);
+
+// Card shadows
+$shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+$shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+// Button shadows
+$shadow-button: 0 4px 12px rgba(195, 54, 42, 0.3);
+$shadow-button-hover: 0 8px 20px rgba(195, 54, 42, 0.4);
+
+// ================================
+// TYPOGRAPHY
+// ================================
+$font-family-primary: 'Roboto', sans-serif;
+$font-family-secondary: 'Roboto', sans-serif;
+$font-family-heading: 'Roboto', sans-serif;
+$font-family-body: 'Roboto', sans-serif;
+
+$font-size-2xs: 10px;
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-md: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 20px;
+$font-size-2xl: 24px;
+$font-size-3xl: 32px;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$letter-spacing-tight: -0.025em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.025em;
+$letter-spacing-wider: 0.05em;
+
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ================================
+// TRANSITIONS
+// ================================
+$transition-fast: 0.15s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// ================================
+// Z-INDEX LAYERS
+// ================================
+$z-dropdown: 1000;
+$z-modal: 1050;
+$z-popover: 1060;
+$z-tooltip: 1070;
+$z-toast: 1080;
+
+// ================================
+// COMPONENT SPECIFIC VARIABLES
+// ================================
+
+// Header
+$header-height: 70px;
+$header-bg: #{$brand-secondary};
+$header-border: #{$border-light};
+
+// Sidebar
+$sidebar-width: 280px;
+$sidebar-bg: #{$brand-secondary};
+$sidebar-border: #{$border-light};
+
+// Table
+$table-header-bg: #{$bg-secondary};
+$table-row-hover: #{$bg-tertiary};
+$table-border: #{$border-light};
+
+// Button heights
+$button-height-sm: 32px;
+$button-height-md: 40px;
+$button-height-lg: 48px;
+
+// Form elements
+$input-height: 48px;
+$input-bg: #{$brand-secondary};
+$input-border: #{$border-medium};
+$input-border-focus: #{$brand-primary};
+
+// ================================
+// RESPONSIVE BREAKPOINTS
+// ================================
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-2xl: 1400px;
+
+// ================================
+// UTILITY MIXINS
+// ================================
+@mixin theme-button-primary {
+  background: $gradient-primary;
+  color: $brand-secondary;
+  border: none;
+  border-radius: $radius-lg;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-normal;
+  box-shadow: $shadow-button;
+  
+  &:hover {
+    background: $gradient-primary-hover;
+    transform: translateY(-2px);
+    box-shadow: $shadow-button-hover;
+  }
+}
+
+@mixin theme-button-secondary {
+  background: $gradient-secondary;
+  color: $brand-primary;
+  border: 2px solid $brand-primary;
+  border-radius: $radius-lg;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-normal;
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    background: $gradient-primary;
+    color: $brand-secondary;
+    transform: translateY(-2px);
+    box-shadow: $shadow-button;
+  }
+}
+
+@mixin theme-card {
+  background: $bg-primary;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-card;
+  border: 1px solid $border-light;
+  transition: all $transition-normal;
+  
+  &:hover {
+    box-shadow: $shadow-card-hover;
+    transform: translateY(-2px);
+  }
+}
+
+@mixin theme-glassmorphism {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: $radius-2xl;
+  box-shadow: $shadow-lg;
+}

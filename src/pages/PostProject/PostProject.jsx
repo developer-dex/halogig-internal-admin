@@ -23,7 +23,6 @@ import {
   Radio,
   RadioGroup,
   FormLabel,
-  Switch,
   Chip,
   Snackbar,
   Alert,
@@ -31,7 +30,9 @@ import {
 } from '@mui/material';
 import LaunchIcon from '@mui/icons-material/Launch';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { Home, Assignment } from '@mui/icons-material';
 import { projectData, updateProject, updateProjectStatus } from '../../features/admin/projectManagementSlice';
+import Breadcrumb from '../../components/Breadcrumb';
 import { 
   fetchCategories, 
   fetchSubcategories, 
@@ -44,6 +45,12 @@ import './PostProject.scss';
 const PostProject = () => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Breadcrumb items for posted projects page
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Posted Projects', path: null, icon: <Assignment /> }
+  ];
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -52,6 +59,8 @@ const PostProject = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [statusProject, setStatusProject] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const statusOptions = ['Pending', 'Approved', 'Rejected'];
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('info');
@@ -336,10 +345,45 @@ const PostProject = () => {
     }
   };
 
-  // Helper function to get approval status text
-  const getApprovalStatusText = (approvedByAdmin) => {
-    return approvedByAdmin ? 'Approved' : 'Pending';
+  // Helper function to get status button style
+  const getStatusButtonStyle = (approved) => {
+    const status = approved ? 'approved' : 'pending';
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return {
+          backgroundColor: '#fff3e0',
+          color: '#e65100',
+          border: '1px solid #ffcc02',
+          '&:hover': {
+            backgroundColor: '#ffe0b2',
+          }
+        };
+      case 'approved':
+        return {
+          backgroundColor: '#e8f5e9',
+          color: '#2e7d32',
+          border: '1px solid #4caf50',
+          '&:hover': {
+            backgroundColor: '#c8e6c9',
+          }
+        };
+      case 'rejected':
+        return {
+          backgroundColor: '#ffebee',
+          color: '#c62828',
+          border: '1px solid #f44336',
+          '&:hover': {
+            backgroundColor: '#ffcdd2',
+          }
+        };
+      default:
+        return {
+          backgroundColor: '#f5f5f5',
+          color: '#757575',
+        };
+    }
   };
+
 
   // Helper function to format project link display
   const formatProjectLink = (url) => {
@@ -352,17 +396,20 @@ const PostProject = () => {
     }
   };
 
-  // Handle approval status toggle
-  const handleApprovalToggle = (project) => {
+  // Handle status button click
+  const handleStatusClick = (project) => {
     setStatusProject(project);
+    setSelectedStatus(project.approved_by_admin ? 'Approved' : 'Pending');
     setStatusModal(true);
   };
 
-  // Handle approval status confirmation
-  const handleApprovalConfirm = async () => {
+  // Handle status change confirmation
+  const handleStatusChange = async () => {
     if (!statusProject) return;
 
     try {
+      const newApprovedStatus = selectedStatus === 'Approved';
+      
       await dispatch(updateProjectStatus({
         projectId: statusProject.id,
         currentApprovedStatus: statusProject.approved_by_admin
@@ -372,22 +419,24 @@ const PostProject = () => {
       setProjects(prevProjects => 
         prevProjects.map(project => 
           project.id === statusProject.id 
-            ? { ...project, approved_by_admin: !project.approved_by_admin }
+            ? { ...project, approved_by_admin: newApprovedStatus }
             : project
         )
       );
 
       setStatusModal(false);
       setStatusProject(null);
+      setSelectedStatus('');
     } catch (error) {
-      console.error('Error updating approval status:', error);
+      console.error('Error updating project status:', error);
     }
   };
 
-  // Handle approval modal close
-  const handleApprovalModalClose = () => {
+  // Handle status modal close
+  const handleStatusModalClose = () => {
     setStatusModal(false);
     setStatusProject(null);
+    setSelectedStatus('');
   };
 
   const handleCopyLink = (url, projectId) => {
@@ -470,7 +519,7 @@ const PostProject = () => {
 
   return (
     <div className="project-list">
-      <h2>Posted Projects</h2>
+      <Breadcrumb items={breadcrumbItems} />
 
       <div className="table-wrapper">
         <TableContainer>
@@ -507,17 +556,15 @@ const PostProject = () => {
                         {getPricingModelName(project.model_engagement)}
                       </TableCell>
                       <TableCell width="10%">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Switch
-                            checked={project.approved_by_admin}
-                            onChange={() => handleApprovalToggle(project)}
-                            color="primary"
-                            size="small"
-                          />
-                          <span style={{ fontSize: '12px', color: project.approved_by_admin ? '#4caf50' : '#ff9800' }}>
-                            {getApprovalStatusText(project.approved_by_admin)}
-                          </span>
-                        </div>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleStatusClick(project)}
+                          sx={getStatusButtonStyle(project.approved_by_admin)}
+                          className={`status-button ${project.approved_by_admin ? 'approved' : 'pending'}`}
+                        >
+                          {project.approved_by_admin ? 'Approved' : 'Pending'}
+                        </Button>
                       </TableCell>
                       <TableCell width="15%">
                         {project.client_project_link ? (
@@ -541,6 +588,7 @@ const PostProject = () => {
                         <Button 
                           variant="outlined" 
                           size="small"
+                          className="gradient-primary"
                           onClick={() => handleEditClick(project)}
                         >
                           Edit
@@ -792,11 +840,12 @@ const PostProject = () => {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} disabled={isSaving}>Cancel</Button>
+          <Button onClick={handleCloseModal} disabled={isSaving} className="gradient-secondary">Cancel</Button>
           <Button 
             onClick={handleSaveChanges} 
             variant="contained" 
             color="primary"
+            className="gradient-primary"
             disabled={isSaving}
             startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : null}
           >
@@ -805,26 +854,81 @@ const PostProject = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Approval Confirmation Modal */}
+      {/* Status Selection Modal */}
       <Dialog 
         open={statusModal} 
-        onClose={handleApprovalModalClose}
+        onClose={handleStatusModalClose}
         maxWidth="sm"
-        fullWidth
+        PaperProps={{
+          style: {
+            minWidth: '450px',
+            maxWidth: '520px',
+            width: '480px'
+          }
+        }}
       >
-        <DialogTitle>Confirm Approval Change</DialogTitle>
-        <DialogContent>
-          <p>
-            Are you sure you want to {statusProject?.approved_by_admin ? 'reject' : 'approve'} this project?
-          </p>
-          <p style={{ marginTop: '10px', fontWeight: 'bold' }}>
-            Project: {statusProject?.project_title}
-          </p>
+        <DialogTitle style={{ 
+          fontSize: '18px', 
+          fontWeight: '600',
+          padding: '20px 24px 12px 24px',
+          textAlign: 'center'
+        }}>
+          Update Project Status
+        </DialogTitle>
+        <DialogContent style={{ 
+          padding: '12px 24px 20px 24px'
+        }}>
+          <div style={{ 
+            marginBottom: '20px', 
+            fontSize: '15px',
+            color: '#555',
+            textAlign: 'center',
+            background: '#f8f9fa',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            border: '1px solid #e9ecef'
+          }}>
+            <strong>{statusProject?.project_title}</strong>
+          </div>
+          <RadioGroup
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            style={{ gap: '6px', marginLeft: '8px' }}
+          >
+            {statusOptions.map((status) => (
+              <FormControlLabel
+                key={status}
+                value={status}
+                control={<Radio />}
+                label={status}
+                style={{ 
+                  margin: '4px 0',
+                  fontSize: '15px'
+                }}
+              />
+            ))}
+          </RadioGroup>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleApprovalModalClose}>Cancel</Button>
-          <Button onClick={handleApprovalConfirm} variant="contained" color="primary">
-            Confirm
+        <DialogActions style={{ 
+          padding: '12px 24px 20px 24px',
+          gap: '12px',
+          justifyContent: 'center'
+        }}>
+          <Button 
+            onClick={handleStatusModalClose} 
+            className="gradient-secondary"
+            style={{ minWidth: '100px', padding: '8px 20px' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleStatusChange} 
+            variant="contained" 
+            color="primary" 
+            className="gradient-primary"
+            style={{ minWidth: '100px', padding: '8px 20px' }}
+          >
+            Update
           </Button>
         </DialogActions>
       </Dialog>

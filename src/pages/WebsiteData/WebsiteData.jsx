@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -42,6 +42,7 @@ import {
   getWebsiteDataById,
   createWebsiteData,
   updateWebsiteData,
+  downloadWebsiteDataExcel,
   clearUploadResponse,
 } from '../../features/admin/websiteDataSlice';
 import './WebsiteData.scss';
@@ -63,8 +64,8 @@ const WebsiteData = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [categoryFilter, setCategoryFilter] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
+  const [debouncedServiceFilter, setDebouncedServiceFilter] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -78,6 +79,7 @@ const WebsiteData = () => {
     serviceTitle: '',
     serviceDescription: '',
     serviceLists: [{ title: '', description: '' }],
+    industryTitle: '',
     industryLists: [''],
     mainApplicationTitle: '',
     mainApplicationDescription: '',
@@ -99,20 +101,28 @@ const WebsiteData = () => {
     responseData
   } = useSelector((state) => state.websiteData);
 
+  // Debouncing effect for service filter
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setDebouncedServiceFilter(serviceFilter);
+    }, 500); // 500ms debounce delay
+
+    return () => clearTimeout(debounceTimer);
+  }, [serviceFilter]);
+
   // Fetch website data
-  const fetchWebsiteData = async () => {
+  const fetchWebsiteData = useCallback(async () => {
     const response = await dispatch(getWebsiteData({
       page: currentPage,
       limit: pageLimit,
-      categoryName: categoryFilter || undefined,
-      serviceName: serviceFilter || undefined,
+      serviceName: debouncedServiceFilter || undefined,
     }));
     
     if (response.payload?.data?.success) {
       setWebsiteData(response.payload.data.data.data || []);
       setTotalCount(response.payload.data.data.pagination?.totalRecords || 0);
     }
-  };
+  }, [dispatch, currentPage, pageLimit, debouncedServiceFilter]);
 
   // Format date helper function
   const formatDate = (dateString, includeTime = false) => {
@@ -135,7 +145,7 @@ const WebsiteData = () => {
 
   useEffect(() => {
     fetchWebsiteData();
-  }, [currentPage, categoryFilter, serviceFilter]);
+  }, [fetchWebsiteData]);
 
   // Handle file selection
   const handleFileSelect = (event) => {
@@ -210,6 +220,31 @@ const WebsiteData = () => {
     }
   };
 
+  // Handle download Excel
+  const handleDownloadExcel = async () => {
+    try {
+      const filters = {};
+      if (debouncedServiceFilter) filters.serviceName = debouncedServiceFilter;
+      
+      const response = await dispatch(downloadWebsiteDataExcel(filters));
+      
+      if (response.payload?.blob) {
+        // Handle blob download from fetch response
+        const blob = response.payload.blob;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `website-data-${new Date().toISOString().slice(0, 10)}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+    }
+  };
+
   // Handle view details
   const handleViewDetails = async (record) => {
     setSelectedRecord(record);
@@ -233,6 +268,7 @@ const WebsiteData = () => {
       serviceLists: record.service_lists && record.service_lists.length > 0 
         ? record.service_lists 
         : [{ title: '', description: '' }],
+      industryTitle: record.industry_title || '',
       industryLists: record.industry_lists 
         ? record.industry_lists.split(',').map(item => item.trim())
         : [''],
@@ -260,7 +296,6 @@ const WebsiteData = () => {
 
   // Clear filters
   const clearFilters = () => {
-    setCategoryFilter('');
     setServiceFilter('');
     setCurrentPage(1);
   };
@@ -278,6 +313,7 @@ const WebsiteData = () => {
       serviceTitle: '',
       serviceDescription: '',
       serviceLists: [{ title: '', description: '' }],
+      industryTitle: '',
       industryLists: [''],
       mainApplicationTitle: '',
       mainApplicationDescription: '',
@@ -366,12 +402,10 @@ const WebsiteData = () => {
   };
 
   const addInterlinkPage = () => {
-    if (formData.interlinkPages.length < 5) {
-      setFormData(prev => ({
-        ...prev,
-        interlinkPages: [...prev.interlinkPages, { slug: '', altername_skill_name: '' }]
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      interlinkPages: [...prev.interlinkPages, { slug: '', altername_skill_name: '' }]
+    }));
   };
 
   const removeInterlinkPage = (index) => {
@@ -564,69 +598,159 @@ const WebsiteData = () => {
 
   return (
     <div className="website-data-container">
-      <div className="page-header">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Website Data Management
-        </Typography>
-        <Typography variant="body1" color="textSecondary" gutterBottom>
-          Upload and manage website data from Excel files
-        </Typography>
-      </div>
-
-      {/* Upload Section */}
-      <Card className="upload-card" sx={{ mb: 3 }}>
+      {/* Actions Section */}
+      <Card className="actions-card" sx={{ mb: 3 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h6" gutterBottom>
-                Upload Excel File
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                Website Data Management
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Upload an Excel file containing website data. Supported formats: .xlsx, .xls (Max: 10MB)
+                Manage your website data with powerful tools for upload, download, and content management
               </Typography>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Box display="flex" gap={2} justifyContent="flex-end">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<CloudUploadIcon />}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadLoading}
-                >
-                  Select File
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<RefreshIcon />}
-                  onClick={fetchWebsiteData}
-                  disabled={isLoading}
-                >
-                  Refresh
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => setOpenDeleteAllModal(true)}
-                  disabled={isLoading || totalCount === 0}
-                >
-                  Delete All
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => setOpenCreateModal(true)}
-                  disabled={isLoading}
-                >
-                  Add WebData
-                </Button>
+            <Grid item xs={12} md={6}>
+              {/* Primary Actions */}
+              <Box display="flex" flexDirection="column" gap={2}>
+                <Box display="flex" gap={1.5} justifyContent="flex-end" flexWrap="wrap">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                  
+                  {/* File Operations Group */}
+                  <Button
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadLoading}
+                    sx={{
+                      minWidth: 140,
+                      height: 40,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      boxShadow: 2,
+                      '&:hover': {
+                        boxShadow: 4,
+                        transform: 'translateY(-1px)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Upload Excel
+                  </Button>
+                  
+                  <Button
+                    variant="contained"
+                    startIcon={<GetAppIcon />}
+                    onClick={handleDownloadExcel}
+                    disabled={isLoading || totalCount === 0}
+                    sx={{
+                      minWidth: 140,
+                      height: 40,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      backgroundColor: 'success.main',
+                      boxShadow: 2,
+                      '&:hover': {
+                        backgroundColor: 'success.dark',
+                        boxShadow: 4,
+                        transform: 'translateY(-1px)',
+                      },
+                      '&:disabled': {
+                        backgroundColor: 'action.disabledBackground',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Download Excel
+                  </Button>
+                </Box>
+                
+                {/* Secondary Actions */}
+                <Box display="flex" gap={1.5} justifyContent="flex-end" flexWrap="wrap">
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => setOpenCreateModal(true)}
+                    disabled={isLoading}
+                    sx={{
+                      minWidth: 120,
+                      height: 36,
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      borderWidth: 1.5,
+                      '&:hover': {
+                        borderWidth: 1.5,
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        transform: 'translateY(-1px)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Add New
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    startIcon={<RefreshIcon />}
+                    onClick={fetchWebsiteData}
+                    disabled={isLoading}
+                    sx={{
+                      minWidth: 100,
+                      height: 36,
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      borderColor: 'grey.400',
+                      color: 'grey.700',
+                      borderWidth: 1.5,
+                      '&:hover': {
+                        borderWidth: 1.5,
+                        borderColor: 'primary.main',
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        transform: 'translateY(-1px)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => setOpenDeleteAllModal(true)}
+                    disabled={isLoading || totalCount === 0}
+                    sx={{
+                      minWidth: 120,
+                      height: 36,
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      borderColor: 'error.main',
+                      color: 'error.main',
+                      borderWidth: 1.5,
+                      '&:hover': {
+                        borderWidth: 1.5,
+                        backgroundColor: 'error.main',
+                        color: 'white',
+                        transform: 'translateY(-1px)',
+                      },
+                      '&:disabled': {
+                        borderColor: 'action.disabled',
+                        color: 'action.disabled',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Delete All
+                  </Button>
+                </Box>
               </Box>
             </Grid>
           </Grid>
@@ -674,33 +798,24 @@ const WebsiteData = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
-                label="Filter by Category"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                variant="outlined"
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Filter by Service"
+                label="Search by Service Name"
                 value={serviceFilter}
                 onChange={(e) => setServiceFilter(e.target.value)}
                 variant="outlined"
                 size="small"
+                placeholder="Type to search services... (debounced)"
               />
             </Grid>
             <Grid item xs={12} md={4}>
               <Button
                 variant="outlined"
                 onClick={clearFilters}
-                disabled={!categoryFilter && !serviceFilter}
+                disabled={!serviceFilter}
               >
-                Clear Filters
+                Clear Search
               </Button>
             </Grid>
           </Grid>
@@ -732,11 +847,8 @@ const WebsiteData = () => {
                       <TableCell>ID</TableCell>
                       <TableCell>Category</TableCell>
                       <TableCell>Service</TableCell>
-                      <TableCell>Title</TableCell>
-                      <TableCell>Services Count</TableCell>
-                      <TableCell>Applications Count</TableCell>
-                      <TableCell>Actions</TableCell>
-                      <TableCell>Preview</TableCell>
+                      <TableCell>Slug URL</TableCell>
+                      <TableCell>Operations</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -750,53 +862,89 @@ const WebsiteData = () => {
                         </TableCell>
                         <TableCell>{row.service_name || '-'}</TableCell>
                         <TableCell>
-                          <Typography variant="body2" noWrap style={{ maxWidth: 200 }}>
-                            {row.service_title || row.banner_title || '-'}
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              maxWidth: 250,
+                              fontFamily: 'monospace',
+                              fontSize: '0.875rem',
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                textDecoration: 'underline',
+                              }
+                            }}
+                            title={row.slug_link || 'No slug URL'}
+                            onClick={() => row.slug_link && navigator.clipboard.writeText(row.slug_link)}
+                          >
+                            {row.slug_link || '-'}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          {row.service_lists ? row.service_lists.length : 0}
-                        </TableCell>
-                        <TableCell>
-                          {row.main_application_lists ? row.main_application_lists.length : 0}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleViewDetails(row)}
-                            title="View Details"
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEdit(row)}
-                            title="Edit"
-                            color="primary"
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              setSelectedRecord(row);
-                              setOpenDeleteModal(true);
-                            }}
-                            title="Delete"
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={() => handlePreview(row)}
-                            title="Preview"
-                            color="secondary"
-                          >
-                            <LaunchIcon />
-                          </IconButton>
+                          <Box display="flex" gap={0.5} flexWrap="wrap">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleViewDetails(row)}
+                              title="View Details"
+                              sx={{
+                                '&:hover': {
+                                  backgroundColor: 'action.hover',
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.2s ease-in-out',
+                              }}
+                            >
+                              <VisibilityIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEdit(row)}
+                              title="Edit"
+                              color="primary"
+                              sx={{
+                                '&:hover': {
+                                  backgroundColor: 'primary.light',
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.2s ease-in-out',
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handlePreview(row)}
+                              title="Preview Page"
+                              color="secondary"
+                              sx={{
+                                '&:hover': {
+                                  backgroundColor: 'secondary.light',
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.2s ease-in-out',
+                              }}
+                            >
+                              <LaunchIcon />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedRecord(row);
+                                setOpenDeleteModal(true);
+                              }}
+                              title="Delete"
+                              color="error"
+                              sx={{
+                                '&:hover': {
+                                  backgroundColor: 'error.light',
+                                  transform: 'scale(1.1)',
+                                },
+                                transition: 'all 0.2s ease-in-out',
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -832,6 +980,7 @@ const WebsiteData = () => {
           <Button 
             onClick={() => setOpenUploadModal(false)} 
             disabled={uploadLoading}
+            className="gradient-secondary"
           >
             Cancel
           </Button>
@@ -840,6 +989,7 @@ const WebsiteData = () => {
             onClick={handleUpload}
             disabled={uploadLoading}
             startIcon={uploadLoading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+            className="gradient-primary"
           >
             {uploadLoading ? 'Uploading...' : 'Upload'}
           </Button>
@@ -868,7 +1018,10 @@ const WebsiteData = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteModal(false)}>
+          <Button 
+            onClick={() => setOpenDeleteModal(false)}
+            className="gradient-secondary"
+          >
             Cancel
           </Button>
           <Button
@@ -876,6 +1029,13 @@ const WebsiteData = () => {
             color="error"
             onClick={handleDelete}
             disabled={isLoading}
+            className="gradient-primary"
+            sx={{
+              backgroundColor: 'error.main',
+              '&:hover': {
+                backgroundColor: 'error.dark',
+              }
+            }}
           >
             Delete
           </Button>
@@ -1136,7 +1296,10 @@ const WebsiteData = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenViewModal(false)}>
+          <Button 
+            onClick={() => setOpenViewModal(false)}
+            className="gradient-secondary"
+          >
             Close
           </Button>
         </DialogActions>
@@ -1165,7 +1328,10 @@ const WebsiteData = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteAllModal(false)}>
+          <Button 
+            onClick={() => setOpenDeleteAllModal(false)}
+            className="gradient-secondary"
+          >
             Cancel
           </Button>
           <Button
@@ -1174,6 +1340,13 @@ const WebsiteData = () => {
             onClick={handleDeleteAll}
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={16} /> : <DeleteIcon />}
+            className="gradient-primary"
+            sx={{
+              backgroundColor: 'error.main',
+              '&:hover': {
+                backgroundColor: 'error.dark',
+              }
+            }}
           >
             {isLoading ? 'Deleting...' : 'Delete All Data'}
           </Button>
@@ -1349,6 +1522,7 @@ const WebsiteData = () => {
                     variant="contained"
                     size="small"
                     disabled={formData.serviceLists.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Service
                   </Button>
@@ -1392,6 +1566,19 @@ const WebsiteData = () => {
                     </Grid>
                   </Paper>
                 ))}
+              </Grid>
+
+              {/* Industry Title */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Industry Title"
+                  value={formData.industryTitle}
+                  onChange={(e) => setFormData(prev => ({ ...prev, industryTitle: e.target.value }))}
+                  variant="outlined"
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
               </Grid>
 
               {/* Industry Lists */}
@@ -1442,6 +1629,7 @@ const WebsiteData = () => {
                     variant="contained"
                     size="small"
                     disabled={formData.mainApplicationLists.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Application
                   </Button>
@@ -1491,14 +1679,14 @@ const WebsiteData = () => {
               <Grid item xs={12}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="h6" gutterBottom color="primary">
-                    Interlink Pages (Max 5)
+                    Interlink Pages
                   </Typography>
                   <Button
                     startIcon={<AddIcon />}
                     onClick={addInterlinkPage}
                     variant="contained"
                     size="small"
-                    disabled={formData.interlinkPages.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Page
                   </Button>
@@ -1588,6 +1776,8 @@ const WebsiteData = () => {
               setOpenCreateModal(false);
               resetForm();
             }}
+            className="gradient-secondary"
+            disabled={isLoading}
           >
             Cancel
           </Button>
@@ -1596,6 +1786,7 @@ const WebsiteData = () => {
             onClick={handleCreateSubmit}
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={16} /> : <AddIcon />}
+            className="gradient-primary"
           >
             {isLoading ? 'Creating...' : 'Create'}
           </Button>
@@ -1775,6 +1966,7 @@ const WebsiteData = () => {
                     variant="contained"
                     size="small"
                     disabled={formData.serviceLists.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Service
                   </Button>
@@ -1818,6 +2010,19 @@ const WebsiteData = () => {
                     </Grid>
                   </Paper>
                 ))}
+              </Grid>
+
+              {/* Industry Title */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Industry Title"
+                  value={formData.industryTitle}
+                  onChange={(e) => setFormData(prev => ({ ...prev, industryTitle: e.target.value }))}
+                  variant="outlined"
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
               </Grid>
 
               {/* Industry Lists */}
@@ -1868,6 +2073,7 @@ const WebsiteData = () => {
                     variant="contained"
                     size="small"
                     disabled={formData.mainApplicationLists.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Application
                   </Button>
@@ -1917,14 +2123,14 @@ const WebsiteData = () => {
               <Grid item xs={12}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="h6" gutterBottom color="primary">
-                    Interlink Pages (Max 5)
+                    Interlink Pages
                   </Typography>
                   <Button
                     startIcon={<AddIcon />}
                     onClick={addInterlinkPage}
                     variant="contained"
                     size="small"
-                    disabled={formData.interlinkPages.length >= 5}
+                    className="gradient-primary"
                   >
                     Add Page
                   </Button>
@@ -2015,6 +2221,8 @@ const WebsiteData = () => {
               setEditingRecord(null);
               resetForm();
             }}
+            className="gradient-secondary"
+            disabled={isLoading}
           >
             Cancel
           </Button>
@@ -2023,6 +2231,7 @@ const WebsiteData = () => {
             onClick={handleEditSubmit}
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={16} /> : <EditIcon />}
+            className="gradient-primary"
           >
             {isLoading ? 'Updating...' : 'Update'}
           </Button>

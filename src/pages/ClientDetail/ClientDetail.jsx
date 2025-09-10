@@ -16,9 +16,13 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
+  IconButton,
 } from '@mui/material';
 import {
-  ArrowBack,
   Email,
   Phone,
   LocationOn,
@@ -31,8 +35,17 @@ import {
   Language,
   VideoLibrary,
   CardGiftcard,
+  ExpandMore,
+  Info,
+  Badge,
+  AccountBox,
+  Description,
+  Star,
+  Assignment,
+  Home,
 } from '@mui/icons-material';
 import './ClientDetail.scss';
+import Breadcrumb from '../../components/Breadcrumb';
 
 const ClientDetail = () => {
   const navigate = useNavigate();
@@ -42,6 +55,9 @@ const ClientDetail = () => {
   const [clientDetails, setClientDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  
+  // State for accordion panels
+  const [expandedPanel, setExpandedPanel] = useState('personal'); // First panel open by default
 
   useEffect(() => {
     const fetchClientDetails = async () => {
@@ -64,9 +80,16 @@ const ClientDetail = () => {
     fetchClientDetails();
   }, [clientId]);
 
-  const handleBack = () => {
-    navigate('/clients');
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpandedPanel(isExpanded ? panel : false);
   };
+
+  // Breadcrumb items for client details page
+  const breadcrumbItems = [
+    { label: 'Home', path: '/clients', icon: <Home /> },
+    { label: 'Clients', path: '/clients', icon: <Person /> },
+    { label: 'Client Details', path: null, icon: <AccountBox /> }
+  ];
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -90,6 +113,44 @@ const ClientDetail = () => {
     }
   };
 
+  const renderProfessionalField = (icon, label, value, fullWidth = false) => (
+    <Grid item xs={12} sm={fullWidth ? 12 : 6} md={fullWidth ? 12 : 4}>
+      <Box className="professional-field">
+        <Box className="field-header">
+          <Box className="field-icon">
+            {icon}
+          </Box>
+          <Typography variant="caption" className="field-label">
+            {label}
+          </Typography>
+        </Box>
+        <Typography variant="body1" className="field-value">
+          {value || 'N/A'}
+        </Typography>
+      </Box>
+    </Grid>
+  );
+
+  const renderListField = (icon, label, value) => (
+    <ListItem className="professional-list-item">
+      <ListItemIcon className="list-icon">
+        {icon}
+      </ListItemIcon>
+      <ListItemText
+        primary={
+          <Typography variant="body2" className="list-label">
+            {label}
+          </Typography>
+        }
+        secondary={
+          <Typography variant="body1" className="list-value">
+            {value || 'N/A'}
+          </Typography>
+        }
+      />
+    </ListItem>
+  );
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -100,13 +161,18 @@ const ClientDetail = () => {
 
   if (isError || !clientDetails) {
     return (
+      <div className="client-detail">
       <div className="error-container">
         <Typography variant="h6" color="error">
           Failed to load client details
         </Typography>
-        <Button onClick={handleBack} variant="contained" sx={{ mt: 2 }}>
-          Go Back
-        </Button>
+          <Typography variant="body2" sx={{ mt: 1, mb: 2 }}>
+            There was an error loading the client information. Please try again.
+          </Typography>
+          <Button onClick={() => navigate('/clients')} variant="contained" sx={{ mt: 2 }}>
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }
@@ -114,559 +180,533 @@ const ClientDetail = () => {
   return (
     <div className="client-detail">
       <div className="header-client-detail">
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={handleBack}
-          variant="outlined"
-          sx={{ mb: 2 }}
-        >
-          Back to Client List
-        </Button>
+        <Breadcrumb items={breadcrumbItems} />
         <Typography variant="h4" component="h1" gutterBottom>
           Client Details
         </Typography>
       </div>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {/* Personal Information Card */}
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-          <Box sx={{ flex: { md: '0 0 33.333%' } }}>
-            <Card>
-              <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Avatar
-                    src={clientDetails.profile_image}
-                    sx={{ width: 80, height: 80, mr: 2 }}
-                  >
-                    {clientDetails.first_name?.charAt(0) || 'U'}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6">
-                      {clientDetails.first_name} {clientDetails.last_name}
+      <Box className="accordion-container">
+        {/* Personal Information Accordion */}
+        <Accordion 
+          expanded={expandedPanel === 'personal'} 
+          onChange={handleAccordionChange('personal')}
+          className="client-accordion"
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMore />}
+            className="accordion-header"
+          >
+            <Box className="accordion-title-container">
+              <AccountBox className="accordion-icon" />
+              <Typography variant="h6" className="accordion-title">
+                Personal Information
                     </Typography>
                     <Chip
                       label={clientDetails.status}
                       color={getStatusColor(clientDetails.status)}
                       size="small"
-                    />
+                className="status-chip"
+              />
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails className="accordion-content">
+            <Box className="personal-info-section">
+              <Box className="profile-header">
+                <Avatar
+                  src={clientDetails.profile_image}
+                  className="profile-avatar"
+                >
+                  {clientDetails.first_name?.charAt(0) || 'U'}
+                </Avatar>
+                <Box className="profile-details">
+                  <Typography variant="h5" className="profile-name">
+                    {clientDetails.first_name} {clientDetails.last_name}
+                  </Typography>
+                  <Typography variant="subtitle1" className="profile-subtitle">
+                    {clientDetails.designation || 'Client'}
+                  </Typography>
                   </Box>
                 </Box>
 
-                <List dense>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Email />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Email"
-                      secondary={clientDetails.email || 'N/A'}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Phone />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Mobile"
-                      secondary={clientDetails.mobile || 'N/A'}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Business />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Company"
-                      secondary={clientDetails.company_name || 'N/A'}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <LocationOn />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Location"
-                      secondary={`${clientDetails.city || ''} ${clientDetails.country || ''}`.trim() || 'N/A'}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Person />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Gender"
-                      secondary={clientDetails.gender || 'N/A'}
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <CalendarToday />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Date of Registration"
-                      secondary={formatDate(clientDetails.createdAt)}
-                    />
-                  </ListItem>
+              <List className="personal-info-list">
+                {renderListField(<Email />, 'Email Address', clientDetails.email)}
+                {renderListField(<Phone />, 'Mobile Number', clientDetails.mobile)}
+                {renderListField(<Business />, 'Company', clientDetails.company_name)}
+                {renderListField(<LocationOn />, 'Location', `${clientDetails.city || ''} ${clientDetails.country || ''}`.trim())}
+                {renderListField(<Person />, 'Gender', clientDetails.gender)}
+                {renderListField(<CalendarToday />, 'Registration Date', formatDate(clientDetails.createdAt))}
                 </List>
-              </CardContent>
-            </Card>
           </Box>
+          </AccordionDetails>
+        </Accordion>
 
-          {/* Additional Details Card */}
-          <Box sx={{ flex: { md: '0 0 66.667%' } }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+        {/* Additional Information Accordion */}
+        <Accordion 
+          expanded={expandedPanel === 'additional'} 
+          onChange={handleAccordionChange('additional')}
+          className="client-accordion"
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMore />}
+            className="accordion-header"
+          >
+            <Box className="accordion-title-container">
+              <Info className="accordion-icon" />
+              <Typography variant="h6" className="accordion-title">
                   Additional Information
                 </Typography>
-                
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Username
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.username || 'N/A'}
+              <Typography variant="caption" className="section-subtitle">
+                Extended profile details and verification data
                     </Typography>
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      GST Number
+          </AccordionSummary>
+          <AccordionDetails className="accordion-content">
+            <Grid container spacing={3}>
+              {renderProfessionalField(<AccountBox />, 'Username', clientDetails.username)}
+              {renderProfessionalField(<Badge />, 'GST Number', clientDetails.gst_number)}
+              {renderProfessionalField(<Badge />, 'PAN Card', clientDetails.pan_card_no)}
+              {renderProfessionalField(<Assignment />, 'Government ID', clientDetails.govtID)}
+              {renderProfessionalField(<Assignment />, 'ID Proof Number', clientDetails.idProofNo)}
+              {renderProfessionalField(<LocationOn />, 'Postal Code', clientDetails.postal)}
+              {renderProfessionalField(<LocationOn />, 'State', clientDetails.user_state)}
+              {renderProfessionalField(<CalendarToday />, 'Date of Issue', formatDate(clientDetails.doi))}
+              {renderProfessionalField(<Person />, 'Pseudo Name', clientDetails.pseudoName)}
+              {renderProfessionalField(<Work />, 'Experience', clientDetails.experience)}
+              {renderProfessionalField(<Star />, 'Key Skills', clientDetails.key_skills)}
+              {renderProfessionalField(<Star />, 'Rating', clientDetails.rating)}
+              {renderProfessionalField(<Work />, 'Designation', clientDetails.designation)}
+              {renderProfessionalField(<Person />, 'Register As', clientDetails.register_as)}
+              {renderProfessionalField(<CalendarToday />, 'Last Login', formatDate(clientDetails.last_login))}
+              {renderProfessionalField(<Language />, 'Last Login IP', clientDetails.last_login_ip)}
+              {renderProfessionalField(<Badge />, 'OTP', clientDetails.otp)}
+              {renderProfessionalField(<Person />, 'Role', clientDetails.role)}
+              {renderProfessionalField(<Assignment />, 'Profile Published', clientDetails.is_profile_published ? 'Yes' : 'No')}
+              {renderProfessionalField(<Person />, 'Anonymous', clientDetails.anonymous ? 'Yes' : 'No')}
+              {renderProfessionalField(<LocationOn />, 'Address', clientDetails.address, true)}
+              {renderProfessionalField(<Description />, 'About Me', clientDetails.aboutme, true)}
+              {renderProfessionalField(<Description />, 'Bio', clientDetails.bio, true)}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Professional Details Accordion */}
+        {clientDetails.ProfessionalDetails && clientDetails.ProfessionalDetails.length > 0 && (
+          <Accordion 
+            expanded={expandedPanel === 'professional'} 
+            onChange={handleAccordionChange('professional')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <Work className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Professional Details
                     </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.gst_number || 'N/A'}
+                <Chip
+                  label={`${clientDetails.total_professional_details} Experience${clientDetails.total_professional_details !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+                  </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
+                {clientDetails.ProfessionalDetails.map((professional, index) => (
+                  <Grid item xs={12} md={6} key={professional.id}>
+                    <Paper className="professional-card">
+                      <Box className="card-header">
+                        <Business className="card-icon" />
+                        <Typography variant="h6" className="card-title">
+                          {professional.company_name || 'Company Name N/A'}
                     </Typography>
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      PAN Card
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.pan_card_no || 'N/A'}
-                    </Typography>
+                      <Box className="card-content">
+                        <Box className="detail-row">
+                          <Typography variant="caption">Position</Typography>
+                          <Typography variant="body1">{professional.position || 'N/A'}</Typography>
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Government ID
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.govtID || 'N/A'}
-                    </Typography>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Duration</Typography>
+                          <Typography variant="body1">{professional.duration || 'N/A'}</Typography>
                   </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      ID Proof Number
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.idProofNo || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Postal Code
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.postal || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      State
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.user_state || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Date of Issue
-                    </Typography>
-                    <Typography variant="body1">
-                      {formatDate(clientDetails.doi)}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Pseudo Name
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.pseudoName || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Experience
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.experience || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Key Skills
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.key_skills || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Bio
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.bio || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Rating
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.rating || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Designation
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.designation || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Register As
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.register_as || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Last Login
-                    </Typography>
-                    <Typography variant="body1">
-                      {formatDate(clientDetails.last_login)}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Last Login IP
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.last_login_ip || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      OTP
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.otp || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Role
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.role || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Profile Published
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.is_profile_published ? 'Yes' : 'No'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)' } }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Anonymous
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.anonymous ? 'Yes' : 'No'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: '1 1 100%' }}>
-                    <Typography variant="body2" color="textSecondary">
-                      Address
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.address || 'N/A'}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: '1 1 100%' }}>
-                    <Typography variant="body2" color="textSecondary">
-                      About Me
-                    </Typography>
-                    <Typography variant="body1">
-                      {clientDetails.aboutme || 'N/A'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Description</Typography>
+                          <Typography variant="body2">{professional.description || 'N/A'}</Typography>
           </Box>
         </Box>
-
-        {/* Professional Details Section */}
-        {clientDetails.ProfessionalDetails && clientDetails.ProfessionalDetails.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Work sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Professional Details ({clientDetails.total_professional_details})
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                {clientDetails.ProfessionalDetails.map((professional) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={professional.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        {professional.company_name || 'Company Name N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Position: {professional.position || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Duration: {professional.duration || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Description: {professional.description || 'N/A'}
-                      </Typography>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
 
-        {/* Certificates Section */}
+        {/* Certificates Accordion */}
         {clientDetails.Certificates && clientDetails.Certificates.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <CardGiftcard sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Certificates ({clientDetails.total_certificates})
+          <Accordion 
+            expanded={expandedPanel === 'certificates'} 
+            onChange={handleAccordionChange('certificates')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <CardGiftcard className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Certificates & Achievements
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                {clientDetails.Certificates.map((certificate) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={certificate.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
+                <Chip
+                  label={`${clientDetails.total_certificates} Certificate${clientDetails.total_certificates !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
+                {clientDetails.Certificates.map((certificate, index) => (
+                  <Grid item xs={12} md={6} key={certificate.id}>
+                    <Paper className="professional-card">
+                      <Box className="card-header">
+                        <CardGiftcard className="card-icon" />
+                        <Typography variant="h6" className="card-title">
                         {certificate.certificate_name || 'Certificate Name N/A'}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Issuing Organization: {certificate.issuing_organization || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Issue Date: {formatDate(certificate.issue_date)}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Expiry Date: {formatDate(certificate.expiry_date)}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Credential ID: {certificate.credential_id || 'N/A'}
-                      </Typography>
+                      </Box>
+                      <Box className="card-content">
+                        <Box className="detail-row">
+                          <Typography variant="caption">Issuing Organization</Typography>
+                          <Typography variant="body1">{certificate.issuing_organization || 'N/A'}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Issue Date</Typography>
+                          <Typography variant="body1">{formatDate(certificate.issue_date)}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Expiry Date</Typography>
+                          <Typography variant="body1">{formatDate(certificate.expiry_date)}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Credential ID</Typography>
+                          <Typography variant="body2">{certificate.credential_id || 'N/A'}</Typography>
+                        </Box>
+                      </Box>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
 
-        {/* Education Section */}
+        {/* Education Accordion */}
         {clientDetails.Education && clientDetails.Education.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <School sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Education ({clientDetails.total_education})
+          <Accordion 
+            expanded={expandedPanel === 'education'} 
+            onChange={handleAccordionChange('education')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <School className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Education Background
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Chip
+                  label={`${clientDetails.total_education} Qualification${clientDetails.total_education !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
                 {clientDetails.Education.map((education, index) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={education.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
+                  <Grid item xs={12} md={6} key={education.id}>
+                    <Paper className="professional-card">
+                      <Box className="card-header">
+                        <School className="card-icon" />
+                        <Typography variant="h6" className="card-title">
                         {education.university_name || 'University Name N/A'}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Education Type: {education.education_type || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Graduation Type: {education.graduation_type || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Degree: {education.degree || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Month: {education.month || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Year: {education.year || 'N/A'}
-                      </Typography>
+                      </Box>
+                      <Box className="card-content">
+                        <Box className="detail-row">
+                          <Typography variant="caption">Education Type</Typography>
+                          <Typography variant="body1">{education.education_type || 'N/A'}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Graduation Type</Typography>
+                          <Typography variant="body1">{education.graduation_type || 'N/A'}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Degree</Typography>
+                          <Typography variant="body1">{education.degree || 'N/A'}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Completion Date</Typography>
+                          <Typography variant="body1">{education.month || 'N/A'} {education.year || ''}</Typography>
+                        </Box>
+                      </Box>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
 
-        {/* Projects Section */}
+        {/* Projects Accordion */}
         {clientDetails.Projects && clientDetails.Projects.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Work sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Projects ({clientDetails.total_projects})
+          <Accordion 
+            expanded={expandedPanel === 'projects'} 
+            onChange={handleAccordionChange('projects')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <Assignment className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Project Portfolio
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                {clientDetails.Projects.map((project) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={project.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
+                <Chip
+                  label={`${clientDetails.total_projects} Project${clientDetails.total_projects !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
+                {clientDetails.Projects.map((project, index) => (
+                  <Grid item xs={12} lg={6} key={project.id}>
+                    <Paper className="professional-card">
+                      <Box className="card-header">
+                        <Assignment className="card-icon" />
+                        <Typography variant="h6" className="card-title">
                         {project.project_name}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Type: {project.project_type || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Duration: {project.duration || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Technology Preference: {project.technologty_pre || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Industry: {project.industry || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Project Link: {project.project_link || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Mobile Platform: {project.is_mobile_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Web Platform: {project.is_web_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Desktop Platform: {project.is_desktop_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" sx={{ wordBreak: 'break-word' }}>
-                        Details: {project.project_details || 'N/A'}
-                      </Typography>
+                      </Box>
+                      <Box className="card-content">
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Project Type</Typography>
+                              <Typography variant="body1">{project.project_type || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Duration</Typography>
+                              <Typography variant="body1">{project.duration || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Technology</Typography>
+                              <Typography variant="body1">{project.technologty_pre || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Industry</Typography>
+                              <Typography variant="body1">{project.industry || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Platform Support</Typography>
+                              <Box className="platform-tags">
+                                {project.is_mobile_platform && <Chip label="Mobile" size="small" variant="outlined" />}
+                                {project.is_web_platform && <Chip label="Web" size="small" variant="outlined" />}
+                                {project.is_desktop_platform && <Chip label="Desktop" size="small" variant="outlined" />}
+                              </Box>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Project Details</Typography>
+                              <Typography variant="body2">{project.project_details || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
 
-        {/* Ready Made Apps Section */}
+        {/* Ready Made Apps Accordion */}
         {clientDetails.readyMadeApps && clientDetails.readyMadeApps.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <Apps sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Ready Made Apps ({clientDetails.total_ready_made_apps})
+          <Accordion 
+            expanded={expandedPanel === 'apps'} 
+            onChange={handleAccordionChange('apps')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <Apps className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Ready Made Applications
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                {clientDetails.readyMadeApps.map((app) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={app.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
+                <Chip
+                  label={`${clientDetails.total_ready_made_apps} App${clientDetails.total_ready_made_apps !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
+                {clientDetails.readyMadeApps.map((app, index) => (
+                  <Grid item xs={12} lg={6} key={app.id}>
+                    <Paper className="professional-card app-card">
+                      <Box className="card-header">
+                        <Apps className="card-icon" />
+                        <Typography variant="h6" className="card-title">
                         {app.appName}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Industry: {app.industry || 'N/A'}
+                        <Typography variant="h6" className="price-tag">
+                          {app.price} {app.currency_type}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Technology: {app.technology || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Software Version: {app.softwareVersion || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Features: {app.features || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Delivery Time: {app.deliveryTime || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Source Code: {app.sourceCode || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Price: {app.price} {app.currency_type}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Headline: {app.headline || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Mobile Platform: {app.is_mobile_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Web Platform: {app.is_web_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Desktop Platform: {app.is_desktop_platform ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Customizable: {app.is_customizable ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Published: {app.is_published ? 'Yes' : 'No'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" sx={{ wordBreak: 'break-word' }}>
-                        Description: {app.description || 'N/A'}
-                      </Typography>
+                      </Box>
                       {app.Thumbnail && app.Thumbnail.thumbnailImages && app.Thumbnail.thumbnailImages.length > 0 && (
-                        <Box mt={1}>
+                        <Box className="app-thumbnail">
                           <img
                             src={app.Thumbnail.thumbnailImages[0].imageUrl}
                             alt={app.appName}
-                            style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 4 }}
+                            className="thumbnail-image"
                           />
                         </Box>
                       )}
+                      <Box className="card-content">
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Industry</Typography>
+                              <Typography variant="body1">{app.industry || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Technology</Typography>
+                              <Typography variant="body1">{app.technology || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Delivery Time</Typography>
+                              <Typography variant="body1">{app.deliveryTime || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Source Code</Typography>
+                              <Typography variant="body1">{app.sourceCode || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Platform Support</Typography>
+                              <Box className="platform-tags">
+                                {app.is_mobile_platform && <Chip label="Mobile" size="small" variant="outlined" />}
+                                {app.is_web_platform && <Chip label="Web" size="small" variant="outlined" />}
+                                {app.is_desktop_platform && <Chip label="Desktop" size="small" variant="outlined" />}
+                                {app.is_customizable && <Chip label="Customizable" size="small" variant="outlined" color="primary" />}
+                              </Box>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Box className="detail-row">
+                              <Typography variant="caption">Description</Typography>
+                              <Typography variant="body2">{app.description || 'N/A'}</Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
 
-        {/* Ready Made Apps Videos Section */}
+        {/* Ready Made Apps Videos Accordion */}
         {clientDetails.readyMapAppsVideo && clientDetails.readyMapAppsVideo.length > 0 && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <VideoLibrary sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Ready Made Apps Videos ({clientDetails.total_videos})
+          <Accordion 
+            expanded={expandedPanel === 'videos'} 
+            onChange={handleAccordionChange('videos')}
+            className="client-accordion"
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              className="accordion-header"
+            >
+              <Box className="accordion-title-container">
+                <VideoLibrary className="accordion-icon" />
+                <Typography variant="h6" className="accordion-title">
+                  Application Videos
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                {clientDetails.readyMapAppsVideo.map((video) => (
-                  <Box sx={{ flex: { xs: '1 1 100%', sm: '0 0 calc(50% - 8px)', md: '0 0 calc(33.333% - 8px)' } }} key={video.id}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
+                <Chip
+                  label={`${clientDetails.total_videos} Video${clientDetails.total_videos !== 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  className="count-chip"
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className="accordion-content">
+              <Grid container spacing={3}>
+                {clientDetails.readyMapAppsVideo.map((video, index) => (
+                  <Grid item xs={12} md={6} key={video.id}>
+                    <Paper className="professional-card">
+                      <Box className="card-header">
+                        <VideoLibrary className="card-icon" />
+                        <Typography variant="h6" className="card-title">
                         {video.title || 'Video Title N/A'}
                       </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Description: {video.description || 'N/A'}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Video URL: {video.video_url || 'N/A'}
-                      </Typography>
+                      </Box>
+                      <Box className="card-content">
+                        <Box className="detail-row">
+                          <Typography variant="caption">Description</Typography>
+                          <Typography variant="body2">{video.description || 'N/A'}</Typography>
+                        </Box>
+                        <Box className="detail-row">
+                          <Typography variant="caption">Video URL</Typography>
+                          <Typography variant="body2" className="video-url">{video.video_url || 'N/A'}</Typography>
+                        </Box>
+                      </Box>
                     </Paper>
-                  </Box>
+                  </Grid>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         )}
       </Box>
     </div>

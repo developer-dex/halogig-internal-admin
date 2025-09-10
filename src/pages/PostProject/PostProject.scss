@@ -1,25 +1,37 @@
+@import '../../assets/styles/theme.scss';
+
 .project-list {
-  padding: 10px;
-  height: calc(100vh - 120px);
+  padding: $spacing-md;
+  height: calc(100vh - $header-height);
   display: flex;
   flex-direction: column;
+  background-color: $bg-secondary;
 
-  h2 {
-    font-size: 20px;
-    font-weight: 500;
-    color: #333;
-    padding-bottom: 10px;
-    flex-shrink: 0;
+  @media (max-width: $breakpoint-lg) {
+    padding: $spacing-md;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-sm;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-xs;
   }
 
   .table-wrapper {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    @include theme-card;
+    padding: $spacing-md $spacing-sm;
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    transition: $transition-normal;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+    }
 
     .MuiTableContainer-root {
       box-shadow: none;
@@ -34,7 +46,8 @@
 
         .MuiTableHead-root {
           flex-shrink: 0;
-          background-color: #f8f9fa;
+          background-color: $table-header-bg;
+          border-bottom: 2px solid $brand-primary;
           
           .MuiTableRow-root {
             display: table;
@@ -43,12 +56,15 @@
           }
 
           .MuiTableCell-head {
-            color: #666;
-            font-size: 12px;
-            font-weight: 600;
+            color: $text-primary;
+            font-size: $font-size-xs;
+            font-weight: $font-weight-semibold;
             text-transform: uppercase;
-            padding: 16px;
+            letter-spacing: $letter-spacing-wide;
+            padding: $spacing-lg $spacing-md;
             border: none;
+            font-family: $font-family-heading;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             
             // Ensure project link column doesn't break layout
             &:nth-child(7) {
@@ -66,16 +82,21 @@
             display: table;
             width: 100%;
             table-layout: fixed;
+            transition: $transition-normal;
 
             &:hover {
-              background-color: #f8f9fa;
+              background-color: $bg-hover;
+              transform: translateX(2px);
+              box-shadow: inset 3px 0 0 $brand-primary;
             }
 
             .MuiTableCell-body {
-              padding: 16px;
-              border-bottom: 1px solid #eee;
-              color: #333;
-              font-size: 14px;
+              padding: $spacing-lg $spacing-md;
+              border-bottom: 1px solid $border-light;
+              color: $text-primary;
+              font-size: $font-size-sm;
+              font-family: $font-family-body;
+              transition: $transition-normal;
               
               // Ensure project link column displays properly
               &:nth-child(7) {
@@ -84,19 +105,25 @@
                 
                 .MuiChip-root {
                   cursor: pointer;
-                  transition: all 0.2s ease;
+                  transition: $transition-normal;
                   max-width: 200px;
+                  border: 1px solid $border-light;
                   
                   &:hover {
-                    background-color: #e3f2fd;
-                    border-color: #1976d2;
+                    background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+                    color: white;
+                    border-color: $brand-primary;
                     transform: translateY(-1px);
-                    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+                    box-shadow: $shadow-md;
+                    
+                    .MuiChip-icon {
+                      color: white;
+                    }
                   }
                   
                   // Styling for copied state
                   &.MuiChip-colorSuccess {
-                    background-color: #4caf50;
+                    background: linear-gradient(135deg, $success 0%, #66bb6a 100%);
                     color: white;
                     
                     .MuiChip-icon {
@@ -109,10 +136,63 @@
                     text-overflow: ellipsis;
                     white-space: nowrap;
                     max-width: 150px;
+                    font-weight: $font-weight-medium;
                   }
                   
                   .MuiChip-icon {
-                    color: #1976d2;
+                    color: $brand-primary;
+                    transition: $transition-normal;
+                  }
+                }
+              }
+
+              // Status column styling
+              &:nth-child(6) {
+                text-align: center;
+                padding: $spacing-lg;
+                
+                .status-button {
+                  text-transform: capitalize;
+                  font-weight: $font-weight-medium;
+                  font-size: $font-size-xs;
+                  min-width: 80px;
+                  border-radius: $radius-sm;
+                  transition: all $transition-normal;
+                  cursor: pointer;
+                  
+                  &:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                  }
+                  
+                  &.approved {
+                    background-color: #e8f5e9;
+                    color: #2e7d32;
+                    border: 1px solid #4caf50;
+                    
+                    &:hover {
+                      background-color: #c8e6c9;
+                    }
+                  }
+                  
+                  &.pending {
+                    background-color: #fff3e0;
+                    color: #e65100;
+                    border: 1px solid #ffcc02;
+                    
+                    &:hover {
+                      background-color: #ffe0b2;
+                    }
+                  }
+                  
+                  &.rejected {
+                    background-color: #ffebee;
+                    color: #c62828;
+                    border: 1px solid #f44336;
+                    
+                    &:hover {
+                      background-color: #ffcdd2;
+                    }
                   }
                 }
               }
@@ -127,27 +207,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    border-top: 1px solid #eee;
+    padding: $spacing-lg;
+    border-top: 1px solid $border-light;
     background: white;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 $radius-lg $radius-lg;
     flex-shrink: 0;
     margin-top: auto;
 
     .entries-info {
-      color: #666;
-      font-size: 14px;
+      color: $text-muted;
+      font-size: $font-size-sm;
+      font-family: $font-family-body;
 
       span {
-        font-weight: 500;
-        margin: 0 4px;
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        margin: 0 $spacing-xs;
       }
     }
 
     .pagination {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: $spacing-xs;
 
       button {
         width: 32px;
@@ -155,27 +237,34 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: none;
-        background: #f8f9fa;
-        color: #666;
-        font-size: 18px;
+        border: 1px solid $border-light;
+        background: white;
+        color: $text-muted;
+        font-size: $font-size-lg;
         cursor: pointer;
-        border-radius: 6px;
+        border-radius: $radius-md;
+        font-weight: $font-weight-medium;
+        transition: $transition-normal;
 
-        &:hover {
-          background: #f0f0f0;
+        &:hover:not(:disabled) {
+          background: $brand-primary;
+          color: white;
+          border-color: $brand-primary;
+          transform: translateY(-1px);
+          box-shadow: $shadow-sm;
         }
 
         &:disabled {
-          opacity: 0.5;
+          opacity: 0.4;
           cursor: not-allowed;
+          background: $bg-muted;
         }
       }
 
       .page-numbers {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: $spacing-xs;
 
         span {
           width: 32px;
@@ -183,18 +272,27 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 14px;
-          color: #666;
+          font-size: $font-size-sm;
+          color: $text-muted;
           cursor: pointer;
-          border-radius: 6px;
+          border-radius: $radius-md;
+          font-weight: $font-weight-medium;
+          border: 1px solid $border-light;
+          background: white;
+          transition: $transition-normal;
 
           &:hover {
-            background: #f8f9fa;
+            background: $bg-hover;
+            color: $text-primary;
+            border-color: $brand-primary;
+            transform: translateY(-1px);
           }
 
           &.active {
-            background: #007bff;
+            background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
             color: white;
+            border-color: $brand-primary;
+            box-shadow: $shadow-sm;
           }
         }
       }
@@ -206,21 +304,209 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 120px);
+  height: calc(100vh - $header-height);
+  background-color: $bg-secondary;
+
+  .MuiCircularProgress-root {
+    color: $brand-primary;
+  }
+}
+
+// Enhanced dialog styling
+.MuiDialog-root {
+  .MuiDialog-paper {
+    @include theme-card;
+    border: 2px solid $brand-primary;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    
+    // Compact status dialog specific styling
+    &[style*="min-width: 450px"] {
+      border-radius: $radius-lg;
+      overflow: hidden;
+      
+      .MuiDialogTitle-root {
+        background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+        color: white;
+        font-weight: $font-weight-bold;
+        font-family: $font-family-heading;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 1px;
+        }
+      }
+      
+      .MuiDialogContent-root {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        
+        // Project title box styling
+        & > div:first-child {
+          background: linear-gradient(135deg, rgba($brand-primary, 0.05) 0%, rgba($brand-primary, 0.02) 100%) !important;
+          border: 1px solid rgba($brand-primary, 0.1) !important;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          
+          strong {
+            color: $brand-primary;
+          }
+        }
+      }
+      
+      .MuiDialogActions-root {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-top: 1px solid rgba($brand-primary, 0.1);
+        
+        .MuiButton-root {
+          font-size: $font-size-sm;
+          font-weight: $font-weight-semibold;
+          padding: 8px 20px;
+          border-radius: $radius-md;
+          text-transform: none;
+          letter-spacing: 0.025em;
+          min-width: 100px;
+          
+          &.gradient-secondary {
+            border: 1px solid $border-medium;
+            
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+          }
+          
+          &.gradient-primary {
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba($brand-primary, 0.4);
+            }
+          }
+        }
+      }
+    }
+    
+    .MuiDialogTitle-root {
+      background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+      color: white;
+      font-weight: $font-weight-bold;
+      font-family: $font-family-heading;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .MuiDialogContent-root {
+      background-color: $bg-card;
+      
+      .MuiTextField-root,
+      .MuiFormControl-root {
+        .MuiInputLabel-root {
+          color: $text-muted;
+          
+          &.Mui-focused {
+            color: $brand-primary;
+          }
+        }
+        
+        .MuiOutlinedInput-root {
+          &.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: $brand-primary;
+          }
+        }
+        
+        .MuiSelect-root {
+          &.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: $brand-primary;
+          }
+        }
+      }
+      
+      .MuiRadio-root {
+        color: $brand-primary;
+        
+        &.Mui-checked {
+          color: $brand-primary;
+        }
+      }
+      
+      // Compact status dialog styling
+      .MuiFormControlLabel-root {
+        margin: 0;
+        
+        .MuiFormControlLabel-label {
+          font-size: $font-size-sm;
+          color: $text-primary;
+        }
+      }
+      
+      .MuiRadioGroup-root {
+        gap: 6px;
+        margin-left: 8px;
+        
+        .MuiFormControlLabel-root {
+          margin: 4px 0;
+          padding: 8px 16px;
+          border-radius: $radius-md;
+          transition: $transition-normal;
+          border: 1px solid transparent;
+          background-color: rgba(255, 255, 255, 0.5);
+          
+          &:hover {
+            background-color: rgba($brand-primary, 0.08);
+            border-color: rgba($brand-primary, 0.25);
+            transform: translateX(2px);
+          }
+          
+          .MuiRadio-root {
+            padding: 6px 12px 6px 6px;
+            
+            &.Mui-checked {
+              .MuiSvgIcon-root {
+                color: $brand-primary;
+                filter: drop-shadow(0 2px 4px rgba($brand-primary, 0.3));
+                transform: scale(1.1);
+              }
+            }
+            
+            .MuiSvgIcon-root {
+              transition: all $transition-normal;
+            }
+          }
+          
+          .MuiFormControlLabel-label {
+            font-weight: $font-weight-medium;
+            letter-spacing: 0.025em;
+            font-size: 15px;
+            color: $text-primary;
+          }
+        }
+      }
+    }
+    
+    .MuiDialogActions-root {
+      background-color: $bg-card;
+      padding: $spacing-lg;
+      gap: $spacing-md;
+    }
+  }
 }
 
 // Mobile responsive styles
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-md) {
   .project-list {
-    padding: 5px;
-    
     .table-wrapper {
       .MuiTableContainer-root {
         .MuiTable-root {
           .MuiTableHead-root {
             .MuiTableCell-head {
-              padding: 8px 4px;
-              font-size: 10px;
+              padding: $spacing-md $spacing-xs;
+              font-size: $font-size-2xs;
               
               &:nth-child(7) {
                 min-width: 80px;
@@ -231,8 +517,8 @@
           
           .MuiTableBody-root {
             .MuiTableCell-body {
-              padding: 8px 4px;
-              font-size: 12px;
+              padding: $spacing-md $spacing-xs;
+              font-size: $font-size-xs;
               
               &:nth-child(7) {
                 min-width: 80px;
@@ -243,5 +529,15 @@
         }
       }
     }
+    
+    .table-footer {
+      padding: $spacing-md;
+      flex-direction: column;
+      gap: $spacing-md;
+      
+      .entries-info {
+        font-size: $font-size-xs;
+      }
+    }
   }
-} 
+}
