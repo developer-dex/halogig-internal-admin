@@ -13,6 +13,7 @@ import ProjectBids from './pages/ProjectBids/ProjectBids';
 import ProjectBidDetail from './pages/ProjectBidDetail/ProjectBidDetail';
 import LogManager from './pages/LogManager/LogManager';
 import WebsiteData from './pages/WebsiteData/WebsiteData';
+import WebsiteDataDetails from './pages/WebsiteData/WebsiteDataDetails';
 
 // Helper component for protected routes
 const ProtectedRoute = () => {
@@ -47,6 +48,7 @@ const AppRoutes = () => {
         <Route path="/site-analytics" element={<SiteAnalytics />} />
         <Route path="/logs" element={<LogManager />} />
         <Route path="/website-data" element={<WebsiteData />} />
+        <Route path="/website-data/:id/details" element={<WebsiteDataDetails />} />
       </Route>
       <Route path="/chat" element={<ChatRoom />} />
     </Routes>
