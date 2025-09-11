@@ -1,7 +1,7 @@
 .website-data-details {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px 40px;
+  width: 100%;
+  margin: 0;
 
   .MuiCard-root {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -28,15 +28,15 @@
 
   .MuiButton-root {
     &.gradient-primary {
-      background: linear-gradient(45deg, #1976d2, #42a5f5);
+      background: linear-gradient(#c3362a 0, #92150d 74%);
       color: white;
       border: none;
-      box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+      box-shadow: 0 2px 4px rgba(195, 54, 42, 0.3);
       transition: all 0.2s ease-in-out;
 
       &:hover {
-        background: linear-gradient(45deg, #1565c0, #1976d2);
-        box-shadow: 0 4px 8px rgba(25, 118, 210, 0.4);
+        background: linear-gradient(#92150d 0, #c3362a 74%);
+        box-shadow: 0 4px 8px rgba(195, 54, 42, 0.4);
         transform: translateY(-1px);
       }
 
@@ -61,6 +61,30 @@
         transform: translateY(-1px);
       }
     }
+
+    &.gradient-outlined {
+      background: transparent;
+      color: #c3362a;
+      border: 1px solid #c3362a;
+      box-shadow: none;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background: linear-gradient(#c3362a 0, #92150d 74%);
+        color: white;
+        border-color: #c3362a;
+        box-shadow: 0 4px 8px rgba(195, 54, 42, 0.3);
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        background: transparent;
+        color: #9e9e9e;
+        border-color: #e0e0e0;
+        box-shadow: none;
+        transform: none;
+      }
+    }
   }
 
   .MuiIconButton-root {
@@ -72,30 +96,30 @@
   }
 
   .MuiTypography-h4 {
-    color: #1976d2;
+    color: #c3362a;
     font-weight: 600;
     margin-bottom: 8px;
   }
 
   .MuiTypography-h6 {
-    color: #1976d2;
+    color: #c3362a;
     font-weight: 600;
     margin-bottom: 16px;
-    border-bottom: 2px solid #e3f2fd;
+    border-bottom: 2px solid #ffebee;
     padding-bottom: 8px;
   }
 
   .MuiTextField-root {
     .MuiInputLabel-root {
       &.Mui-focused {
-        color: #1976d2;
+        color: #c3362a;
       }
     }
 
     .MuiOutlinedInput-root {
       &.Mui-focused {
         .MuiOutlinedInput-notchedOutline {
-          border-color: #1976d2;
+          border-color: #c3362a;
         }
       }
     }
@@ -103,7 +127,7 @@
 
   // Responsive design
   @media (max-width: 768px) {
-    padding: 10px;
+    padding: 10px 20px;
 
     .MuiGrid-container {
       .MuiGrid-item {
@@ -115,6 +139,10 @@
     .MuiCardContent-root {
       padding: 16px;
     }
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 15px;
   }
 
   // Loading state
@@ -173,8 +201,8 @@
     }
 
     &.saving {
-      background-color: #e3f2fd;
-      color: #1976d2;
+      background-color: #ffebee;
+      color: #c3362a;
     }
   }
 }

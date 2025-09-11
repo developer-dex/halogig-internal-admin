@@ -73,6 +73,7 @@ const WebsiteDataDetails = () => {
   const [syncField, setSyncField] = useState('');
   const [syncValue, setSyncValue] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [saveConfirmDialogOpen, setSaveConfirmDialogOpen] = useState(false);
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -289,17 +290,23 @@ const WebsiteDataDetails = () => {
     }
   };
 
-  // Handle save
-  const handleSave = async () => {
+  // Handle save - show confirmation modal
+  const handleSave = () => {
+    // Validate required fields
+    if (!formData.serviceName.trim()) {
+      alert('Service name is required');
+      return;
+    }
+    
+    setSaveConfirmDialogOpen(true);
+  };
+
+  // Handle save confirmation - actually call the API
+  const handleSaveConfirm = async () => {
     try {
       setIsSaving(true);
+      setSaveConfirmDialogOpen(false);
       
-      // Validate required fields
-      if (!formData.serviceName.trim()) {
-        alert('Service name is required');
-        return;
-      }
-
       // Filter out empty service lists and main application lists
       const filteredServiceLists = formData.serviceLists.filter(service => 
         service.title.trim() || service.description.trim()
@@ -339,6 +346,11 @@ const WebsiteDataDetails = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Handle save cancel - close modal
+  const handleSaveCancel = () => {
+    setSaveConfirmDialogOpen(false);
   };
 
   // Handle cancel edit
@@ -403,7 +415,7 @@ const WebsiteDataDetails = () => {
       const response = await patchApi('admin/website-data/bulk-update', payload);
       
       if (response.data.success) {
-        alert(`Successfully synced ${response.data.data.updatedRecords} records with ${syncField}: ${syncValue}`);
+        // alert(`Successfully synced ${response.data.data.updatedRecords} records with ${syncField}: ${syncValue}`);
         // Refresh the current record data
         fetchWebsiteData();
       } else {
@@ -466,6 +478,7 @@ const WebsiteDataDetails = () => {
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => navigate('/website-data')}
+                className="gradient-outlined"
               >
                 Back to List
               </Button>
@@ -484,7 +497,7 @@ const WebsiteDataDetails = () => {
                     variant="outlined"
                     onClick={handleCancelEdit}
                     disabled={isSaving}
-                    className="gradient-secondary"
+                    className="gradient-outlined"
                   >
                     Cancel
                   </Button>
@@ -548,7 +561,31 @@ const WebsiteDataDetails = () => {
                 disabled={!isEditing}
               />
             </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Meta Title"
+                value={formData.metaTitle}
+                onChange={(e) => handleInputChange('metaTitle', e.target.value)}
+                variant="outlined"
+                disabled={!isEditing}
+              />
+            </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Meta Description"
+                value={formData.metaDescription}
+                onChange={(e) => handleInputChange('metaDescription', e.target.value)}
+                variant="outlined"
+                multiline
+                rows={3}
+                minRows={3}
+                disabled={!isEditing}
+                sx={{ '& .MuiInputBase-root': { minHeight: '120px' } }}
+              />
+            </Grid>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -591,7 +628,9 @@ const WebsiteDataDetails = () => {
                 variant="outlined"
                 multiline
                 rows={3}
+                minRows={3}
                 disabled={!isEditing}
+                sx={{ '& .MuiInputBase-root': { minHeight: '120px' } }}
               />
             </Grid>
 
@@ -611,6 +650,7 @@ const WebsiteDataDetails = () => {
                     size="small"
                     startIcon={<SyncIcon />}
                     onClick={() => handleSyncAll('service_title', formData.serviceTitle)}
+                    className="gradient-outlined"
                     sx={{
                       minWidth: 'auto',
                       px: 2,
@@ -634,79 +674,14 @@ const WebsiteDataDetails = () => {
                 variant="outlined"
                 multiline
                 rows={3}
+                minRows={3}
                 disabled={!isEditing}
+                sx={{ '& .MuiInputBase-root': { minHeight: '120px' } }}
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <TextField
-                  fullWidth
-                  label="Main Application Title"
-                  value={formData.mainApplicationTitle}
-                  onChange={(e) => handleInputChange('mainApplicationTitle', e.target.value)}
-                  variant="outlined"
-                  disabled={!isEditing}
-                />
-                {isEditing && formData.mainApplicationTitle && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<SyncIcon />}
-                    onClick={() => handleSyncAll('main_application_title', formData.mainApplicationTitle)}
-                    sx={{
-                      minWidth: 'auto',
-                      px: 2,
-                      whiteSpace: 'nowrap',
-                      fontSize: '0.75rem',
-                    }}
-                    title="Sync this value to all records"
-                  >
-                    Sync All
-                  </Button>
-                )}
-              </Box>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Main Application Description"
-                value={formData.mainApplicationDescription}
-                onChange={(e) => handleInputChange('mainApplicationDescription', e.target.value)}
-                variant="outlined"
-                multiline
-                rows={3}
-                disabled={!isEditing}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Meta Title"
-                value={formData.metaTitle}
-                onChange={(e) => handleInputChange('metaTitle', e.target.value)}
-                variant="outlined"
-                disabled={!isEditing}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Meta Description"
-                value={formData.metaDescription}
-                onChange={(e) => handleInputChange('metaDescription', e.target.value)}
-                variant="outlined"
-                multiline
-                rows={3}
-                disabled={!isEditing}
-              />
-            </Grid>
-
-            {/* Service Lists Section */}
-            <Grid item xs={12}>
+               {/* Service Lists Section */}
+               <Grid item xs={12}>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Typography variant="h6" gutterBottom color="primary">
                   Service Lists (Max 5)
@@ -759,7 +734,11 @@ const WebsiteDataDetails = () => {
                         onChange={(e) => handleServiceListChange(index, 'description', e.target.value)}
                         variant="outlined"
                         size="small"
+                        multiline
+                        rows={3}
+                        minRows={3}
                         disabled={!isEditing}
+                        sx={{ '& .MuiInputBase-root': { minHeight: '100px' } }}
                       />
                     </Grid>
                   </Grid>
@@ -785,6 +764,7 @@ const WebsiteDataDetails = () => {
                     size="small"
                     startIcon={<SyncIcon />}
                     onClick={() => handleSyncAll('industry_title', formData.industryTitle)}
+                    className="gradient-outlined"
                     sx={{
                       minWidth: 'auto',
                       px: 2,
@@ -832,10 +812,57 @@ const WebsiteDataDetails = () => {
                   onClick={addIndustryList}
                   variant="outlined"
                   size="small"
+                  className="gradient-outlined"
                 >
                   Add Industry
                 </Button>
               )}
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <TextField
+                  fullWidth
+                  label="Main Application Title"
+                  value={formData.mainApplicationTitle}
+                  onChange={(e) => handleInputChange('mainApplicationTitle', e.target.value)}
+                  variant="outlined"
+                  disabled={!isEditing}
+                />
+                {isEditing && formData.mainApplicationTitle && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SyncIcon />}
+                    onClick={() => handleSyncAll('main_application_title', formData.mainApplicationTitle)}
+                    className="gradient-outlined"
+                    sx={{
+                      minWidth: 'auto',
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.75rem',
+                    }}
+                    title="Sync this value to all records"
+                  >
+                    Sync All
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Main Application Description"
+                value={formData.mainApplicationDescription}
+                onChange={(e) => handleInputChange('mainApplicationDescription', e.target.value)}
+                variant="outlined"
+                multiline
+                rows={3}
+                minRows={3}
+                disabled={!isEditing}
+                sx={{ '& .MuiInputBase-root': { minHeight: '120px' } }}
+              />
             </Grid>
 
             {/* Main Application Lists Section */}
@@ -892,12 +919,57 @@ const WebsiteDataDetails = () => {
                         onChange={(e) => handleMainApplicationChange(index, 'description', e.target.value)}
                         variant="outlined"
                         size="small"
+                        multiline
+                        rows={3}
+                        minRows={3}
                         disabled={!isEditing}
+                        sx={{ '& .MuiInputBase-root': { minHeight: '100px' } }}
                       />
                     </Grid>
                   </Grid>
                 </Paper>
               ))}
+            </Grid>
+
+
+            {/* Use Case Lists */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom color="primary">
+                Use Case Lists
+              </Typography>
+              {formData.usercaseListes.map((usecase, index) => (
+                <Box key={index} display="flex" alignItems="center" gap={1} mb={1}>
+                  <TextField
+                    fullWidth
+                    label={`Use Case ${index + 1}`}
+                    value={usecase}
+                    onChange={(e) => handleUsecaseListChange(index, e.target.value)}
+                    variant="outlined"
+                    size="small"
+                    disabled={!isEditing}
+                  />
+                  {isEditing && formData.usercaseListes.length > 1 && (
+                    <IconButton 
+                      onClick={() => removeUsecaseList(index)}
+                      color="error"
+                      size="small"
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  )}
+                </Box>
+              ))}
+              {isEditing && (
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={addUsecaseList}
+                  variant="outlined"
+                  size="small"
+                  className="gradient-outlined"
+                >
+                  Add Use Case
+                </Button>
+              )}
             </Grid>
 
             {/* Interlink Pages Section */}
@@ -961,47 +1033,48 @@ const WebsiteDataDetails = () => {
               ))}
             </Grid>
 
-            {/* Use Case Lists */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom color="primary">
-                Use Case Lists
-              </Typography>
-              {formData.usercaseListes.map((usecase, index) => (
-                <Box key={index} display="flex" alignItems="center" gap={1} mb={1}>
-                  <TextField
-                    fullWidth
-                    label={`Use Case ${index + 1}`}
-                    value={usecase}
-                    onChange={(e) => handleUsecaseListChange(index, e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    disabled={!isEditing}
-                  />
-                  {isEditing && formData.usercaseListes.length > 1 && (
-                    <IconButton 
-                      onClick={() => removeUsecaseList(index)}
-                      color="error"
-                      size="small"
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              ))}
-              {isEditing && (
-                <Button
-                  startIcon={<AddIcon />}
-                  onClick={addUsecaseList}
-                  variant="outlined"
-                  size="small"
-                >
-                  Add Use Case
-                </Button>
-              )}
-            </Grid>
           </Grid>
         </CardContent>
       </Card>
+
+      {/* Save Confirmation Dialog */}
+      <Dialog open={saveConfirmDialogOpen} onClose={handleSaveCancel}>
+        <DialogTitle>Confirm Save Changes</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Are you sure you want to save the changes to this website data?
+          </Typography>
+          <Box mt={2} p={2}  borderRadius={1}>
+            <Typography variant="body2" color="text.secondary" fontWeight="bold">
+              ⚠️ WARNING: This action will update the record!
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mt={1}>
+              <strong>Service:</strong> {formData.serviceName || 'N/A'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mt={1}>
+              This will update the website data record with all your changes and cannot be undone.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleSaveCancel}
+            disabled={isSaving}
+            className="gradient-outlined"
+          >
+            No, Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveConfirm}
+            disabled={isSaving}
+            startIcon={isSaving ? <CircularProgress size={16} /> : <SaveIcon />}
+            className="gradient-primary"
+          >
+            {isSaving ? 'Saving...' : 'Yes, Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Sync Confirmation Dialog */}
       <Dialog open={syncDialogOpen} onClose={handleSyncDialogClose}>
@@ -1010,17 +1083,17 @@ const WebsiteDataDetails = () => {
           <Typography gutterBottom>
             Are you sure you want to sync this value to ALL records in the database?
           </Typography>
-          <Box mt={2} p={2} bgcolor="warning.light" borderRadius={1}>
-            <Typography variant="body2" color="warning.contrastText" fontWeight="bold">
+          <Box mt={2} p={2}  borderRadius={1}>
+            <Typography variant="body2" color="text.secondary" fontWeight="bold">
               ⚠️ WARNING: This action will update ALL records!
             </Typography>
-            <Typography variant="body2" color="warning.contrastText" mt={1}>
+            <Typography variant="body2" color="text.secondary" mt={1}>
               <strong>Field:</strong> {syncField}
             </Typography>
-            <Typography variant="body2" color="warning.contrastText">
+            <Typography variant="body2" color="text.secondary">
               <strong>Value:</strong> {syncValue}
             </Typography>
-            <Typography variant="body2" color="warning.contrastText" mt={1}>
+            <Typography variant="body2" color="text.secondary" mt={1}>
               This action cannot be undone and will affect all website data records.
             </Typography>
           </Box>
@@ -1029,7 +1102,7 @@ const WebsiteDataDetails = () => {
           <Button 
             onClick={handleSyncDialogClose}
             disabled={isSyncing}
-            className="gradient-secondary"
+            className="gradient-outlined"
           >
             Cancel
           </Button>
@@ -1040,9 +1113,9 @@ const WebsiteDataDetails = () => {
             startIcon={isSyncing ? <CircularProgress size={16} /> : <SyncIcon />}
             className="gradient-primary"
             sx={{
-              backgroundColor: 'warning.main',
+              backgroundColor: 'text.secondary',
               '&:hover': {
-                backgroundColor: 'warning.dark',
+                backgroundColor: 'text.secondary',
               }
             }}
           >

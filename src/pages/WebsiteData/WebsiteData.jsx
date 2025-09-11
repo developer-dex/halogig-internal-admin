@@ -811,7 +811,7 @@ const WebsiteData = () => {
                         </TableCell>
                         <TableCell>
                           <Box display="flex" gap={0.5} flexWrap="wrap">
-                            <IconButton
+                            {/* <IconButton
                               size="small"
                               onClick={() => handleViewDetails(row)}
                               title="View Details"
@@ -824,7 +824,7 @@ const WebsiteData = () => {
                               }}
                             >
                               <VisibilityIcon />
-                            </IconButton>
+                            </IconButton> */}
                             <IconButton
                               size="small"
                               onClick={() => handleEdit(row)}
