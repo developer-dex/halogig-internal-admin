@@ -14,17 +14,23 @@ import {
   IconButton,
   Alert,
   AlertTitle,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Remove as RemoveIcon,
   Save as SaveIcon,
   ArrowBack as ArrowBackIcon,
+  Sync as SyncIcon,
 } from '@mui/icons-material';
 import {
   getWebsiteDataById,
   updateWebsiteData,
 } from '../../features/admin/websiteDataSlice';
+import { patchApi } from '../../services/api';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Home, Web, Edit } from '@mui/icons-material';
 import './WebsiteDataDetails.scss';
@@ -63,6 +69,10 @@ const WebsiteDataDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [originalData, setOriginalData] = useState(null);
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+  const [syncField, setSyncField] = useState('');
+  const [syncValue, setSyncValue] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -370,6 +380,51 @@ const WebsiteDataDetails = () => {
     setIsEditing(false);
   };
 
+  // Handle sync all button click
+  const handleSyncAll = (fieldName, fieldValue) => {
+    setSyncField(fieldName);
+    setSyncValue(fieldValue);
+    setSyncDialogOpen(true);
+  };
+
+  // Handle sync confirmation
+  const handleSyncConfirm = async () => {
+    try {
+      setIsSyncing(true);
+      
+      // Prepare the API payload
+      const payload = {
+        fields: {
+          [syncField]: syncValue
+        }
+      };
+
+      // Call the bulk update API
+      const response = await patchApi('admin/website-data/bulk-update', payload);
+      
+      if (response.data.success) {
+        alert(`Successfully synced ${response.data.data.updatedRecords} records with ${syncField}: ${syncValue}`);
+        // Refresh the current record data
+        fetchWebsiteData();
+      } else {
+        alert('Failed to sync data: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      alert('Error syncing data: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsSyncing(false);
+      setSyncDialogOpen(false);
+    }
+  };
+
+  // Handle sync dialog close
+  const handleSyncDialogClose = () => {
+    setSyncDialogOpen(false);
+    setSyncField('');
+    setSyncValue('');
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -541,14 +596,33 @@ const WebsiteDataDetails = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Service Title"
-                value={formData.serviceTitle}
-                onChange={(e) => handleInputChange('serviceTitle', e.target.value)}
-                variant="outlined"
-                disabled={!isEditing}
-              />
+              <Box display="flex" alignItems="center" gap={1}>
+                <TextField
+                  fullWidth
+                  label="Service Title"
+                  value={formData.serviceTitle}
+                  onChange={(e) => handleInputChange('serviceTitle', e.target.value)}
+                  variant="outlined"
+                  disabled={!isEditing}
+                />
+                {isEditing && formData.serviceTitle && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SyncIcon />}
+                    onClick={() => handleSyncAll('service_title', formData.serviceTitle)}
+                    sx={{
+                      minWidth: 'auto',
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.75rem',
+                    }}
+                    title="Sync this value to all records"
+                  >
+                    Sync All
+                  </Button>
+                )}
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -565,14 +639,33 @@ const WebsiteDataDetails = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Main Application Title"
-                value={formData.mainApplicationTitle}
-                onChange={(e) => handleInputChange('mainApplicationTitle', e.target.value)}
-                variant="outlined"
-                disabled={!isEditing}
-              />
+              <Box display="flex" alignItems="center" gap={1}>
+                <TextField
+                  fullWidth
+                  label="Main Application Title"
+                  value={formData.mainApplicationTitle}
+                  onChange={(e) => handleInputChange('mainApplicationTitle', e.target.value)}
+                  variant="outlined"
+                  disabled={!isEditing}
+                />
+                {isEditing && formData.mainApplicationTitle && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SyncIcon />}
+                    onClick={() => handleSyncAll('main_application_title', formData.mainApplicationTitle)}
+                    sx={{
+                      minWidth: 'auto',
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.75rem',
+                    }}
+                    title="Sync this value to all records"
+                  >
+                    Sync All
+                  </Button>
+                )}
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -676,16 +769,34 @@ const WebsiteDataDetails = () => {
 
             {/* Industry Title */}
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Industry Title"
-                value={formData.industryTitle}
-                onChange={(e) => setFormData(prev => ({ ...prev, industryTitle: e.target.value }))}
-                variant="outlined"
-                size="small"
-                sx={{ mb: 2 }}
-                disabled={!isEditing}
-              />
+              <Box display="flex" alignItems="center" gap={1} sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Industry Title"
+                  value={formData.industryTitle}
+                  onChange={(e) => setFormData(prev => ({ ...prev, industryTitle: e.target.value }))}
+                  variant="outlined"
+                  size="small"
+                  disabled={!isEditing}
+                />
+                {isEditing && formData.industryTitle && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SyncIcon />}
+                    onClick={() => handleSyncAll('industry_title', formData.industryTitle)}
+                    sx={{
+                      minWidth: 'auto',
+                      px: 2,
+                      whiteSpace: 'nowrap',
+                      fontSize: '0.75rem',
+                    }}
+                    title="Sync this value to all records"
+                  >
+                    Sync All
+                  </Button>
+                )}
+              </Box>
             </Grid>
 
             {/* Industry Lists */}
@@ -891,6 +1002,54 @@ const WebsiteDataDetails = () => {
           </Grid>
         </CardContent>
       </Card>
+
+      {/* Sync Confirmation Dialog */}
+      <Dialog open={syncDialogOpen} onClose={handleSyncDialogClose}>
+        <DialogTitle>Confirm Sync All</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Are you sure you want to sync this value to ALL records in the database?
+          </Typography>
+          <Box mt={2} p={2} bgcolor="warning.light" borderRadius={1}>
+            <Typography variant="body2" color="warning.contrastText" fontWeight="bold">
+              ⚠️ WARNING: This action will update ALL records!
+            </Typography>
+            <Typography variant="body2" color="warning.contrastText" mt={1}>
+              <strong>Field:</strong> {syncField}
+            </Typography>
+            <Typography variant="body2" color="warning.contrastText">
+              <strong>Value:</strong> {syncValue}
+            </Typography>
+            <Typography variant="body2" color="warning.contrastText" mt={1}>
+              This action cannot be undone and will affect all website data records.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleSyncDialogClose}
+            disabled={isSyncing}
+            className="gradient-secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSyncConfirm}
+            disabled={isSyncing}
+            startIcon={isSyncing ? <CircularProgress size={16} /> : <SyncIcon />}
+            className="gradient-primary"
+            sx={{
+              backgroundColor: 'warning.main',
+              '&:hover': {
+                backgroundColor: 'warning.dark',
+              }
+            }}
+          >
+            {isSyncing ? 'Syncing...' : 'Sync All Records'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
