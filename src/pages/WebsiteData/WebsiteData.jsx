@@ -335,8 +335,11 @@ const WebsiteData = () => {
 
   // Handle service lists changes
   const handleServiceListChange = (index, field, value) => {
-    const newServiceLists = [...formData.serviceLists];
-    newServiceLists[index][field] = value;
+    const newServiceLists = formData.serviceLists.map((service, i) => 
+      i === index 
+        ? { ...service, [field]: value }
+        : service
+    );
     setFormData(prev => ({
       ...prev,
       serviceLists: newServiceLists
@@ -364,8 +367,11 @@ const WebsiteData = () => {
 
   // Handle main application lists changes
   const handleMainApplicationChange = (index, field, value) => {
-    const newMainApplicationLists = [...formData.mainApplicationLists];
-    newMainApplicationLists[index][field] = value;
+    const newMainApplicationLists = formData.mainApplicationLists.map((app, i) => 
+      i === index 
+        ? { ...app, [field]: value }
+        : app
+    );
     setFormData(prev => ({
       ...prev,
       mainApplicationLists: newMainApplicationLists
@@ -393,8 +399,11 @@ const WebsiteData = () => {
 
   // Handle interlink pages changes
   const handleInterlinkPageChange = (index, field, value) => {
-    const newInterlinkPages = [...formData.interlinkPages];
-    newInterlinkPages[index][field] = value;
+    const newInterlinkPages = formData.interlinkPages.map((page, i) => 
+      i === index 
+        ? { ...page, [field]: value }
+        : page
+    );
     setFormData(prev => ({
       ...prev,
       interlinkPages: newInterlinkPages
