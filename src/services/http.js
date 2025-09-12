@@ -3,6 +3,7 @@ import axios from "axios";
 import { config } from "../config/config";
 import { UNAUTHORIZED } from "../config/httpStatusCodes";
 import { clearSession } from "../config/localStorage";
+import { adminLogout } from "../helpers/messageHelper";
 
 const instance = axios.create({
   baseURL: config.apiBaseUrl,
@@ -36,14 +37,8 @@ instance.interceptors.response.use(
   async (error) => {
     const { response } = error;
     if (response && response.status === UNAUTHORIZED) {
-      // Clear all session data including admin data
-      clearSession();
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminData');
-      localStorage.removeItem('isAdminLogIn');
-      
-      // Redirect to login page
-      window.location.href = '/login';
+      // Use the centralized logout function for consistency
+      adminLogout();
     }
     if (response && response.status === 409) {
       window.location.href = config.baseName || '';

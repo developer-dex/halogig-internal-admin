@@ -47,3 +47,15 @@ export const showWarning = (message) => {
     draggable: true,
   });
 };
+
+// Admin logout utility function
+export const adminLogout = () => {
+  // Clear all admin-related localStorage items
+  localStorage.removeItem('isAdminLogIn');
+  localStorage.removeItem('adminData');
+  localStorage.removeItem('adminToken');
+  
+  // Use window.location.href for a hard redirect to ensure clean state
+  // This forces a complete page reload and clears any React state
+  window.location.href = '/login';
+};

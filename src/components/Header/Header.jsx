@@ -16,6 +16,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import GavelIcon from '@mui/icons-material/Gavel';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { adminLogout } from '../../helpers/messageHelper';
 import './Header.scss';
 
 const Header = ({ toggleSidebar }) => {
@@ -41,9 +42,11 @@ const Header = ({ toggleSidebar }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAdminLogIn');
-    navigate('/login');
+    // Close the menu first
     handleMenuClose();
+    
+    // Use the utility function for consistent logout behavior
+    adminLogout();
   };
 
   const handleNavigationClick = (path) => {
