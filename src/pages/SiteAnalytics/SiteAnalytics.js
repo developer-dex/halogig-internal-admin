@@ -26,6 +26,7 @@ import * as XLSX from 'xlsx';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 // Custom styled table cells
 const StyledTableCell = styled(TableCell)({
@@ -88,32 +89,34 @@ const SiteAnalytics = () => {
     // Get data from Redux store
     const totalEntries = totalCount;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                if (selectedIpAddress) {
-                    const response = await dispatch(ipAnalytics({
-                        page: currentPage,
-                        pageLimit,
-                        ipAddress: selectedIpAddress
-                    }));
-                    setpageAnalytics(response.payload.data.data.userActivities);
-                    setTotalCount(response.payload.data.data.total_count);
-                } else {
-                    const response = await dispatch(siteAnalytics({
-                        page: currentPage,
-                        pageLimit
-                    }));
-                    setpageAnalytics(response.payload.data.data.userActivities);
-                    setTotalCount(response.payload.data.data.total_count);
-                }
-            } catch (error) {
-                console.error('Error fetching analytics:', error);
-            } finally {
-                setIsLoading(false);
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            if (selectedIpAddress) {
+                const response = await dispatch(ipAnalytics({
+                    page: currentPage,
+                    pageLimit,
+                    ipAddress: selectedIpAddress
+                }));
+                setpageAnalytics(response.payload.data.data.userActivities);
+                setTotalCount(response.payload.data.data.total_count);
+            } else {
+                const response = await dispatch(siteAnalytics({
+                    page: currentPage,
+                    pageLimit
+                }));
+                setpageAnalytics(response.payload.data.data.userActivities);
+                setTotalCount(response.payload.data.data.total_count);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching analytics:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+       
         fetchData();
         // eslint-disable-next-line
     }, [dispatch, currentPage, selectedIpAddress]);
@@ -202,6 +205,10 @@ const SiteAnalytics = () => {
         setCurrentPage(currentPage);
     };
 
+    const handleRefresh = () => {
+        fetchData();
+    };
+
     if (isLoading) {
         return (
             <div className="loading-container">
@@ -227,15 +234,26 @@ const SiteAnalytics = () => {
                     <h2 style={{paddingTop: '10px'}}>{selectedIpAddress ? `Analytics for IP: ${selectedIpAddress}` : 'Site Analytics'}</h2>
                 </div>
               
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleExportClick}
-                    disabled={isExporting}
-                    startIcon={<FileDownloadIcon />}
-                >
-                    {isExporting ? 'Exporting...' : 'Export to Excel'}
-                </Button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        startIcon={<RefreshIcon />}
+                    >
+                        Refresh
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleExportClick}
+                        disabled={isExporting}
+                        startIcon={<FileDownloadIcon />}
+                    >
+                        {isExporting ? 'Exporting...' : 'Export to Excel'}
+                    </Button>
+                </div>
             </div>
 
             {/* Export Dialog */}

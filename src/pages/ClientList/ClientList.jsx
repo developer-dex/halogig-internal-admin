@@ -17,8 +17,10 @@ import {
   FormControlLabel,
   Checkbox,
   DialogActions,
+  Tooltip,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Home, People } from '@mui/icons-material';
 import { clientData, statusChange } from '../../features/admin/clientManagementSlice';
 import Breadcrumb from '../../components/Breadcrumb';
@@ -108,6 +110,20 @@ const ClientList = () => {
     });
   };
 
+  const handleCopyLink = (link) => {
+    navigator.clipboard.writeText(link).then(() => {
+      // You could add a toast notification here if needed
+      console.log('Link copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy link: ', err);
+    });
+  };
+
+  const truncateLink = (link, maxLength = 30) => {
+    if (link.length <= maxLength) return link;
+    return link.substring(0, maxLength) + '...';
+  };
+
   const getStatusButtonStyle = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
@@ -182,8 +198,9 @@ const ClientList = () => {
                 <TableCell width="15%">LAST NAME</TableCell>
                 <TableCell width="20%">EMAIL</TableCell>
                 <TableCell width="10%" >VIEW</TableCell>
-                <TableCell width="20%">ACTION</TableCell>
-                <TableCell width="20%">POST PROJECT</TableCell>
+                <TableCell width="15%">ACTION</TableCell>
+                <TableCell width="15%">POST PROJECT</TableCell>
+                <TableCell width="10%">SET-UP LINK</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -198,7 +215,7 @@ const ClientList = () => {
                   <TableCell width="20%">
                     {client.email ? client.email : '--'}
                   </TableCell>
-                  <TableCell width="10%">
+               <TableCell width="10%">
                     <IconButton 
                       className="action-btn"
                       onClick={() => handleViewClient(client)}
@@ -207,7 +224,8 @@ const ClientList = () => {
                       <VisibilityIcon />
                     </IconButton>
                   </TableCell>
-                  <TableCell width="20%">
+                     
+                  <TableCell width="15%">
                     <Button 
                       variant="outlined" 
                       onClick={() => handleOpenModal(client)}
@@ -217,7 +235,8 @@ const ClientList = () => {
                       {client.status}
                     </Button>
                   </TableCell>
-                  <TableCell width="20%">
+            
+                  <TableCell width="15%">
                     {client.created_by_admin && (
                       <Button 
                         variant="contained" 
@@ -229,6 +248,37 @@ const ClientList = () => {
                       </Button>
                     )}
                   </TableCell>
+                  
+                  <TableCell width="10%">
+                    {client.created_by_admin && client.share_link ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Tooltip title={client.share_link}>
+                          <span style={{ 
+                            fontSize: '12px', 
+                            color: '#1976d2',
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                          onClick={() => window.open(client.share_link, '_blank')}
+                          >
+                            {truncateLink(client.share_link, 15)}
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Copy link">
+                          <IconButton 
+                            size="small"
+                            onClick={() => handleCopyLink(client.share_link)}
+                            sx={{ padding: '2px' }}
+                          >
+                            <ContentCopyIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    ) : (
+                      '--'
+                    )}
+                  </TableCell>
+                
                 </TableRow>
               ))}
             </TableBody>
