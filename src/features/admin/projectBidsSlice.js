@@ -12,6 +12,7 @@ const initialState = {
   bids: [],
   totalCount: 0,
   currentBid: null,
+  billingInfo: null,
 };
 
 // Get all project bids (admin view)
@@ -37,6 +38,20 @@ export const getProjectBidDetails = createAsyncThunk(
       return payload;
     } catch (e) {
       showError(e.response?.data?.message || "Failed to fetch bid details");
+      throw e;
+    }
+  }
+);
+
+// Get billing information for invoice by milestone and project bid
+export const getBillingInformation = createAsyncThunk(
+  "/getBillingInformation",
+  async ({ milestoneId, projectbidId }) => {
+    try {
+      const payload = await getApi(`admin/billing/${milestoneId}/details/${projectbidId}/information`);
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to fetch billing information");
       throw e;
     }
   }
@@ -93,6 +108,23 @@ export const projectBidsSlice = createSlice({
         state.currentBid = payload?.data?.data || null;
       })
       .addCase(getProjectBidDetails.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.isSuccess = false;
+      })
+      // GetBillingInformation
+      .addCase(getBillingInformation.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.isSuccess = false;
+      })
+      .addCase(getBillingInformation.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.responseCode = payload?.status;
+        state.billingInfo = payload?.data?.data || null;
+      })
+      .addCase(getBillingInformation.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;

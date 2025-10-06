@@ -166,6 +166,12 @@ const ProjectBidDetail = () => {
     );
   }
 
+  const handleGenerateInvoice = (milestoneIndex) => {
+    const milestone = currentBid?.milestones?.[milestoneIndex] || currentBid?.sow?.milestones?.[milestoneIndex];
+    const milestoneId = milestone?.id || milestone?.milestone_id || milestoneIndex;
+    navigate(`/invoice/${milestoneId}/${bidId}`);
+  };
+
   return (
     <div className="project-bid-detail">
       <Breadcrumb items={breadcrumbItems} />
@@ -532,7 +538,7 @@ const ProjectBidDetail = () => {
                       <Divider className="milestones-divider" />
                       
                       <Grid container spacing={2}>
-                        {currentBid.sow.milestones.map((milestone, index) => (
+                        {currentBid.milestones.map((milestone, index) => (
                           <Grid item xs={12} md={6} key={index}>
                             <Card className="milestone-card">
                               <CardContent>
@@ -540,12 +546,20 @@ const ProjectBidDetail = () => {
                                   <Typography variant="h6" className="milestone-number">
                                     Milestone {index + 1}
                                   </Typography>
+                                  <Box>
+                                  <Chip 
+                                    label={milestone.is_paid == true ? 'Paid' : 'Unpaid'}
+                                    color="primary"
+                                    variant="filled"
+                                    className="paid-status"
+                                  />
                                   <Chip 
                                     label={formatCurrency(milestone.amount)}
                                     color="primary"
                                     variant="filled"
                                     className="milestone-amount"
                                   />
+                                  </Box>
                                 </Box>
                                 <Typography variant="body1" className="milestone-scope">
                                   {milestone.scope}
@@ -563,6 +577,20 @@ const ProjectBidDetail = () => {
                                       {formatCurrency(milestone.amount)}
                                     </Typography>
                                   </Box>
+                                  {milestone.is_paid == true && (
+                                    <Box>
+                                      <Button
+                                        variant="contained"
+                                        size="small"
+                                        className="gradient-primary view-btn"
+                            onClick={() => handleGenerateInvoice(index)}
+                                      // onClick={() => handleViewBidDetails(bid)}
+                                      // startIcon={<Visibility />}
+                                    >
+                                      Generate Invoice
+                                    </Button>
+                                  </Box>
+                                  )}
                                 </Box>
                               </CardContent>
                             </Card>
