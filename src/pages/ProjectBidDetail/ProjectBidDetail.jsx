@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Typography,
   Grid,
   Button,
@@ -12,9 +9,12 @@ import {
   CircularProgress,
   Box,
   Paper,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
 } from '@mui/material';
 import {
-  ExpandMore,
   Home,
   Assignment,
   Info,
@@ -22,7 +22,25 @@ import {
   Work,
   Description,
   CalendarToday,
-  Money
+  Money,
+  Email,
+  Phone,
+  LocationOn,
+  Category,
+  AccessTime,
+  AttachMoney,
+  Business,
+  Timeline,
+  TrendingUp,
+  AccountCircle,
+  Language,
+  Public,
+  Schedule,
+  Assignment as AssignmentIcon,
+  CheckCircle,
+  HourglassEmpty,
+  ListAlt,
+  Flag,
 } from '@mui/icons-material';
 import { getProjectBidDetails, clearCurrentBid } from '../../features/admin/projectBidsSlice';
 import Breadcrumb from '../../components/Breadcrumb';
@@ -33,7 +51,6 @@ const ProjectBidDetail = () => {
   const navigate = useNavigate();
   const { bidId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedPanel, setExpandedPanel] = useState('bid');
 
   // Get data from Redux store
   const { currentBid } = useSelector((state) => state.projectBidsReducer);
@@ -60,72 +77,41 @@ const ProjectBidDetail = () => {
     };
   }, [dispatch, bidId]);
 
-  const handleAccordionChange = (panel) => (event, isExpanded) => {
-    setExpandedPanel(isExpanded ? panel : false);
-  };
-
-  // Helper function to get status button style (matching other pages)
-  const getStatusButtonStyle = (status) => {
+  // Helper function to get status chip color
+  const getStatusChipProps = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return {
-          backgroundColor: '#fff3e0',
-          color: '#e65100',
-          border: '1px solid #ffcc02',
-        };
+        return { color: 'warning', variant: 'filled' };
       case 'accepted':
-        return {
-          backgroundColor: '#e8f5e9',
-          color: '#2e7d32',
-          border: '1px solid #4caf50',
-        };
+        return { color: 'success', variant: 'filled' };
       case 'rejected':
-        return {
-          backgroundColor: '#ffebee',
-          color: '#c62828',
-          border: '1px solid #f44336',
-        };
+        return { color: 'error', variant: 'filled' };
       case 'in_progress':
-        return {
-          backgroundColor: '#e3f2fd',
-          color: '#1565c0',
-          border: '1px solid #2196f3',
-        };
+        return { color: 'info', variant: 'filled' };
       case 'completed':
-        return {
-          backgroundColor: '#e8f5e9',
-          color: '#2e7d32',
-          border: '1px solid #4caf50',
-        };
+        return { color: 'success', variant: 'filled' };
       default:
-        return {
-          backgroundColor: '#fff3e0',
-          color: '#e65100',
-          border: '1px solid #ffcc02',
-        };
+        return { color: 'default', variant: 'outlined' };
     }
   };
 
-  // Helper function to render professional field
-  const renderProfessionalField = (icon, label, value, isAmount = false) => {
-    if (!value && value !== 0) return null;
+  // Helper function to render info item
+  const renderInfoItem = (icon, label, value, fullWidth = false) => {
+    if (!value && value !== 0 && value !== false) return null;
     
     return (
-      <Grid item xs={12} sm={6} md={4}>
-        <Paper className="professional-field">
-          <Box className="field-header">
-            {icon && <Box className="field-icon">{icon}</Box>}
-            <Typography variant="subtitle2" className="field-label">
+      <Grid item xs={12} sm={fullWidth ? 12 : 6} md={fullWidth ? 12 : 4}>
+        <Box className="info-item">
+          <Box className="info-header">
+            {icon}
+            <Typography variant="subtitle2" className="info-label">
               {label}
             </Typography>
           </Box>
-          <Typography 
-            variant="body1" 
-            className={`field-value ${isAmount ? 'amount-value' : ''}`}
-          >
+          <Typography variant="body1" className="info-value">
             {value}
           </Typography>
-        </Paper>
+        </Box>
       </Grid>
     );
   };
@@ -184,343 +170,457 @@ const ProjectBidDetail = () => {
     <div className="project-bid-detail">
       <Breadcrumb items={breadcrumbItems} />
 
-      <div className="accordion-container">
-        {/* Bid Information Accordion */}
-        <Accordion 
-          expanded={expandedPanel === 'bid'} 
-          onChange={handleAccordionChange('bid')}
-          className="bid-accordion"
-        >
-          <AccordionSummary 
-            expandIcon={<ExpandMore />}
-            className="accordion-header"
-          >
-            <Box className="accordion-title-container">
-              <Info className="accordion-icon" />
-              <Typography variant="h6" className="accordion-title">
-                Bid Information
-              </Typography>
-              <Button
-                variant="contained"
-                size="small"
-                sx={getStatusButtonStyle(currentBid.status)}
-                className={`status-button ${(currentBid.status || 'pending').toLowerCase().replace(' ', '-')}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {currentBid.status || 'Pending'}
-              </Button>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails className="accordion-content">
-            <Grid container spacing={2}>
-              {renderProfessionalField(
-                <Info />, 
-                'Bid ID', 
-                `#${currentBid.id}`
-              )}
-              {renderProfessionalField(
-                <Money />, 
-                'Bid Amount', 
-                formatCurrency(currentBid.bid_amount),
-                true
-              )}
-              {renderProfessionalField(
-                <CalendarToday />, 
-                'Delivery Time', 
-                currentBid.delivery_time ? `${currentBid.delivery_time} days` : '--'
-              )}
-              {renderProfessionalField(
-                <CalendarToday />, 
-                'Submitted', 
-                formatDate(currentBid.created_at)
-              )}
-              
-              {currentBid.bid_description && (
-                <Grid item xs={12}>
-                  <Paper className="professional-field description-field">
-                    <Box className="field-header">
-                      <Description className="field-icon" />
-                      <Typography variant="subtitle2" className="field-label">
-                        Bid Description
-                      </Typography>
-                    </Box>
-                    <Typography variant="body1" className="field-value description-text">
-                      {currentBid.bid_description}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+      <div className="detail-container">
+        {/* Page Header */}
+        <Box className="page-header">
+          <Box className="header-content">
+            <Typography variant="h4" className="page-title">
+              Project Bid Details
+            </Typography>
+            <Chip 
+              label={currentBid.status || 'Pending'}
+              {...getStatusChipProps(currentBid.status)}
+              className="status-chip"
+            />
+          </Box>
+          <Typography variant="subtitle1" className="bid-id">
+            Bid ID: #{currentBid.id}
+          </Typography>
+        </Box>
 
-        {/* Freelancer Information Accordion */}
-        <Accordion 
-          expanded={expandedPanel === 'freelancer'} 
-          onChange={handleAccordionChange('freelancer')}
-          className="freelancer-accordion"
-        >
-          <AccordionSummary 
-            expandIcon={<ExpandMore />}
-            className="accordion-header"
-          >
-            <Box className="accordion-title-container">
-              <Person className="accordion-icon" />
-              <Typography variant="h6" className="accordion-title">
-                Freelancer Information
-              </Typography>
-              <Box className="freelancer-preview">
-                <Avatar 
-                  className="preview-avatar"
-                  src={currentBid.freelancer?.profile_image}
-                >
-                  {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
-                </Avatar>
-                <Typography variant="body2" className="preview-name">
-                  {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
-                </Typography>
-              </Box>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails className="accordion-content">
-            <Box className="profile-header">
-              <Avatar 
-                className="freelancer-avatar"
-                src={currentBid.freelancer?.profile_image}
-              >
-                {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
-              </Avatar>
-              <Box className="freelancer-info">
-                <Typography variant="h6" className="freelancer-name">
-                  {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
-                </Typography>
-                <Typography variant="body2" className="freelancer-email">
-                  {currentBid.freelancer?.email || '--'}
-                </Typography>
-              </Box>
-            </Box>
-            
-            <Grid container spacing={2}>
-              {renderProfessionalField(
-                <Person />, 
-                'Phone', 
-                currentBid.freelancer?.mobile || '--'
-              )}
-              {renderProfessionalField(
-                <Work />, 
-                'Location', 
-                currentBid.freelancer?.city && currentBid.freelancer?.country 
-                  ? `${currentBid.freelancer.city}, ${currentBid.freelancer.country}`
-                  : '--'
-              )}
-              {renderProfessionalField(
-                <CalendarToday />, 
-                'Experience', 
-                currentBid.freelancer?.experience ? `${currentBid.freelancer.experience} years` : '--'
-              )}
-              
-              {currentBid.freelancer?.key_skills && (
-                <Grid item xs={12}>
-                  <Paper className="professional-field description-field">
-                    <Box className="field-header">
-                      <Work className="field-icon" />
-                      <Typography variant="subtitle2" className="field-label">
-                        Skills
-                      </Typography>
-                    </Box>
-                    <Typography variant="body1" className="field-value">
-                      {currentBid.freelancer.key_skills}
-                    </Typography>
-                  </Paper>
+        <Grid container spacing={3}>
+          {/* Bid Information Section */}
+          <Grid item xs={12}>
+            <Card className="detail-section">
+              <CardContent>
+                <Box className="section-header">
+                  <Info className="section-icon" />
+                  <Typography variant="h6" className="section-title">
+                    Bid Information
+                  </Typography>
+                </Box>
+                <Divider className="section-divider" />
+                <Grid container spacing={3}>
+                  {renderInfoItem(
+                    <AttachMoney />, 
+                    'Bid Amount', 
+                    formatCurrency(currentBid.bid_amount)
+                  )}
+                  {renderInfoItem(
+                    <Schedule />, 
+                    'Delivery Timeline', 
+                    currentBid.delivery_timeline ? `${currentBid.delivery_timeline} days` : '--'
+                  )}
+                  {renderInfoItem(
+                    <Language />, 
+                    'Technology Preference', 
+                    currentBid.technologty_pre || '--'
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Submitted Date', 
+                    formatDate(currentBid.createdAt)
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Last Updated', 
+                    formatDate(currentBid.updatedAt)
+                  )}
+                  {renderInfoItem(
+                    <TrendingUp />, 
+                    'Lead Status', 
+                    currentBid.lead_status === '2' ? 'Active' : 'Inactive'
+                  )}
+                  {renderInfoItem(
+                    <AttachMoney />, 
+                    'Sales Commission', 
+                    formatCurrency(currentBid.sales_comm_amount || 0)
+                  )}
+                  {renderInfoItem(
+                    <AttachMoney />, 
+                    'Total Proposal Value', 
+                    formatCurrency(currentBid.total_proposal_value || 0)
+                  )}
+                  {currentBid.message && renderInfoItem(
+                    <Description />, 
+                    'Bid Message', 
+                    currentBid.message,
+                    true
+                  )}
+                  {currentBid.gst_note && renderInfoItem(
+                    <Description />, 
+                    'GST Note', 
+                    currentBid.gst_note,
+                    true
+                  )}
                 </Grid>
-              )}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        {/* Project Information Accordion */}
-        <Accordion 
-          expanded={expandedPanel === 'project'} 
-          onChange={handleAccordionChange('project')}
-          className="project-accordion"
-        >
-          <AccordionSummary 
-            expandIcon={<ExpandMore />}
-            className="accordion-header"
-          >
-            <Box className="accordion-title-container">
-              <Work className="accordion-icon" />
-              <Typography variant="h6" className="accordion-title">
-                Project Information
-              </Typography>
-              <Button
-                variant="contained"
-                size="small"
-                className={`status-button ${currentBid.ClientProject?.status === 1 ? 'accepted' : 'rejected'}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {currentBid.ClientProject?.status === 1 ? 'Active' : 'Inactive'}
-              </Button>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails className="accordion-content">
-            <Grid container spacing={2}>
-              {renderProfessionalField(
-                <Work />, 
-                'Project Title', 
-                currentBid.ClientProject?.project_title || '--'
-              )}
-              {renderProfessionalField(
-                <Work />, 
-                'Category', 
-                currentBid.ClientProject?.Category?.name || '--'
-              )}
-              {renderProfessionalField(
-                <Money />, 
-                'Budget Range', 
-                currentBid.ClientProject?.project_amount_min && currentBid.ClientProject?.project_amount_max
-                  ? `${formatCurrency(currentBid.ClientProject.project_amount_min)} - ${formatCurrency(currentBid.ClientProject.project_amount_max)}`
-                  : '--',
-                true
-              )}
-              {renderProfessionalField(
-                <CalendarToday />, 
-                'Posted', 
-                formatDate(currentBid.ClientProject?.created_at)
-              )}
-              {renderProfessionalField(
-                <Person />, 
-                'Client', 
-                currentBid.ClientProject?.User?.first_name && currentBid.ClientProject?.User?.last_name
-                  ? `${currentBid.ClientProject.User.first_name} ${currentBid.ClientProject.User.last_name}`
-                  : '--'
-              )}
-              {renderProfessionalField(
-                <Person />, 
-                'Client Email', 
-                currentBid.ClientProject?.User?.email || '--'
-              )}
-              
-              {currentBid.ClientProject?.project_summary && (
-                <Grid item xs={12}>
-                  <Paper className="professional-field description-field">
-                    <Box className="field-header">
-                      <Description className="field-icon" />
-                      <Typography variant="subtitle2" className="field-label">
-                        Project Description
-                      </Typography>
-                    </Box>
-                    <Typography variant="body1" className="field-value description-text">
-                      {currentBid.ClientProject.project_summary}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-
-        {/* SOW Information Accordion - Only show if SOW exists */}
-        {currentBid.sow && (
-          <Accordion 
-            expanded={expandedPanel === 'sow'} 
-            onChange={handleAccordionChange('sow')}
-            className="sow-accordion"
-          >
-            <AccordionSummary 
-              expandIcon={<ExpandMore />}
-              className="accordion-header"
-            >
-              <Box className="accordion-title-container">
-                <Description className="accordion-icon" />
-                <Typography variant="h6" className="accordion-title">
-                  Statement of Work (SOW)
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="small"
-                  sx={getStatusButtonStyle(currentBid.sow.status)}
-                  className={`status-button ${(currentBid.sow.status || 'pending').toLowerCase().replace(' ', '-')}`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {currentBid.sow.status || 'Draft'}
-                </Button>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails className="accordion-content">
-              <Grid container spacing={2}>
-                {renderProfessionalField(
-                  <Info />, 
-                  'SOW ID', 
-                  `#${currentBid.sow.id}`
-                )}
-                {renderProfessionalField(
-                  <Info />, 
-                  'Version', 
-                  currentBid.sow.version || '1.0'
-                )}
-                {renderProfessionalField(
-                  <CalendarToday />, 
-                  'Created', 
-                  formatDate(currentBid.sow.created_at)
-                )}
-                {renderProfessionalField(
-                  <CalendarToday />, 
-                  'Last Updated', 
-                  formatDate(currentBid.sow.updated_at)
-                )}
+          {/* Freelancer Information Section */}
+          <Grid item xs={12}>
+            <Card className="detail-section">
+              <CardContent>
+                <Box className="section-header">
+                  <Person className="section-icon" />
+                  <Typography variant="h6" className="section-title">
+                    Freelancer Information
+                  </Typography>
+                </Box>
+                <Divider className="section-divider" />
                 
-                {currentBid.sow.description && (
-                  <Grid item xs={12}>
-                    <Paper className="professional-field description-field">
-                      <Box className="field-header">
-                        <Description className="field-icon" />
-                        <Typography variant="subtitle2" className="field-label">
-                          SOW Description
+                {/* Freelancer Profile Header */}
+                <Box className="freelancer-profile">
+                  <Avatar 
+                    className="freelancer-avatar"
+                    src={currentBid.freelancer?.profile_image}
+                  >
+                    {currentBid.freelancer?.first_name?.[0]?.toUpperCase()}
+                  </Avatar>
+                  <Box className="freelancer-info">
+                    <Typography variant="h6" className="freelancer-name">
+                      {`${currentBid.freelancer?.first_name || ''} ${currentBid.freelancer?.last_name || ''}`}
+                    </Typography>
+                    <Typography variant="body2" className="freelancer-email">
+                      {currentBid.freelancer?.email}
+                    </Typography>
+                    <Chip 
+                      label={currentBid.freelancer?.status || 'Unknown'}
+                      {...getStatusChipProps(currentBid.freelancer?.status)}
+                      size="small"
+                      className="freelancer-status"
+                    />
+                  </Box>
+                </Box>
+
+                <Grid container spacing={3}>
+                  {renderInfoItem(
+                    <Phone />, 
+                    'Mobile', 
+                    currentBid.freelancer?.mobile
+                  )}
+                  {renderInfoItem(
+                    <LocationOn />, 
+                    'Location', 
+                    currentBid.freelancer?.city && currentBid.freelancer?.state
+                      ? `${currentBid.freelancer.city}, ${currentBid.freelancer.state}, ${currentBid.freelancer.country}`
+                      : '--'
+                  )}
+                  {renderInfoItem(
+                    <AccountCircle />, 
+                    'Username', 
+                    currentBid.freelancer?.pseudoName || currentBid.freelancer?.username || '--'
+                  )}
+                  {renderInfoItem(
+                    <Business />, 
+                    'Company', 
+                    currentBid.freelancer?.company_name || '--'
+                  )}
+                  {renderInfoItem(
+                    <Work />, 
+                    'Experience', 
+                    currentBid.freelancer?.experience ? `${currentBid.freelancer.experience} years` : '--'
+                  )}
+                  {renderInfoItem(
+                    <Public />, 
+                    'Gender', 
+                    currentBid.freelancer?.gender || '--'
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Joined Date', 
+                    formatDate(currentBid.freelancer?.createdAt)
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Last Login', 
+                    formatDate(currentBid.freelancer?.last_login) || 'Never'
+                  )}
+                  {currentBid.freelancer?.key_skills && renderInfoItem(
+                    <Work />, 
+                    'Key Skills', 
+                    currentBid.freelancer.key_skills,
+                    true
+                  )}
+                  {currentBid.freelancer?.bio && renderInfoItem(
+                    <Description />, 
+                    'Bio', 
+                    currentBid.freelancer.bio,
+                    true
+                  )}
+                  {currentBid.freelancer?.aboutme && renderInfoItem(
+                    <Description />, 
+                    'About Me', 
+                    currentBid.freelancer.aboutme,
+                    true
+                  )}
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Project Information Section */}
+          <Grid item xs={12}>
+            <Card className="detail-section">
+              <CardContent>
+                <Box className="section-header">
+                  <Work className="section-icon" />
+                  <Typography variant="h6" className="section-title">
+                    Project Information
+                  </Typography>
+                </Box>
+                <Divider className="section-divider" />
+                
+                {/* Project Header */}
+                <Box className="project-header">
+                  <Typography variant="h6" className="project-title">
+                    {currentBid.ClientProject?.project_title}
+                  </Typography>
+                </Box>
+
+                <Grid container spacing={3}>
+                  {renderInfoItem(
+                    <Category />, 
+                    'Category', 
+                    currentBid.ClientProject?.Category?.name
+                  )}
+                  {renderInfoItem(
+                    <AttachMoney />, 
+                    'Budget Range', 
+                    currentBid.ClientProject?.project_amount_min && currentBid.ClientProject?.project_amount_max
+                      ? `${formatCurrency(currentBid.ClientProject.project_amount_min)} - ${formatCurrency(currentBid.ClientProject.project_amount_max)}`
+                      : '--'
+                  )}
+                  {renderInfoItem(
+                    <Timeline />, 
+                    'Duration', 
+                    currentBid.ClientProject?.project_duration_min && currentBid.ClientProject?.project_duration_max
+                      ? `${currentBid.ClientProject.project_duration_min} - ${currentBid.ClientProject.project_duration_max} days`
+                      : '--'
+                  )}
+                  {renderInfoItem(
+                    <Work />, 
+                    'Engagement Model', 
+                    currentBid.ClientProject?.model_engagement || '--'
+                  )}
+                  {renderInfoItem(
+                    <Language />, 
+                    'Technology Preference', 
+                    currentBid.ClientProject?.technologty_pre || '--'
+                  )}
+                  {renderInfoItem(
+                    <Public />, 
+                    'Currency', 
+                    `${currentBid.ClientProject?.currency_symbol} ${currentBid.ClientProject?.currency_type}` || '--'
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Posted Date', 
+                    formatDate(currentBid.ClientProject?.createdAt)
+                  )}
+                  {renderInfoItem(
+                    <CalendarToday />, 
+                    'Last Updated', 
+                    formatDate(currentBid.ClientProject?.updatedAt)
+                  )}
+                  {renderInfoItem(
+                    <Person />, 
+                    'Client Name', 
+                    `${currentBid.ClientProject?.User?.first_name} ${currentBid.ClientProject?.User?.last_name}`
+                  )}
+                  {renderInfoItem(
+                    <Email />, 
+                    'Client Email', 
+                    currentBid.ClientProject?.User?.email
+                  )}
+                  {currentBid.ClientProject?.project_summary && renderInfoItem(
+                    <Description />, 
+                    'Project Summary', 
+                    currentBid.ClientProject.project_summary,
+                    true
+                  )}
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* SOW Information Section - Only show if SOW exists */}
+          {currentBid.sow && (
+            <Grid item xs={12}>
+              <Card className="detail-section">
+                <CardContent>
+                  <Box className="section-header">
+                    <AssignmentIcon className="section-icon" />
+                    <Typography variant="h6" className="section-title">
+                      Statement of Work (SOW)
+                    </Typography>
+                  </Box>
+                  <Divider className="section-divider" />
+                  
+                  {/* SOW Header */}
+                  <Box className="sow-header">
+                    <Typography variant="h6" className="sow-title">
+                      SOW #{currentBid.sow.id}
+                    </Typography>
+                    <Chip 
+                      label={currentBid.sow.status || 'Draft'}
+                      {...getStatusChipProps(currentBid.sow.status)}
+                      className="sow-status"
+                    />
+                  </Box>
+
+                  <Grid container spacing={3}>
+                    {renderInfoItem(
+                      <Info />, 
+                      'SOW ID', 
+                      `#${currentBid.sow.id}`
+                    )}
+                    {renderInfoItem(
+                      <Person />, 
+                      'User ID', 
+                      currentBid.sow.user_id
+                    )}
+                    {renderInfoItem(
+                      <Work />, 
+                      'Project ID', 
+                      currentBid.sow.project_id
+                    )}
+                    {renderInfoItem(
+                      <HourglassEmpty />, 
+                      'Hours Proposed', 
+                      currentBid.sow.hours_proposed ? `${currentBid.sow.hours_proposed} hours` : '0 hours'
+                    )}
+                    {renderInfoItem(
+                      <ListAlt />, 
+                      'Scope of Work', 
+                      currentBid.sow.scope_of_work || '--'
+                    )}
+                    {renderInfoItem(
+                      <CalendarToday />, 
+                      'Created Date', 
+                      formatDate(currentBid.sow.createdAt)
+                    )}
+                    {renderInfoItem(
+                      <CalendarToday />, 
+                      'Last Updated', 
+                      formatDate(currentBid.sow.updatedAt)
+                    )}
+                    {currentBid.sow.customer_objective && renderInfoItem(
+                      <Flag />, 
+                      'Customer Objective', 
+                      currentBid.sow.customer_objective,
+                      true
+                    )}
+                    {currentBid.sow.remarks && renderInfoItem(
+                      <Description />, 
+                      'Remarks', 
+                      currentBid.sow.remarks,
+                      true
+                    )}
+                  </Grid>
+
+                  {/* Milestones Section */}
+                  {currentBid.sow.milestones && currentBid.sow.milestones.length > 0 && (
+                    <Box className="milestones-section">
+                      <Box className="milestones-header">
+                        <CheckCircle className="milestones-icon" />
+                        <Typography variant="h6" className="milestones-title">
+                          Project Milestones ({currentBid.sow.milestones.length})
                         </Typography>
                       </Box>
-                      <Typography variant="body1" className="field-value description-text">
-                        {currentBid.sow.description}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-                
-                {currentBid.sow.deliverables && (
-                  <Grid item xs={12}>
-                    <Paper className="professional-field description-field">
-                      <Box className="field-header">
-                        <Work className="field-icon" />
-                        <Typography variant="subtitle2" className="field-label">
-                          Deliverables
+                      <Divider className="milestones-divider" />
+                      
+                      <Grid container spacing={2}>
+                        {currentBid.sow.milestones.map((milestone, index) => (
+                          <Grid item xs={12} md={6} key={index}>
+                            <Card className="milestone-card">
+                              <CardContent>
+                                <Box className="milestone-header">
+                                  <Typography variant="h6" className="milestone-number">
+                                    Milestone {index + 1}
+                                  </Typography>
+                                  <Chip 
+                                    label={formatCurrency(milestone.amount)}
+                                    color="primary"
+                                    variant="filled"
+                                    className="milestone-amount"
+                                  />
+                                </Box>
+                                <Typography variant="body1" className="milestone-scope">
+                                  {milestone.scope}
+                                </Typography>
+                                <Box className="milestone-details">
+                                  <Box className="milestone-detail">
+                                    <HourglassEmpty className="milestone-detail-icon" />
+                                    <Typography variant="body2">
+                                      {milestone.hours} hours
+                                    </Typography>
+                                  </Box>
+                                  <Box className="milestone-detail">
+                                    <AttachMoney className="milestone-detail-icon" />
+                                    <Typography variant="body2">
+                                      {formatCurrency(milestone.amount)}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+
+                      {/* Milestones Summary */}
+                      <Box className="milestones-summary">
+                        <Typography variant="h6" className="summary-title">
+                          Milestones Summary
                         </Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <Box className="summary-item">
+                              <Typography variant="subtitle2" className="summary-label">
+                                Total Milestones
+                              </Typography>
+                              <Typography variant="h6" className="summary-value">
+                                {currentBid.sow.milestones.length}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Box className="summary-item">
+                              <Typography variant="subtitle2" className="summary-label">
+                                Total Hours
+                              </Typography>
+                              <Typography variant="h6" className="summary-value">
+                                {currentBid.sow.milestones.reduce((total, milestone) => 
+                                  total + parseInt(milestone.hours || 0), 0
+                                )} hours
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Box className="summary-item">
+                              <Typography variant="subtitle2" className="summary-label">
+                                Total Amount
+                              </Typography>
+                              <Typography variant="h6" className="summary-value amount">
+                                {formatCurrency(
+                                  currentBid.sow.milestones.reduce((total, milestone) => 
+                                    total + parseFloat(milestone.amount || 0), 0
+                                  )
+                                )}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
-                      <Typography variant="body1" className="field-value description-text">
-                        {currentBid.sow.deliverables}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-                
-                {currentBid.sow.timeline && (
-                  <Grid item xs={12}>
-                    <Paper className="professional-field description-field">
-                      <Box className="field-header">
-                        <CalendarToday className="field-icon" />
-                        <Typography variant="subtitle2" className="field-label">
-                          Timeline
-                        </Typography>
-                      </Box>
-                      <Typography variant="body1" className="field-value description-text">
-                        {currentBid.sow.timeline}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-              </Grid>
-            </AccordionDetails>
-          </Accordion>
-        )}
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
+        </Grid>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import ClientList from './pages/ClientList/ClientList';
 import ClientDetail from './pages/ClientDetail/ClientDetail';
 import ContactList from './pages/ContactList/ContactList';
 import FreeLancerList from './pages/FreeLancerList/FreeLancerList';
+import FreeLancerDetail from './pages/FreeLancerDetail/FreeLancerDetail';
 import PostProject from './pages/PostProject/PostProject';
 import CreateClientProject from './pages/CreateClientProject/CreateClientProject';
 import SiteAnalytics from './pages/SiteAnalytics/SiteAnalytics';
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/freelancer" element={<FreeLancerList />} />
+        <Route path="/freelancer/:freelancerId/details" element={<FreeLancerDetail />} />
         <Route path="/clients" element={<ClientList />} />
         <Route path="/clients/:clientId" element={<ClientDetail />} />
         <Route path="/contact" element={<ContactList />} />

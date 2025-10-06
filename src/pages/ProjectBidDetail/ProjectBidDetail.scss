@@ -5,26 +5,64 @@
   min-height: calc(100vh - $header-height - #{$spacing-lg});
   background: $bg-secondary;
 
-  // Accordion Container
-  .accordion-container {
-    gap: $spacing-md;
-    display: flex;
-    flex-direction: column;
+  // Detail Container
+  .detail-container {
     margin-top: $spacing-lg;
   }
 
-  // Accordion Styling - Similar to ClientDetail
-  .bid-accordion,
-  .freelancer-accordion,
-  .project-accordion,
-  .sow-accordion {
+  // Page Header
+  .page-header {
     @include theme-card;
-    @include theme-glassmorphism;
-    border: 2px solid $brand-primary !important;
-    border-radius: $radius-lg !important;
+    padding: $spacing-xl;
+    margin-bottom: $spacing-xl;
+    background: linear-gradient(135deg, 
+      rgba($brand-primary, 0.05) 0%,
+      rgba($brand-secondary, 0.95) 50%,
+      rgba($brand-primary, 0.02) 100%
+    );
+    border: 1px solid rgba($brand-primary, 0.1);
+    border-radius: $radius-xl;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-md;
+
+      .page-title {
+        color: $text-primary;
+        font-weight: $font-weight-bold;
+        font-family: $font-family-heading;
+        margin: 0;
+      }
+
+      .status-chip {
+        font-weight: $font-weight-semibold;
+        font-size: $font-size-sm;
+        height: 32px;
+        border-radius: $radius-lg;
+      }
+    }
+
+    .bid-id {
+      color: $text-muted;
+      font-weight: $font-weight-medium;
+      margin: 0;
+    }
+  }
+
+  // Detail Section Cards
+  .detail-section {
+    @include theme-card;
+    border: 1px solid rgba($brand-primary, 0.1);
+    border-radius: $radius-xl;
+    background: linear-gradient(135deg, 
+      rgba($brand-secondary, 0.98) 0%,
+      rgba($brand-primary, 0.02) 100%
+    );
+    transition: all $transition-normal;
     position: relative;
     overflow: hidden;
-    margin-bottom: $spacing-md !important;
 
     // Top border accent
     &::before {
@@ -33,263 +71,418 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, $brand-primary 0%, $brand-primary-light 50%, $brand-secondary 100%);
+      height: 3px;
+      background: linear-gradient(90deg, $brand-primary 0%, $brand-primary-light 50%, $brand-primary 100%);
       z-index: 1;
     }
 
-    .accordion-header {
-      min-height: 64px;
-      padding: $spacing-lg;
-      background: linear-gradient(135deg, 
-        rgba($brand-primary, 0.05) 0%,
-        rgba($brand-secondary, 0.8) 50%,
-        rgba($brand-primary, 0.03) 100%
-      );
-      border-bottom: 1px solid rgba($brand-primary, 0.1);
+    &:hover {
+      border-color: rgba($brand-primary, 0.2);
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+    }
 
-      .MuiAccordionSummary-expandIconWrapper {
+    .MuiCardContent-root {
+      padding: $spacing-xl;
+    }
+
+    // Section Header
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      margin-bottom: $spacing-lg;
+
+      .section-icon {
         color: $brand-primary;
-        transition: $transition-normal;
-
-        &.Mui-expanded {
-          color: $brand-primary-dark;
-          transform: rotate(180deg);
-        }
+        font-size: 28px;
+        flex-shrink: 0;
       }
 
-      .accordion-title-container {
-        display: flex;
-        align-items: center;
-        gap: $spacing-lg;
-        width: 100%;
+      .section-title {
+        color: $text-primary;
+        font-weight: $font-weight-bold;
+        font-family: $font-family-heading;
+        margin: 0;
+      }
+    }
 
-        .accordion-icon {
-          color: $brand-primary;
-          font-size: 24px;
-          flex-shrink: 0;
-        }
+    .section-divider {
+      margin-bottom: $spacing-xl;
+      background: linear-gradient(90deg, transparent 0%, rgba($brand-primary, 0.3) 50%, transparent 100%);
+      height: 1px;
+      border: none;
+    }
 
-        .accordion-title {
+    // Freelancer Profile Header
+    .freelancer-profile {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xl;
+      margin-bottom: $spacing-xl;
+      padding: $spacing-xl;
+      background: linear-gradient(135deg, 
+        rgba($brand-primary, 0.05) 0%,
+        rgba($brand-secondary, 0.8) 100%
+      );
+      border-radius: $radius-lg;
+      border: 1px solid rgba($brand-primary, 0.1);
+
+      .freelancer-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+        color: $brand-secondary;
+        font-size: $font-size-xl;
+        border: 3px solid $brand-secondary;
+        box-shadow: $shadow-md;
+        flex-shrink: 0;
+      }
+
+      .freelancer-info {
+        flex: 1;
+
+        .freelancer-name {
           color: $text-primary;
-          font-weight: $font-weight-semibold;
+          font-weight: $font-weight-bold;
           font-family: $font-family-heading;
-          flex: 1;
-          margin: 0;
+          margin-bottom: $spacing-xs;
         }
 
-        .freelancer-preview {
-          display: flex;
-          align-items: center;
-          gap: $spacing-md;
-          margin-left: auto;
-
-          .preview-avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
-            color: $brand-secondary;
-            font-size: $font-size-sm;
-            border: 2px solid $brand-secondary;
-            box-shadow: $shadow-sm;
-          }
-
-          .preview-name {
-            color: $text-primary;
-            font-weight: $font-weight-medium;
-            font-size: $font-size-sm;
-          }
+        .freelancer-email {
+          color: $text-muted;
+          font-size: $font-size-sm;
+          margin-bottom: $spacing-sm;
         }
 
-        // Status Button Styling (matching other pages)
-        .status-button {
-          text-transform: capitalize;
-          font-weight: $font-weight-medium;
-          font-size: $font-size-xs;
-          min-width: 80px;
-          border-radius: $radius-sm;
-          transition: all $transition-normal;
-          cursor: default;
-          margin-left: auto;
-          
-          &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-          }
-          
-          &.pending {
-            background-color: #fff3e0;
-            color: #e65100;
-            border: 1px solid #ffcc02;
-            
-            &:hover {
-              background-color: #ffe0b2;
-            }
-          }
-          
-          &.accepted {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #4caf50;
-            
-            &:hover {
-              background-color: #c8e6c9;
-            }
-          }
-          
-          &.rejected {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #f44336;
-            
-            &:hover {
-              background-color: #ffcdd2;
-            }
-          }
-          
-          &.in-progress,
-          &.in_progress {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            border: 1px solid #2196f3;
-            
-            &:hover {
-              background-color: #bbdefb;
-            }
-          }
-          
-          &.completed {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #4caf50;
-            
-            &:hover {
-              background-color: #c8e6c9;
-            }
-          }
+        .freelancer-status {
+          margin-top: $spacing-sm;
         }
       }
     }
 
-    .accordion-content {
+    // Project Header
+    .project-header {
+      margin-bottom: $spacing-xl;
       padding: $spacing-lg;
       background: linear-gradient(135deg, 
-        rgba($brand-secondary, 0.95) 0%,
-        rgba($brand-primary, 0.02) 100%
+        rgba($brand-primary, 0.05) 0%,
+        rgba($brand-secondary, 0.8) 100%
       );
-      
-      // Profile Header (for freelancer section)
-      .profile-header {
+      border-radius: $radius-lg;
+      border: 1px solid rgba($brand-primary, 0.1);
+
+      .project-title {
+        color: $text-primary;
+        font-weight: $font-weight-bold;
+        font-family: $font-family-heading;
+        margin: 0;
+      }
+    }
+
+    // SOW Header
+    .sow-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-xl;
+      padding: $spacing-lg;
+      background: linear-gradient(135deg, 
+        rgba($brand-primary, 0.05) 0%,
+        rgba($brand-secondary, 0.8) 100%
+      );
+      border-radius: $radius-lg;
+      border: 1px solid rgba($brand-primary, 0.1);
+
+      .sow-title {
+        color: $text-primary;
+        font-weight: $font-weight-bold;
+        font-family: $font-family-heading;
+        margin: 0;
+        flex: 1;
+        margin-right: $spacing-md;
+      }
+
+      .sow-status {
+        flex-shrink: 0;
+      }
+    }
+
+    // Milestones Section
+    .milestones-section {
+      margin-top: $spacing-2xl;
+      padding-top: $spacing-xl;
+      border-top: 2px solid rgba($brand-primary, 0.1);
+
+      .milestones-header {
         display: flex;
         align-items: center;
-        gap: $spacing-lg;
-        margin-bottom: $spacing-xl;
-        padding: $spacing-lg;
-        background: linear-gradient(135deg, 
-          rgba($brand-primary, 0.05) 0%,
-          rgba($brand-secondary, 0.8) 100%
-        );
-        border-radius: $radius-md;
-        border: 1px solid rgba($brand-primary, 0.1);
+        gap: $spacing-md;
+        margin-bottom: $spacing-lg;
 
-        .freelancer-avatar {
-          width: 80px;
-          height: 80px;
-          background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
-          color: $brand-secondary;
-          font-size: $font-size-xl;
-          border: 3px solid $brand-secondary;
-          box-shadow: $shadow-md;
+        .milestones-icon {
+          color: $brand-primary;
+          font-size: 28px;
           flex-shrink: 0;
         }
 
-        .freelancer-info {
-          .freelancer-name {
+        .milestones-title {
+          color: $text-primary;
+          font-weight: $font-weight-bold;
+          font-family: $font-family-heading;
+          margin: 0;
+        }
+      }
+
+      .milestones-divider {
+        margin-bottom: $spacing-xl;
+        background: linear-gradient(90deg, transparent 0%, rgba($brand-primary, 0.3) 50%, transparent 100%);
+        height: 1px;
+        border: none;
+      }
+
+      // Individual Milestone Cards
+      .milestone-card {
+        @include theme-card;
+        border: 1px solid rgba($brand-primary, 0.1);
+        border-radius: $radius-lg;
+        background: linear-gradient(135deg, 
+          rgba($brand-secondary, 0.98) 0%,
+          rgba($brand-primary, 0.02) 100%
+        );
+        transition: all $transition-normal;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, $color-success 0%, $color-info 50%, $brand-primary 100%);
+          z-index: 1;
+        }
+
+        &:hover {
+          border-color: rgba($brand-primary, 0.2);
+          transform: translateY(-2px);
+          box-shadow: $shadow-md;
+        }
+
+        .MuiCardContent-root {
+          padding: $spacing-lg;
+        }
+
+        .milestone-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: $spacing-md;
+
+          .milestone-number {
             color: $text-primary;
             font-weight: $font-weight-bold;
             font-family: $font-family-heading;
-            margin-bottom: $spacing-xs;
+            margin: 0;
+            font-size: $font-size-lg;
           }
 
-          .freelancer-email {
-            color: $text-muted;
+          .milestone-amount {
+            background: linear-gradient(135deg, $brand-primary 0%, $brand-primary-light 100%);
+            color: $brand-secondary;
+            font-weight: $font-weight-bold;
             font-size: $font-size-sm;
+          }
+        }
+
+        .milestone-scope {
+          color: $text-secondary;
+          font-size: $font-size-md;
+          line-height: 1.5;
+          margin-bottom: $spacing-lg;
+          padding: $spacing-md;
+          background: rgba($brand-primary, 0.02);
+          border-radius: $radius-md;
+          border-left: 3px solid $brand-primary;
+        }
+
+        .milestone-details {
+          display: flex;
+          gap: $spacing-lg;
+
+          .milestone-detail {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            padding: $spacing-sm $spacing-md;
+            background: rgba($brand-primary, 0.05);
+            border-radius: $radius-md;
+            border: 1px solid rgba($brand-primary, 0.1);
+
+            .milestone-detail-icon {
+              color: $brand-primary;
+              font-size: 18px;
+              opacity: 0.8;
+            }
+
+            .MuiTypography-body2 {
+              color: $text-primary;
+              font-weight: $font-weight-medium;
+              font-size: $font-size-sm;
+              margin: 0;
+            }
+          }
+        }
+      }
+
+      // Milestones Summary
+      .milestones-summary {
+        margin-top: $spacing-2xl;
+        padding: $spacing-xl;
+        background: linear-gradient(135deg, 
+          rgba($brand-primary, 0.03) 0%,
+          rgba($brand-secondary, 0.95) 100%
+        );
+        border-radius: $radius-lg;
+        border: 1px solid rgba($brand-primary, 0.1);
+
+        .summary-title {
+          color: $text-primary;
+          font-weight: $font-weight-bold;
+          font-family: $font-family-heading;
+          margin-bottom: $spacing-lg;
+          text-align: center;
+        }
+
+        .summary-item {
+          text-align: center;
+          padding: $spacing-md;
+          background: rgba($brand-secondary, 0.8);
+          border-radius: $radius-md;
+          border: 1px solid rgba($brand-primary, 0.08);
+          transition: all $transition-normal;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: $shadow-sm;
+            border-color: rgba($brand-primary, 0.15);
+          }
+
+          .summary-label {
+            color: $text-muted;
+            font-weight: $font-weight-semibold;
+            font-size: $font-size-sm;
+            text-transform: uppercase;
+            letter-spacing: $letter-spacing-wide;
+            margin-bottom: $spacing-sm;
+          }
+
+          .summary-value {
+            color: $text-primary;
+            font-weight: $font-weight-bold;
+            font-family: $font-family-heading;
+            margin: 0;
+
+            &.amount {
+              color: $brand-primary;
+              font-size: $font-size-xl;
+              text-shadow: 0 1px 2px rgba($brand-primary, 0.1);
+            }
           }
         }
       }
     }
   }
 
-  // Professional Field Styling (matching ClientDetail)
-  .professional-field {
-    @include theme-card;
-    padding: $spacing-md;
-    border: 1px solid rgba($brand-primary, 0.1);
-    border-radius: $radius-md;
+  // Info Item Styling
+  .info-item {
+    padding: $spacing-lg;
+    border: 1px solid rgba($brand-primary, 0.08);
+    border-radius: $radius-lg;
     background: linear-gradient(135deg, 
-      rgba($brand-secondary, 0.95) 0%,
-      rgba($brand-primary, 0.02) 100%
+      rgba($brand-secondary, 0.98) 0%,
+      rgba($brand-primary, 0.01) 100%
     );
-    transition: $transition-normal;
+    transition: all $transition-normal;
+    position: relative;
+    overflow: hidden;
 
-    &:hover {
-      border-color: rgba($brand-primary, 0.2);
-      transform: translateY(-2px);
-      box-shadow: $shadow-md;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, $brand-primary 0%, $brand-primary-light 100%);
+      opacity: 0;
+      transition: opacity $transition-normal;
     }
 
-    .field-header {
+    &:hover {
+      border-color: rgba($brand-primary, 0.15);
+      transform: translateY(-1px);
+      box-shadow: $shadow-sm;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    .info-header {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
-      margin-bottom: $spacing-sm;
+      margin-bottom: $spacing-md;
 
-      .field-icon {
+      .MuiSvgIcon-root {
         color: $brand-primary;
-        font-size: 18px;
+        font-size: 20px;
         opacity: 0.8;
         flex-shrink: 0;
       }
 
-      .field-label {
+      .info-label {
         color: $text-muted;
-        font-weight: $font-weight-medium;
+        font-weight: $font-weight-semibold;
         font-size: $font-size-sm;
         text-transform: uppercase;
         letter-spacing: $letter-spacing-wide;
+        margin: 0;
       }
     }
 
-    .field-value {
+    .info-value {
       color: $text-primary;
       font-weight: $font-weight-medium;
-      line-height: 1.4;
+      font-size: $font-size-md;
+      line-height: 1.5;
       word-break: break-word;
+      margin: 0;
+      white-space: pre-wrap;
 
-      &.amount-value {
+      // Special styling for currency values
+      &:has-text("$"), &:has-text("USD"), &:has-text("₹") {
         color: $brand-primary;
         font-weight: $font-weight-bold;
         font-size: $font-size-lg;
-        text-shadow: 0 1px 2px rgba($brand-primary, 0.1);
-      }
-
-      &.description-text {
-        line-height: 1.6;
-        color: $text-secondary;
-        background: rgba($brand-primary, 0.02);
-        padding: $spacing-md;
-        border-radius: $radius-sm;
-        border-left: 3px solid $brand-primary;
-        white-space: pre-wrap;
-        margin-top: $spacing-sm;
       }
     }
 
-    &.description-field {
+    // Full width items (descriptions, messages, etc.)
+    &.full-width {
       grid-column: 1 / -1;
-      
-      .field-header {
-        margin-bottom: $spacing-md;
+
+      .info-value {
+        background: rgba($brand-primary, 0.02);
+        padding: $spacing-lg;
+        border-radius: $radius-md;
+        border-left: 3px solid $brand-primary;
+        margin-top: $spacing-sm;
+        line-height: 1.6;
+        color: $text-secondary;
       }
     }
   }
@@ -331,68 +524,38 @@
   @media (max-width: $breakpoint-lg) {
     padding: $spacing-md;
 
-    .accordion-header {
-      padding: $spacing-md;
+    .page-header {
+      padding: $spacing-lg;
 
-      .accordion-title-container {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
         gap: $spacing-md;
 
-        .accordion-title {
+        .page-title {
+          font-size: $font-size-2xl;
+        }
+      }
+    }
+
+    .detail-section {
+      .MuiCardContent-root {
+        padding: $spacing-lg;
+      }
+
+      .section-header {
+        .section-icon {
+          font-size: 24px;
+        }
+
+        .section-title {
           font-size: $font-size-lg;
         }
-
-        .freelancer-preview {
-          .preview-name {
-            display: none;
-          }
-        }
       }
-    }
 
-    .accordion-content {
-      padding: $spacing-md;
-    }
-
-    .professional-field {
-      padding: $spacing-sm;
-    }
-  }
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-sm;
-
-    .accordion-header {
-      min-height: 56px;
-      padding: $spacing-sm;
-
-      .accordion-title-container {
-        gap: $spacing-sm;
-        flex-wrap: wrap;
-
-        .accordion-title {
-          font-size: $font-size-md;
-        }
-
-        .status-button {
-          font-size: $font-size-xs;
-          min-width: 70px;
-          margin-left: 0;
-          margin-top: $spacing-xs;
-        }
-
-        .freelancer-preview {
-          display: none;
-        }
-      }
-    }
-
-    .accordion-content {
-      padding: $spacing-sm;
-
-      .profile-header {
-        flex-direction: column;
-        text-align: center;
-        gap: $spacing-md;
+      .freelancer-profile {
+        padding: $spacing-lg;
+        gap: $spacing-lg;
 
         .freelancer-avatar {
           width: 60px;
@@ -400,47 +563,213 @@
           font-size: $font-size-lg;
         }
       }
+
+      .project-header {
+        padding: $spacing-md;
+
+        .project-title {
+          font-size: $font-size-lg;
+        }
+      }
     }
 
-    .professional-field {
-      .field-header {
-        .field-icon {
-          font-size: 16px;
+    .info-item {
+      padding: $spacing-md;
+
+      .info-header {
+        .MuiSvgIcon-root {
+          font-size: 18px;
         }
 
-        .field-label {
+        .info-label {
           font-size: $font-size-xs;
         }
       }
 
-      .field-value {
+      .info-value {
         font-size: $font-size-sm;
+      }
+    }
+  }
 
-        &.amount-value {
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-sm;
+
+    .page-header {
+      padding: $spacing-md;
+
+      .header-content {
+        .page-title {
+          font-size: $font-size-xl;
+        }
+
+        .status-chip {
+          height: 28px;
+          font-size: $font-size-xs;
+        }
+      }
+
+      .bid-id {
+        font-size: $font-size-sm;
+      }
+    }
+
+    .detail-section {
+      .MuiCardContent-root {
+        padding: $spacing-md;
+      }
+
+      .section-header {
+        .section-icon {
+          font-size: 22px;
+        }
+
+        .section-title {
           font-size: $font-size-md;
+        }
+      }
+
+      .freelancer-profile {
+        flex-direction: column;
+        text-align: center;
+        padding: $spacing-md;
+
+        .freelancer-avatar {
+          width: 50px;
+          height: 50px;
+          font-size: $font-size-md;
+        }
+
+        .freelancer-info {
+          .freelancer-name {
+            font-size: $font-size-md;
+          }
+
+          .freelancer-email {
+            font-size: $font-size-xs;
+          }
+        }
+      }
+
+      .project-header {
+        padding: $spacing-sm;
+
+        .project-title {
+          font-size: $font-size-md;
+        }
+      }
+    }
+
+    .info-item {
+      padding: $spacing-sm;
+
+      .info-header {
+        .MuiSvgIcon-root {
+          font-size: 16px;
+        }
+
+        .info-label {
+          font-size: $font-size-2xs;
+        }
+      }
+
+      .info-value {
+        font-size: $font-size-xs;
+      }
+
+      &.full-width {
+        .info-value {
+          padding: $spacing-sm;
+          font-size: $font-size-xs;
         }
       }
     }
   }
 
   @media (max-width: $breakpoint-sm) {
-    .professional-field {
-      .field-header {
-        .field-label {
-          font-size: $font-size-2xs;
+    .page-header {
+      .header-content {
+        .page-title {
+          font-size: $font-size-lg;
+        }
+      }
+    }
+
+    .detail-section {
+      .section-header {
+        .section-title {
+          font-size: $font-size-sm;
         }
       }
 
-      .field-value {
-        font-size: $font-size-xs;
+      .freelancer-profile {
+        .freelancer-info {
+          .freelancer-name {
+            font-size: $font-size-sm;
+          }
+        }
+      }
 
-        &.amount-value {
+      .project-header {
+        .project-title {
           font-size: $font-size-sm;
         }
+      }
 
-        &.description-text {
-          padding: $spacing-sm;
-          font-size: $font-size-xs;
+      .sow-header {
+        .sow-title {
+          font-size: $font-size-sm;
+        }
+      }
+
+      .milestones-section {
+        .milestones-header {
+          .milestones-title {
+            font-size: $font-size-sm;
+          }
+        }
+
+        .milestone-card {
+          .milestone-header {
+            .milestone-number {
+              font-size: $font-size-md;
+            }
+          }
+
+          .milestone-scope {
+            font-size: $font-size-sm;
+          }
+
+          .milestone-details {
+            flex-direction: column;
+            gap: $spacing-sm;
+
+            .milestone-detail {
+              .MuiTypography-body2 {
+                font-size: $font-size-xs;
+              }
+            }
+          }
+        }
+
+        .milestones-summary {
+          padding: $spacing-md;
+
+          .summary-title {
+            font-size: $font-size-md;
+          }
+
+          .summary-item {
+            padding: $spacing-sm;
+
+            .summary-value {
+              font-size: $font-size-md;
+
+              &.amount {
+                font-size: $font-size-lg;
+              }
+            }
+          }
         }
       }
     }

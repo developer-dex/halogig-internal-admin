@@ -21,9 +21,12 @@ import {
   Checkbox,
   DialogActions,
   Button,
+  Tooltip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Home, Work } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { freelancerData } from '../../features/admin/freelancerManagementSlice';
 import { statusChange } from '../../features/admin/clientManagementSlice';
 import Breadcrumb from '../../components/Breadcrumb';
@@ -31,6 +34,7 @@ import './FreeLancerList.scss';
 
 const FreeLancerList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
   // Breadcrumb items for freelancer list page
@@ -69,6 +73,10 @@ const FreeLancerList = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleViewDetails = (freelancerId) => {
+    navigate(`/freelancer/${freelancerId}/details`);
   };
 
   const handleOpenModal = (partner) => {
@@ -172,10 +180,10 @@ const FreeLancerList = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell width="25%">FIRST NAME</TableCell>
-                <TableCell width="25%">LAST NAME</TableCell>
+                <TableCell width="20%">FIRST NAME</TableCell>
+                <TableCell width="20%">LAST NAME</TableCell>
                 <TableCell width="25%">EMAIL</TableCell>
-                <TableCell width="25%">ACTION</TableCell>
+                <TableCell width="35%">ACTIONS</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -191,13 +199,24 @@ const FreeLancerList = () => {
                     {freelancer.email ? freelancer.email : '--'}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      onClick={() => handleOpenModal(freelancer)}
-                      className={`status-button ${freelancer.status?.toLowerCase().replace(' ', '-')}`}
-                    >
-                      {freelancer.status}
-                    </Button>                 
+                    <div className="action-buttons">
+                      <Button 
+                        variant="outlined" 
+                        onClick={() => handleOpenModal(freelancer)}
+                        className={`status-button ${freelancer.status?.toLowerCase().replace(' ', '-')}`}
+                      >
+                        {freelancer.status}
+                      </Button>
+                      <Tooltip title="View Details">
+                        <IconButton 
+                          onClick={() => handleViewDetails(freelancer.id)}
+                          className="view-details-btn"
+                          size="small"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

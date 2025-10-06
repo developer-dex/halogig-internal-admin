@@ -84,14 +84,17 @@ const PostProject = () => {
     project_title: '',
     technologty_pre: '',
     model_engagement: '',
-    project_amount: '',
+    project_amount_min: '',
+    project_amount_max: '',
     project_duration_min: '',
     project_duration_max: '',
+    notice_period_min: '',
+    notice_period_max: '',
     project_summary: '',
     type_of_project: '',
     customer_industry: '',
-    currency_type: 'INR',
-    currency_symbol: '₹'
+    currency_type: 'USD',
+    currency_symbol: '$'
   });
   const pageLimit = 50;
 
@@ -175,14 +178,17 @@ const PostProject = () => {
         project_title: selectedProject.project_title || '',
         technologty_pre: selectedProject.technologty_pre || '',
         model_engagement: pricingModel,
-        project_amount: selectedProject.project_amount || '',
+        project_amount_min: selectedProject.project_amount_min || '',
+        project_amount_max: selectedProject.project_amount_max || '',
         project_duration_min: selectedProject.project_duration_min || '',
         project_duration_max: selectedProject.project_duration_max || '',
+        notice_period_min: selectedProject.notice_period_min || '',
+        notice_period_max: selectedProject.notice_period_max || '',
         project_summary: selectedProject.project_summary || '',
         type_of_project: projectType,
         customer_industry: selectedProject.customer_industry || '',
-        currency_type: selectedProject.currency_type || 'INR',
-        currency_symbol: selectedProject.currency_symbol || '₹'
+        currency_type: selectedProject.currency_type || 'USD',
+        currency_symbol: selectedProject.currency_symbol || '$'
       };
       
       console.log('Setting form data with project values:', updatedFormData);
@@ -234,14 +240,17 @@ const PostProject = () => {
       project_title: project.project_title || '',
       technologty_pre: project.technologty_pre || '',
       model_engagement: pricingModel,
-      project_amount: project.project_amount || '',
+      project_amount_min: project.project_amount_min || '',
+      project_amount_max: project.project_amount_max || '',
       project_duration_min: project.project_duration_min || '',
       project_duration_max: project.project_duration_max || '',
+      notice_period_min: project.notice_period_min || '',
+      notice_period_max: project.notice_period_max || '',
       project_summary: project.project_summary || '',
       type_of_project: projectType,
       customer_industry: project.customer_industry || '',
-      currency_type: project.currency_type || 'INR',
-      currency_symbol: project.currency_symbol || '₹'
+      currency_type: project.currency_type || 'USD',
+      currency_symbol: project.currency_symbol || '$'
     });
     setOpenModal(true);
     
@@ -260,14 +269,17 @@ const PostProject = () => {
       project_title: '',
       technologty_pre: '',
       model_engagement: '',
-      project_amount: '',
+      project_amount_min: '',
+      project_amount_max: '',
       project_duration_min: '',
       project_duration_max: '',
+      notice_period_min: '',
+      notice_period_max: '',
       project_summary: '',
       type_of_project: '',
       customer_industry: '',
-      currency_type: 'INR',
-      currency_symbol: '₹'
+      currency_type: 'USD',
+      currency_symbol: '$'
     });
   };
 
@@ -297,10 +309,12 @@ const PostProject = () => {
         customer_industry: formData.customer_industry,
         technologty_pre: formData.technologty_pre,
         notice_period: selectedProject.notice_period,
+        notice_period_min: formData.notice_period_min,
+        notice_period_max: formData.notice_period_max,
         sales_amount: selectedProject.sales_amount || "0",
         sales_amount_to: selectedProject.sales_amount_to || "0",
-        project_amount: formData.project_amount,
-        project_amount_to: formData.project_amount, // Using same value for both min and max
+        project_amount_min: formData.project_amount_min,
+        project_amount_max: formData.project_amount_max,
         model_engagement: formData.model_engagement,
         currency_type: formData.currency_type,
         currency_symbol: formData.currency_symbol,
@@ -342,6 +356,40 @@ const PostProject = () => {
       return 'Retainership';
     } else {
       return 'Fixed';
+    }
+  };
+
+  // Helper function to get dynamic labels based on pricing model
+  const getDynamicLabels = (modelEngagement) => {
+    switch (modelEngagement) {
+      case 'hourly':
+        return {
+          rateLabel: 'Rate Per Hour',
+          durationLabel: 'Contract Duration (In Hours)',
+          minDurationField: 'project_duration_min',
+          maxDurationField: 'project_duration_max'
+        };
+      case 'retainer':
+        return {
+          rateLabel: 'Rate Per Month',
+          durationLabel: 'Notice Period (In Days)',
+          minDurationField: 'notice_period_min',
+          maxDurationField: 'notice_period_max'
+        };
+      case 'fixed':
+        return {
+          rateLabel: 'Total Project Amount',
+          durationLabel: 'Contract Duration (In Days)',
+          minDurationField: 'project_duration_min',
+          maxDurationField: 'project_duration_max'
+        };
+      default:
+        return {
+          rateLabel: 'Rate',
+          durationLabel: 'Duration',
+          minDurationField: 'project_duration_min',
+          maxDurationField: 'project_duration_max'
+        };
     }
   };
 
@@ -747,51 +795,63 @@ const PostProject = () => {
               </RadioGroup>
             </FormControl>
 
-            {/* Rate Per Hour */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <TextField
-                label="Min"
-                type="number"
-                value={formData.project_amount}
-                onChange={(e) => handleInputChange('project_amount', e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <TextField
-                label="Max"
-                type="number"
-                value={formData.project_amount}
-                onChange={(e) => handleInputChange('project_amount', e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <FormControl style={{ minWidth: 120 }}>
-                <Select
-                  value={formData.currency_type}
-                  onChange={(e) => handleInputChange('currency_type', e.target.value)}
-                >
-                  <MenuItem value="INR">INR-₹</MenuItem>
-                  <MenuItem value="USD">USD-$</MenuItem>
-                  <MenuItem value="EUR">EUR-€</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
+            {/* Dynamic Rate Fields */}
+            {formData.model_engagement && (
+              <>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>{getDynamicLabels(formData.model_engagement).rateLabel}</strong>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <TextField
+                    label="Min"
+                    type="number"
+                    value={formData.project_amount_min}
+                    onChange={(e) => handleInputChange('project_amount_min', e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <TextField
+                    label="Max"
+                    type="number"
+                    value={formData.project_amount_max}
+                    onChange={(e) => handleInputChange('project_amount_max', e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <FormControl style={{ minWidth: 120 }}>
+                    <Select
+                      value={formData.currency_type}
+                      onChange={(e) => handleInputChange('currency_type', e.target.value)}
+                    >
+                      <MenuItem value="USD">USD-$</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
+              </>
+            )}
 
-            {/* Project Duration */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <TextField
-                label="Min Hours"
-                type="number"
-                value={formData.project_duration_min}
-                onChange={(e) => handleInputChange('project_duration_min', e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <TextField
-                label="Max Hours"
-                type="number"
-                value={formData.project_duration_max}
-                onChange={(e) => handleInputChange('project_duration_max', e.target.value)}
-                style={{ flex: 1 }}
-              />
-            </div>
+            {/* Dynamic Duration/Notice Period Fields */}
+            {formData.model_engagement && (
+              <>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>{getDynamicLabels(formData.model_engagement).durationLabel}</strong>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <TextField
+                    label="Min"
+                    type="number"
+                    value={formData[getDynamicLabels(formData.model_engagement).minDurationField]}
+                    onChange={(e) => handleInputChange(getDynamicLabels(formData.model_engagement).minDurationField, e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <TextField
+                    label="Max"
+                    type="number"
+                    value={formData[getDynamicLabels(formData.model_engagement).maxDurationField]}
+                    onChange={(e) => handleInputChange(getDynamicLabels(formData.model_engagement).maxDurationField, e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                </div>
+              </>
+            )}
 
             {/* Project Summary */}
             <TextField

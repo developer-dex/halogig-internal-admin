@@ -5,6 +5,7 @@ export const apiEndPoints = {
   GET_CLIENT_DATA: "admin/clients",
   GET_CLIENT_DETAILS: "admin/user",
   GET_FRELANCER_DATA:"admin/freelancers",
+  GET_FREELANCER_COMPLETE_DATA: "admin/freelancer",
   GET_CONTACT_US:"admin/contact-us",
   STATUS_UPDATE:"admin/user",
   GET_ENROLL_AS: "designation",
@@ -44,4 +45,14 @@ export const apiEndPoints = {
   DELETE_ALL_WEBSITE_DATA: "admin/website-data",
   CREATE_WEBSITE_DATA: "admin/website-data",
   UPDATE_WEBSITE_DATA: "admin/website-data",
+  
+  // Freelancer Country Preferences endpoints
+  GET_FREELANCER_COUNTRY_PREFERENCES: "admin/freelancer",
+  ADD_FREELANCER_COUNTRY_PREFERENCE: "admin/freelancer", 
+  UPDATE_FREELANCER_COUNTRY_PREFERENCE: "admin/freelancer",
+  DELETE_FREELANCER_COUNTRY_PREFERENCE: "admin/freelancer",
+  
+  // Freelancer Max Values endpoints
+  UPDATE_MAX_PROPOSAL_VALUE: "admin/freelancer",
+  UPDATE_MAX_DELIVERY_IN_PROGRESS: "admin/freelancer",
 };
