@@ -16,6 +16,7 @@ import LogManager from './pages/LogManager/LogManager';
 import WebsiteData from './pages/WebsiteData/WebsiteData';
 import WebsiteDataDetails from './pages/WebsiteData/WebsiteDataDetails';
 import Invoice from './pages/Invoice/Invoice';
+import SalesOrder from './pages/SalesOrder/SalesOrder';
 
 // Helper component for protected routes
 const ProtectedRoute = () => {
@@ -52,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/logs" element={<LogManager />} />
         <Route path="/website-data" element={<WebsiteData />} />
         <Route path="/invoice/:milestoneId/:projectbidId" element={<Invoice />} />
+        <Route path="/salesorder/:milestoneId/:projectbidId" element={<SalesOrder />} />
         <Route path="/website-data/:id/details" element={<WebsiteDataDetails />} />
       </Route>
       <Route path="/chat" element={<ChatRoom />} />

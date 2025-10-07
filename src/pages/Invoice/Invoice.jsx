@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { getBillingInformation } from '../../features/admin/projectBidsSlice';
+import logo1 from '../../assets/images/logo1.png';
 
 const currencyFormat = (amount, currency = 'INR') => {
   if (amount === undefined || amount === null || isNaN(amount)) return '--';
@@ -149,124 +150,150 @@ const Invoice = () => {
 
     let position = 0;
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    pdf.save(`Invoice_${projectbidId}.pdf`);
+    pdf.save(`Invoice.pdf`);
   };
 
   return (
     <Paper elevation={0} sx={{ p: 3, background: '#fff' }}>
       {/* Top Bar */}
-      <Box display="flex" justifyContent="space-between" mb={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Button variant="outlined" onClick={() => navigate(-1)}>Back</Button>
         <Button variant="contained" onClick={handleDownloadPDF}>Download Invoice</Button>
       </Box>
 
       {/* INVOICE CONTENT */}
       <Box ref={invoiceRef}>
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2.5}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#111' }}>
-              HaloGig Technologies
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              2nd Floor, Business Park, Lucknow, Uttar Pradesh, India
-            </Typography>
+        <Box style={{ border: `2px solid #000000` }}>
+          <Box style={{ backgroundColor: '#c3362a', height: '50px', width: '100%', marginBottom: '10px', borderBottom: `2px solid #000000` }}>
+            <Box textAlign="right" style={{ paddingRight: '10px' }}>
+              <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 700 }}>Original for Recipient</Typography>
+            </Box>
           </Box>
-        </Box>
 
-        {/* Bill To and Sale Order */}
-        <Grid container spacing={1}>
-          <Grid item xs={12} md={6}>
-            <Box sx={{ border: `1px solid ${borderColor}` }}>
-              <Box sx={headCell}><Typography variant="subtitle2">Bill To</Typography></Box>
-              <Box sx={{ p: 1.2 }}>
-                <Typography sx={{ fontSize: 12, color: '#333' }}>Customer ID : {view.customerId}</Typography>
-                <Typography sx={{ fontWeight: 700 }}>{view.billingName}</Typography>
-                <Typography sx={{ fontSize: 14 }}>{view.billingAddress}</Typography>
-                <Typography sx={{ fontSize: 14 }}>{view.billingEmail}</Typography>
-                <Typography sx={{ fontSize: 14 }}>{view.billingContact}</Typography>
+          {/* Header */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2.5} style={{ borderBottom: `2px solid #000000`, paddingBottom: '10px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', paddingLeft: '10px' }}>
+              <Box component="img" src={logo1} alt="Halogig" sx={{ height: 30 }} />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: '#111', letterSpacing: 0.2, textAlign: 'center' }}>
+                PRANAVA FREELANCING WORLD PRIVATE LIMITED
+              </Typography>
+              <Typography variant="body2" color="text.secondary" style={{ textAlign: 'center' }}>
+                9th Floor, Tower-C , Bhutani Cyber Park, Sector-62, Noida, Uttar Pradesh, India, 201301
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, textAlign: 'center' }}>
+                GST NO. : 09AANCP2796A1ZS : PAN No. : AANCP2796A
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Bill To and Invoice box */}
+          <Grid container spacing={1}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ border: `1px solid ${borderColor}` }}>
+                <Box sx={headCell}><Typography variant="subtitle2">TO</Typography></Box>
+                <Box sx={{ p: 1.2 }}>
+                  <Typography sx={{ fontWeight: 700 }}>{view.billingName}</Typography>
+                  <Typography sx={{ fontSize: 14 }}>{view.billingAddress}</Typography>
+                </Box>
               </Box>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Box sx={{ border: `1px solid ${borderColor}` }}>
-              <Box sx={headCell}><Typography variant="subtitle2">Sale Order</Typography></Box>
-              <Grid container>
-                <Grid item xs={6} sx={cell}><Typography sx={{ fontSize: 12 }}>Sales Order No.</Typography></Grid>
-                <Grid item xs={6} sx={cell}><Typography sx={{ fontWeight: 600 }}>{view.saleOrderNo}</Typography></Grid>
-                <Grid item xs={6} sx={cell}><Typography sx={{ fontSize: 12 }}>Date</Typography></Grid>
-                <Grid item xs={6} sx={cell}><Typography sx={{ fontWeight: 600 }}>{view.billDate}</Typography></Grid>
-              </Grid>
-            </Box>
-          </Grid>
-        </Grid>
-
-        {/* Description */}
-        <Box mt={2}>
-          <Grid container sx={{ border: `1px solid ${borderColor}` }}>
-            <Grid item xs={6} sx={headCell}>Description</Grid>
-            <Grid item xs={2} sx={headCell}>GST Type</Grid>
-            <Grid item xs={1} sx={headCell}>QTY</Grid>
-            <Grid item xs={1} sx={headCell}>Rate</Grid>
-            <Grid item xs={2} sx={headCell}>Amount</Grid>
-
-            <Grid item xs={6} sx={cell}>
-              <Typography sx={{ fontWeight: 700 }}>{view.projectType}</Typography>
-              <Typography sx={{ fontSize: 12, color: '#666' }}>SAC Code : 998519</Typography>
             </Grid>
-            <Grid item xs={2} sx={cell}><Typography>{gstType}</Typography></Grid>
-            <Grid item xs={1} sx={cell}><Typography>1</Typography></Grid>
-            <Grid item xs={1} sx={cell}><Typography>{currencyFormat(view.rate)}</Typography></Grid>
-            <Grid item xs={2} sx={cell}><Typography>{currencyFormat(view.rate)}</Typography></Grid>
-          </Grid>
-        </Box>
 
-        {/* GST Breakdown */}
-        {(cgst || sgst || igst) && (
+            <Grid item xs={12} md={6}>
+              <Box sx={{ border: `1px solid ${borderColor}` }}>
+                <Grid container>
+                  <Grid item xs={6} sx={headCell}><Typography>INVOICE NO.</Typography></Grid>
+                  <Grid item xs={6} sx={{ ...cell, fontWeight: 700 }}>{view.saleOrderNo || ''}</Grid>
+                  <Grid item xs={6} sx={headCell}><Typography>DATE</Typography></Grid>
+                  <Grid item xs={6} sx={{ ...cell, fontWeight: 700 }}>{view.billDate || ''}</Grid>
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Contact Person placeholder */}
+          <Grid container spacing={1} mt={1}>
+            <Grid item xs={12}>
+              <Box sx={{ border: `1px solid ${borderColor}`, p: 1 }}>
+                <Typography variant="body2">Contact Person Name | PH. | Email ID |</Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Description with IGST column */}
+          <Box mt={2}>
+            <Grid container sx={{ border: `1px solid ${borderColor}` }}>
+              <Grid item xs={6} sx={headCell}>Description of Service</Grid>
+              <Grid item xs={1} sx={headCell}>QTY</Grid>
+              <Grid item xs={1.5} sx={headCell}>Rate</Grid>
+              <Grid item xs={1.5} sx={headCell}>{igst > 0 ? 'IGST (18%)' : 'CGST+SGST (18%)'}</Grid>
+              <Grid item xs={2} sx={headCell}>Amount (Rs.)</Grid>
+
+              <Grid item xs={6} sx={cell}>
+                <Typography sx={{ fontWeight: 700 }}>{view.projectType}</Typography>
+                <Typography sx={{ fontSize: 12, color: '#666' }}>SAC Code : 998519</Typography>
+              </Grid>
+              <Grid item xs={1} sx={cell}><Typography>1</Typography></Grid>
+              <Grid item xs={1.5} sx={cell}><Typography>{currencyFormat(view.rate)}</Typography></Grid>
+              <Grid item xs={1.5} sx={cell}><Typography>{currencyFormat(igst > 0 ? igst : (cgst + sgst))}</Typography></Grid>
+              <Grid item xs={2} sx={cell}><Typography>{currencyFormat(view.rate)}</Typography></Grid>
+            </Grid>
+          </Box>
+
+          {/* TOTAL Row with IGST column */}
           <Box mt={1}>
             <Grid container sx={{ border: `1px solid ${borderColor}` }}>
-              {cgst > 0 && (
-                <>
-                  <Grid item xs={8} sx={cell}><Typography>CGST (9%)</Typography></Grid>
-                  <Grid item xs={4} sx={{ ...cell, textAlign: 'right' }}>
-                    <Typography>{currencyFormat(cgst)}</Typography>
-                  </Grid>
-                </>
-              )}
-              {sgst > 0 && (
-                <>
-                  <Grid item xs={8} sx={cell}><Typography>SGST (9%)</Typography></Grid>
-                  <Grid item xs={4} sx={{ ...cell, textAlign: 'right' }}>
-                    <Typography>{currencyFormat(sgst)}</Typography>
-                  </Grid>
-                </>
-              )}
-              {igst > 0 && (
-                <>
-                  <Grid item xs={8} sx={cell}><Typography>IGST (18%)</Typography></Grid>
-                  <Grid item xs={4} sx={{ ...cell, textAlign: 'right' }}>
-                    <Typography>{currencyFormat(igst)}</Typography>
-                  </Grid>
-                </>
-              )}
+              <Grid item xs={6} sx={cell}><Typography>SAC Code : 998519</Typography></Grid>
+              <Grid item xs={1} sx={cell}></Grid>
+              <Grid item xs={1.5} sx={{ ...cell, backgroundColor: '#fafafa' }}><Typography>TOTAL :</Typography></Grid>
+              <Grid item xs={1.5} sx={{ ...cell, textAlign: 'right' }}><Typography>{currencyFormat(igst > 0 ? igst : (cgst + sgst))}</Typography></Grid>
+              <Grid item xs={2} sx={{ ...cell, textAlign: 'right' }}><Typography>{currencyFormat(grandTotal)}</Typography></Grid>
             </Grid>
           </Box>
-        )}
 
-        {/* Total */}
-        <Box mt={2}>
-          <Grid container sx={{ border: `1px solid ${borderColor}` }}>
-            <Grid item xs={8} sx={{ ...cell, backgroundColor: '#fafafa' }}>
-              <Typography sx={{ fontWeight: 800 }}>Grand Total</Typography>
+          {/* Bank Details */}
+          <Box mt={2}>
+            <Box sx={{ border: `1px solid ${borderColor}`, p: 1.2 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Bank Details :</Typography>
+              <Typography variant="body2">Account Name : PRANAVA FREELANCING WORLD PRIVATE LIMITED</Typography>
+              <Typography variant="body2">Bank Name : ICICI Bank Ltd</Typography>
+              <Typography variant="body2">A/C Number : 107005013464</Typography>
+              <Typography variant="body2">Branch : SECTOR -1, NOIDA-201301, UTTAR PRADESH</Typography>
+              <Typography variant="body2">IFSC Code : ICIC0001070</Typography>
+              <Typography variant="body2">Swift Code : ICICINBBCTS</Typography>
+            </Box>
+          </Box>
+
+          {/* PAN / GSTIN and Grand total */}
+          <Box mt={1}>
+            <Grid container sx={{ border: `1px solid ${borderColor}` }}>
+              <Grid item xs={8} sx={cell}>
+                <Grid container>
+                  <Grid item xs={12} md={6} sx={cell}><Typography>PAN No : AANCP2796A</Typography></Grid>
+                  <Grid item xs={12} md={6} sx={cell}><Typography>GSTIN No : 09AANCP2796A1ZS</Typography></Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={2} sx={{ ...cell, backgroundColor: '#fafafa' }}>
+                <Typography sx={{ fontWeight: 800 }}>Grand Total</Typography>
+              </Grid>
+              <Grid item xs={2} sx={{ ...cell, textAlign: 'right' }}>
+                <Typography sx={{ fontWeight: 800 }}>{currencyFormat(grandTotal)}</Typography>
+              </Grid>
             </Grid>
-            <Grid item xs={4} sx={{ ...cell, textAlign: 'right' }}>
-              <Typography sx={{ fontWeight: 800 }}>{currencyFormat(grandTotal)}</Typography>
+          </Box>
+
+          {/* Signature */}
+          <Box mt={1}>
+            <Grid container sx={{ border: `1px solid ${borderColor}` }}>
+              <Grid item xs={8} sx={cell}></Grid>
+              <Grid item xs={4} sx={{ ...cell, textAlign: 'center' }}>
+                <Typography variant="body2">For ( PRANAVA FREELANCING WORLD PRIVATE LIMITED )</Typography>
+                <Box sx={{ height: 40 }}></Box>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Authorised Signatory</Typography>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sx={cell}>
-              <Typography>{amountInWords(grandTotal)}</Typography>
-            </Grid>
-          </Grid>
+          </Box>
         </Box>
       </Box>
     </Paper>
