@@ -8,10 +8,10 @@ import {
   CircularProgress,
   Button,
 } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { getBillingInformation } from '../../features/admin/projectBidsSlice';
+import { getBillingInformation, saveSaleOrderInvoiceInformation, clearSaveInvoiceState, saveInvoiceInformation } from '../../features/admin/projectBidsSlice';
 import logo1 from '../../assets/images/logo1.png';
 
 const currencyFormat = (amount, currency = 'INR') => {
@@ -31,6 +31,26 @@ const Invoice = () => {
 
   const [billingInfo, setBillingInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Redux state for save invoice
+  const { isSavingInvoice, saveInvoiceSuccess, saveInvoiceError } = useSelector((state) => state.projectBidsReducer);
+
+  // Handle success/error states
+  useEffect(() => {
+    if (saveInvoiceSuccess) {
+      // You can add a success notification here
+      console.log('Invoice created successfully!');
+      // Clear the state
+      dispatch(clearSaveInvoiceState());
+      // Optionally navigate or show success message
+    }
+    if (saveInvoiceError) {
+      // You can add an error notification here
+      console.error('Failed to create invoice');
+      // Clear the state
+      dispatch(clearSaveInvoiceState());
+    }
+  }, [saveInvoiceSuccess, saveInvoiceError, dispatch]);
 
   useEffect(() => {
     const fetchBillingInfo = async () => {
@@ -153,12 +173,68 @@ const Invoice = () => {
     pdf.save(`Invoice.pdf`);
   };
 
+  const handleCreateInvoice = async () => {
+    if (!billingInfo) {
+      console.error('Billing information not available');
+      return;
+    }
+
+    try {
+      // Generate PDF
+      const element = invoiceRef.current;
+      if (!element) {
+        console.error('Invoice element not found');
+        return;
+      }
+
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      // Convert PDF to blob
+      const pdfBlob = pdf.output('blob');
+      
+      // Create FormData
+      const formData = new FormData();
+      formData.append('milestoneId', milestoneId);
+      formData.append('projectBidId', projectbidId);
+      formData.append('file', pdfBlob, 'invoice.pdf');
+      formData.append('fileType', 'invoice');
+      formData.append('clientId', billingInfo.userBillingInformation?.user_id || '');
+      formData.append('freelancerId', ''); // Add freelancer ID if available
+      formData.append('jsonDetails', JSON.stringify(billingInfo));
+
+      // Call API
+      await dispatch(saveInvoiceInformation(formData));
+      
+      // Navigate or show success message
+      // navigate(`/order/${milestoneId}/${projectbidId}`);
+      
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+    }
+  };
+
   return (
     <Paper elevation={0} sx={{ p: 3, background: '#fff' }}>
       {/* Top Bar */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Button variant="outlined" onClick={() => navigate(-1)}>Back</Button>
-        <Button variant="contained" onClick={handleDownloadPDF}>Download Invoice</Button>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Button variant="contained" onClick={handleDownloadPDF}>Download Invoice</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleCreateInvoice}
+            disabled={isSavingInvoice}
+          >
+            {isSavingInvoice ? 'Creating Invoice...' : 'Create Invoice'}
+          </Button>
+        </Box>
       </Box>
 
       {/* INVOICE CONTENT */}

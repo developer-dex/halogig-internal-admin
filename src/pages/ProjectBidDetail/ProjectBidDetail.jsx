@@ -45,7 +45,7 @@ import {
   Flag,
   Subtitles,
 } from '@mui/icons-material';
-import { getProjectBidDetails, clearCurrentBid } from '../../features/admin/projectBidsSlice';
+import { getProjectBidDetails, clearCurrentBid, approveMilestoneByAdmin, clearApproveMilestoneState } from '../../features/admin/projectBidsSlice';
 import Breadcrumb from '../../components/Breadcrumb';
 import './ProjectBidDetail.scss';
 
@@ -57,7 +57,7 @@ const ProjectBidDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   // Get data from Redux store
-  const { currentBid } = useSelector((state) => state.projectBidsReducer);
+  const { currentBid, isApprovingMilestone, approveMilestoneSuccess, approveMilestoneError } = useSelector((state) => state.projectBidsReducer);
 
   const fetchBidDetails = async () => {
     setIsLoading(true);
@@ -80,6 +80,22 @@ const ProjectBidDetail = () => {
       dispatch(clearCurrentBid());
     };
   }, [dispatch, bidId]);
+
+  // Handle success/error states for milestone approval
+  useEffect(() => {
+    if (approveMilestoneSuccess) {
+      console.log('Milestone approved successfully!');
+      // Clear the state
+      dispatch(clearApproveMilestoneState());
+      // Optionally refresh the bid details to show updated status
+      fetchBidDetails();
+    }
+    if (approveMilestoneError) {
+      console.error('Failed to approve milestone');
+      // Clear the state
+      dispatch(clearApproveMilestoneState());
+    }
+  }, [approveMilestoneSuccess, approveMilestoneError, dispatch]);
 
   // Helper function to get status chip color
   const getStatusChipProps = (status) => {
@@ -183,6 +199,24 @@ const ProjectBidDetail = () => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+  };
+
+  const handleOrderApproved = async (milestoneIndex) => {
+    try {
+      const milestone = currentBid?.milestones?.[milestoneIndex] || currentBid?.sow?.milestones?.[milestoneIndex];
+      const milestoneId = milestone?.id || milestone?.milestone_id || milestoneIndex;
+      
+      if (!milestoneId) {
+        console.error('Milestone ID not found');
+        return;
+      }
+
+      // Call API to approve milestone
+      await dispatch(approveMilestoneByAdmin(milestoneId));
+      
+    } catch (error) {
+      console.error('Error approving milestone:', error);
+    }
   };
 
   return (
@@ -728,6 +762,7 @@ const ProjectBidDetail = () => {
                                     {formatCurrency(milestone.amount)}
                                   </Typography>
                                 </Box>
+                                
                                 {milestone.is_paid == true && (
                                   <Box>
                                     <Button
@@ -751,6 +786,19 @@ const ProjectBidDetail = () => {
                                       View Invoice
                                     </Button>
                                   </Box>
+                                )}
+                                {milestone.is_paid == true && (
+                                <Box>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    className="gradient-primary view-btn"
+                                    onClick={() => handleOrderApproved(index)}
+                                    disabled={isApprovingMilestone || milestone.admin_approved_date != null}
+                                  >
+                                    {isApprovingMilestone ? 'Approving...' : 'Order Approved'}
+                                  </Button>
+                                </Box>
                                 )}
                               </Box>
                             </CardContent>

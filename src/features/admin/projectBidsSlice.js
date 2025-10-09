@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiEndPoints } from "../../config/path";
 import { showError } from "../../helpers/messageHelper";
-import { getApi } from "../../services/api";
+import { getApi, postApi } from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -13,6 +13,12 @@ const initialState = {
   totalCount: 0,
   currentBid: null,
   billingInfo: null,
+  isSavingInvoice: false,
+  saveInvoiceSuccess: false,
+  saveInvoiceError: false,
+  isApprovingMilestone: false,
+  approveMilestoneSuccess: false,
+  approveMilestoneError: false,
 };
 
 // Get all project bids (admin view)
@@ -57,6 +63,55 @@ export const getBillingInformation = createAsyncThunk(
   }
 );
 
+// Save sale order invoice information
+export const saveSaleOrderInvoiceInformation = createAsyncThunk(
+  "/saveSaleOrderInvoiceInformation",
+  async (formData) => {
+    try {
+      const payload = await postApi("admin/save-sale-order-information", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to save sale order invoice information");
+      throw e;
+    }
+  }
+);
+
+export const saveInvoiceInformation = createAsyncThunk(
+  "/saveInvoiceInformation",
+  async (formData) => {
+    try {
+      const payload = await postApi("admin/save-invoice-information", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to save invoice information");
+      throw e;
+    }
+  }
+);
+
+// Approve milestone by admin
+export const approveMilestoneByAdmin = createAsyncThunk(
+  "/approveMilestoneByAdmin",
+  async (milestoneId) => {
+    try {
+      const payload = await postApi("admin/milestone-approved-by-admin", { milestoneId });
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to approve milestone");
+      throw e;
+    }
+  }
+);
+
 export const projectBidsSlice = createSlice({
   name: "projectBids",
   initialState,
@@ -73,6 +128,16 @@ export const projectBidsSlice = createSlice({
     },
     clearCurrentBid: (state) => {
       state.currentBid = null;
+    },
+    clearSaveInvoiceState: (state) => {
+      state.isSavingInvoice = false;
+      state.saveInvoiceSuccess = false;
+      state.saveInvoiceError = false;
+    },
+    clearApproveMilestoneState: (state) => {
+      state.isApprovingMilestone = false;
+      state.approveMilestoneSuccess = false;
+      state.approveMilestoneError = false;
     },
   },
   extraReducers: (builder) => {
@@ -128,10 +193,58 @@ export const projectBidsSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
+      })
+      // SaveSaleOrderInvoiceInformation
+      .addCase(saveSaleOrderInvoiceInformation.pending, (state) => {
+        state.isSavingInvoice = true;
+        state.saveInvoiceError = false;
+        state.saveInvoiceSuccess = false;
+      })
+      .addCase(saveSaleOrderInvoiceInformation.fulfilled, (state, { payload }) => {
+        state.isSavingInvoice = false;
+        state.saveInvoiceSuccess = true;
+        state.responseCode = payload?.status;
+      })
+      .addCase(saveSaleOrderInvoiceInformation.rejected, (state) => {
+        state.isSavingInvoice = false;
+        state.saveInvoiceError = true;
+        state.saveInvoiceSuccess = false;
+      })
+      // SaveInvoiceInformation
+      .addCase(saveInvoiceInformation.pending, (state) => {
+        state.isSavingInvoice = true;
+        state.saveInvoiceError = false;
+        state.saveInvoiceSuccess = false;
+      })
+      .addCase(saveInvoiceInformation.fulfilled, (state, { payload }) => {
+        state.isSavingInvoice = false;
+        state.saveInvoiceSuccess = true;
+        state.responseCode = payload?.status;
+      })
+      .addCase(saveInvoiceInformation.rejected, (state) => {
+        state.isSavingInvoice = false;
+        state.saveInvoiceError = true;
+        state.saveInvoiceSuccess = false;
+      })
+      // ApproveMilestoneByAdmin
+      .addCase(approveMilestoneByAdmin.pending, (state) => {
+        state.isApprovingMilestone = true;
+        state.approveMilestoneError = false;
+        state.approveMilestoneSuccess = false;
+      })
+      .addCase(approveMilestoneByAdmin.fulfilled, (state, { payload }) => {
+        state.isApprovingMilestone = false;
+        state.approveMilestoneSuccess = true;
+        state.responseCode = payload?.status;
+      })
+      .addCase(approveMilestoneByAdmin.rejected, (state) => {
+        state.isApprovingMilestone = false;
+        state.approveMilestoneError = true;
+        state.approveMilestoneSuccess = false;
       });
   },
 });
 
-export const { clearProjectBidsState, clearCurrentBid } = projectBidsSlice.actions;
+export const { clearProjectBidsState, clearCurrentBid, clearSaveInvoiceState, clearApproveMilestoneState } = projectBidsSlice.actions;
 export const projectBidsReducer = projectBidsSlice.reducer;
 

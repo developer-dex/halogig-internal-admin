@@ -12,10 +12,10 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { getBillingInformation } from '../../features/admin/projectBidsSlice';
+import { getBillingInformation, saveSaleOrderInvoiceInformation, clearSaveInvoiceState } from '../../features/admin/projectBidsSlice';
 import logo1 from '../../assets/images/logo1.png';
 
 const currencyFormat = (amount, currency = 'INR') => {
@@ -59,7 +59,27 @@ const SalesOrder = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [financialYear, setFinancialYear] = useState('');
 
+    // Redux state for save invoice
+    const { isSavingInvoice, saveInvoiceSuccess, saveInvoiceError } = useSelector((state) => state.projectBidsReducer);
+
     const fyOptions = useMemo(() => buildFinancialYears(8), []);
+
+    // Handle success/error states
+    useEffect(() => {
+        if (saveInvoiceSuccess) {
+            // You can add a success notification here
+            console.log('Order created successfully!');
+            // Clear the state
+            dispatch(clearSaveInvoiceState());
+            // Optionally navigate or show success message
+        }
+        if (saveInvoiceError) {
+            // You can add an error notification here
+            console.error('Failed to create order');
+            // Clear the state
+            dispatch(clearSaveInvoiceState());
+        }
+    }, [saveInvoiceSuccess, saveInvoiceError, dispatch]);
 
     useEffect(() => {
         const fetchBillingInfo = async () => {
@@ -193,6 +213,51 @@ const SalesOrder = () => {
         pdf.save(`SalesOrder.pdf`);
     };
 
+    const handleCreateOrder = async () => {
+        if (!billingInfo) {
+            console.error('Billing information not available');
+            return;
+        }
+
+        try {
+            // Generate PDF
+            const element = invoiceRef.current;
+            if (!element) {
+                console.error('Invoice element not found');
+                return;
+            }
+
+            const canvas = await html2canvas(element, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const imgWidth = pageWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            
+            // Convert PDF to blob
+            const pdfBlob = pdf.output('blob');
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('milestoneId', milestoneId);
+            formData.append('projectBidId', projectbidId);
+            formData.append('file', pdfBlob, 'sales-order.pdf');
+            formData.append('fileType', 'sale-order');
+            formData.append('jsonDetails', JSON.stringify(billingInfo));
+
+            // Call API
+            await dispatch(saveSaleOrderInvoiceInformation(formData));
+            
+            // Navigate or show success message
+            // navigate(`/order/${milestoneId}/${projectbidId}`);
+            
+        } catch (error) {
+            console.error('Error creating order:', error);
+        }
+    };
+
     return (
         <Paper elevation={0} sx={{ p: 3, background: '#fff' }}>
 
@@ -214,6 +279,13 @@ const SalesOrder = () => {
                         </Select>
                     </FormControl>
                     <Button variant="contained" onClick={handleDownloadPDF}>Download Sales Order</Button>
+                    <Button 
+                        variant="contained" 
+                        onClick={handleCreateOrder}
+                        disabled={isSavingInvoice}
+                    >
+                        {isSavingInvoice ? 'Creating Order...' : 'Create Order'}
+                    </Button>
                 </Box>
             </Box>
 
