@@ -65,6 +65,7 @@ const CreateClientProject = () => {
   const [hourlyVisible, setHourlyVisible] = useState(true);
   const [retainershipVisible, setRetainershipVisible] = useState(false);
   const [fixedPriceVisible, setFixedPriceVisible] = useState(false);
+  const [halogigVisible, setHalogigVisible] = useState(false);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -241,6 +242,7 @@ const CreateClientProject = () => {
     setHourlyVisible(value === 'hourly');
     setRetainershipVisible(value === 'retainer');
     setFixedPriceVisible(value === 'fixed');
+    setHalogigVisible(value === 'halogig');
   };
 
   // Handle form submission
@@ -507,15 +509,16 @@ const CreateClientProject = () => {
                     <FormControlLabel value="hourly" control={<Radio />} label="Hourly" />
                     <FormControlLabel value="retainer" control={<Radio />} label="Retainership" />
                     <FormControlLabel value="fixed" control={<Radio />} label="Fixed Price" />
+                    <FormControlLabel value="halogig" control={<Radio />} label="Halogig" />
                   </RadioGroup>
                 </FormControl>
               </Grid>
 
               {/* Rate Range */}
-              {(hourlyVisible || retainershipVisible || fixedPriceVisible) && (
+              {(hourlyVisible || retainershipVisible || fixedPriceVisible || halogigVisible) && (
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" gutterBottom>
-                    {hourlyVisible ? 'Rate Per Hour' : retainershipVisible ? 'Rate Per Month' : 'Total Project Amount'} *
+                    {hourlyVisible ? 'Rate Per Hour' : retainershipVisible ? 'Rate Per Month' : fixedPriceVisible ? 'Total Project Amount' : 'Halogig Rate'} *
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
@@ -559,10 +562,10 @@ const CreateClientProject = () => {
               )}
 
               {/* Duration Range */}
-              {(hourlyVisible || retainershipVisible || fixedPriceVisible) && (
+              {(hourlyVisible || retainershipVisible || fixedPriceVisible || halogigVisible) && (
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" gutterBottom>
-                    Project Duration ({hourlyVisible ? 'Hours' : retainershipVisible ? 'Months' : 'Days'}) *
+                    Project Duration ({hourlyVisible ? 'Hours' : retainershipVisible ? 'Months' : fixedPriceVisible ? 'Days' : 'Months'}) *
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
