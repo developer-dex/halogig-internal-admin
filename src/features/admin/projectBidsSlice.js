@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiEndPoints } from "../../config/path";
 import { showError } from "../../helpers/messageHelper";
-import { getApi, postApi } from "../../services/api";
+import { getApi, patchApi, postApi } from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -19,6 +19,9 @@ const initialState = {
   isApprovingMilestone: false,
   approveMilestoneSuccess: false,
   approveMilestoneError: false,
+  isUpdatingBid: false,
+  updateBidSuccess: false,
+  updateBidError: false,
 };
 
 // Get all project bids (admin view)
@@ -112,6 +115,20 @@ export const approveMilestoneByAdmin = createAsyncThunk(
   }
 );
 
+// Update project bid by admin
+export const updateProjectBid = createAsyncThunk(
+  "/updateProjectBid",
+  async ({ projectBidId, bidData }) => {
+    try {
+      const payload = await patchApi(`admin/project-bid/${projectBidId}/update`, bidData);
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to update project bid");
+      throw e;
+    }
+  }
+);
+
 export const projectBidsSlice = createSlice({
   name: "projectBids",
   initialState,
@@ -138,6 +155,11 @@ export const projectBidsSlice = createSlice({
       state.isApprovingMilestone = false;
       state.approveMilestoneSuccess = false;
       state.approveMilestoneError = false;
+    },
+    clearUpdateBidState: (state) => {
+      state.isUpdatingBid = false;
+      state.updateBidSuccess = false;
+      state.updateBidError = false;
     },
   },
   extraReducers: (builder) => {
@@ -241,10 +263,26 @@ export const projectBidsSlice = createSlice({
         state.isApprovingMilestone = false;
         state.approveMilestoneError = true;
         state.approveMilestoneSuccess = false;
+      })
+      // UpdateProjectBid
+      .addCase(updateProjectBid.pending, (state) => {
+        state.isUpdatingBid = true;
+        state.updateBidError = false;
+        state.updateBidSuccess = false;
+      })
+      .addCase(updateProjectBid.fulfilled, (state, { payload }) => {
+        state.isUpdatingBid = false;
+        state.updateBidSuccess = true;
+        state.responseCode = payload?.status;
+      })
+      .addCase(updateProjectBid.rejected, (state) => {
+        state.isUpdatingBid = false;
+        state.updateBidError = true;
+        state.updateBidSuccess = false;
       });
   },
 });
 
-export const { clearProjectBidsState, clearCurrentBid, clearSaveInvoiceState, clearApproveMilestoneState } = projectBidsSlice.actions;
+export const { clearProjectBidsState, clearCurrentBid, clearSaveInvoiceState, clearApproveMilestoneState, clearUpdateBidState } = projectBidsSlice.actions;
 export const projectBidsReducer = projectBidsSlice.reducer;
 

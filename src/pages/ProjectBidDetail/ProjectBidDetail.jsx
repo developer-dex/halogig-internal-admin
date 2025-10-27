@@ -15,6 +15,12 @@ import {
   Divider,
   Tabs,
   Tab,
+  TextField,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Home,
@@ -44,8 +50,12 @@ import {
   ListAlt,
   Flag,
   Subtitles,
+  Edit,
+  Save,
+  Cancel,
 } from '@mui/icons-material';
-import { getProjectBidDetails, clearCurrentBid, approveMilestoneByAdmin, clearApproveMilestoneState } from '../../features/admin/projectBidsSlice';
+import { getProjectBidDetails, clearCurrentBid, approveMilestoneByAdmin, clearApproveMilestoneState, updateProjectBid, clearUpdateBidState } from '../../features/admin/projectBidsSlice';
+import { showSuccess, showError } from '../../helpers/messageHelper';
 import Breadcrumb from '../../components/Breadcrumb';
 import './ProjectBidDetail.scss';
 
@@ -55,9 +65,18 @@ const ProjectBidDetail = () => {
   const { bidId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  
+  // State for editable admin bid fields
+  const [isEditingBid, setIsEditingBid] = useState(false);
+  const [editedBidData, setEditedBidData] = useState({
+    admin_modified_bid_amount: '',
+    admin_modified_delivery_timeline: '',
+    admin_modified_message: '',
+    approved_by_admin: false
+  });
 
   // Get data from Redux store
-  const { currentBid, isApprovingMilestone, approveMilestoneSuccess, approveMilestoneError } = useSelector((state) => state.projectBidsReducer);
+  const { currentBid, isApprovingMilestone, approveMilestoneSuccess, approveMilestoneError, isUpdatingBid, updateBidSuccess, updateBidError } = useSelector((state) => state.projectBidsReducer);
 
   const fetchBidDetails = async () => {
     setIsLoading(true);
@@ -84,18 +103,36 @@ const ProjectBidDetail = () => {
   // Handle success/error states for milestone approval
   useEffect(() => {
     if (approveMilestoneSuccess) {
-      console.log('Milestone approved successfully!');
+      showSuccess('Milestone approved successfully!');
       // Clear the state
       dispatch(clearApproveMilestoneState());
       // Optionally refresh the bid details to show updated status
       fetchBidDetails();
     }
     if (approveMilestoneError) {
-      console.error('Failed to approve milestone');
+      showError('Failed to approve milestone');
       // Clear the state
       dispatch(clearApproveMilestoneState());
     }
   }, [approveMilestoneSuccess, approveMilestoneError, dispatch]);
+
+  // Handle success/error states for bid update
+  useEffect(() => {
+    if (updateBidSuccess) {
+      showSuccess('Bid updated successfully!');
+      // Clear the state
+      dispatch(clearUpdateBidState());
+      // Refresh the bid details to show updated data
+      fetchBidDetails();
+      // Exit edit mode
+      setIsEditingBid(false);
+    }
+    if (updateBidError) {
+      showError('Failed to update bid');
+      // Clear the state
+      dispatch(clearUpdateBidState());
+    }
+  }, [updateBidSuccess, updateBidError, dispatch]);
 
   // Helper function to get status chip color
   const getStatusChipProps = (status) => {
@@ -217,6 +254,60 @@ const ProjectBidDetail = () => {
     } catch (error) {
       console.error('Error approving milestone:', error);
     }
+  };
+
+  // Handle bid editing functions
+  const handleEditBid = () => {
+    setEditedBidData({
+      admin_modified_bid_amount: currentBid?.admin_modified_bid_amount ? parseFloat(currentBid.admin_modified_bid_amount).toString() : '',
+      admin_modified_delivery_timeline: currentBid?.admin_modified_delivery_timeline || '',
+      admin_modified_message: currentBid?.admin_modified_message || '',
+      approved_by_admin: currentBid?.approved_by_admin || false
+    });
+    setIsEditingBid(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingBid(false);
+    setEditedBidData({
+      admin_modified_bid_amount: '',
+      admin_modified_delivery_timeline: '',
+      admin_modified_message: '',
+      approved_by_admin: false
+    });
+  };
+
+  const handleSaveBid = async () => {
+    try {
+      // Validate minimum character limit for admin message
+      if (editedBidData.admin_modified_message && editedBidData.admin_modified_message.length < 100) {
+        showError('Bid Message Admin must be at least 100 characters long');
+        return;
+      }
+
+      // Prepare data for API call
+      const apiData = {
+        ...editedBidData,
+        // Ensure bid amount is sent as integer/string without decimal points
+        admin_modified_bid_amount: editedBidData.admin_modified_bid_amount ? 
+          parseFloat(editedBidData.admin_modified_bid_amount).toString() : ''
+      };
+
+      // Call API to update bid data
+      await dispatch(updateProjectBid({ 
+        projectBidId: bidId, 
+        bidData: apiData 
+      }));
+    } catch (error) {
+      console.error('Error saving bid data:', error);
+    }
+  };
+
+  const handleBidDataChange = (field, value) => {
+    setEditedBidData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -567,19 +658,111 @@ const ProjectBidDetail = () => {
                     <Typography variant="h6" className="section-title">
                       Bid Information
                     </Typography>
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Box sx={{ ml: 'auto' }}>
+                        {!isEditingBid ? (
+                          <IconButton onClick={handleEditBid} color="primary">
+                            <Edit />
+                          </IconButton>
+                        ) : (
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <IconButton 
+                              onClick={handleSaveBid} 
+                              color="success"
+                              disabled={isUpdatingBid}
+                            >
+                              <Save />
+                            </IconButton>
+                            <IconButton 
+                              onClick={handleCancelEdit} 
+                              color="error"
+                              disabled={isUpdatingBid}
+                            >
+                              <Cancel />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
                   </Box>
                   <Divider className="section-divider" />
                   <Grid container spacing={3}>
+                    {/* Original Bid Amount */}
                     {renderInfoItem(
                       <AttachMoney />,
                       'Bid Amount',
                       formatCurrency(currentBid.bid_amount)
                     )}
+
+                    {/* Bid Amount Admin - Only show if created_by_admin */}
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Box className="info-item">
+                          <Box className="info-header">
+                            <AttachMoney />
+                            <Typography variant="subtitle2" className="info-label">
+                              Bid Amount Admin
+                            </Typography>
+                          </Box>
+                          {isEditingBid ? (
+                            <TextField
+                              type="number"
+                              value={editedBidData.admin_modified_bid_amount}
+                              onChange={(e) => handleBidDataChange('admin_modified_bid_amount', e.target.value)}
+                              variant="outlined"
+                              size="small"
+                              fullWidth
+                              placeholder="Enter admin bid amount"
+                            />
+                          ) : (
+                            <Typography variant="body1" className="info-value">
+                              {currentBid.admin_modified_bid_amount ? `$${parseFloat(currentBid.admin_modified_bid_amount).toString()}` : '--'}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Grid>
+                    )}
+
+                    {/* Original Delivery Timeline */}
                     {renderInfoItem(
                       <Schedule />,
                       'Delivery Timeline',
                       currentBid.delivery_timeline ? `${currentBid.delivery_timeline} days` : '--'
                     )}
+
+                    {/* Delivery Timeline Admin - Only show if created_by_admin */}
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Box className="info-item">
+                          <Box className="info-header">
+                            <Schedule />
+                            <Typography variant="subtitle2" className="info-label">
+                              Delivery Timeline Admin
+                            </Typography>
+                          </Box>
+                          {isEditingBid ? (
+                            <TextField
+                              type="number"
+                              value={editedBidData.admin_modified_delivery_timeline}
+                              onChange={(e) => handleBidDataChange('admin_modified_delivery_timeline', e.target.value)}
+                              variant="outlined"
+                              size="small"
+                              fullWidth
+                              placeholder="Enter admin delivery days"
+                              InputProps={{
+                                endAdornment: <Typography variant="body2">days</Typography>
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="body1" className="info-value">
+                              {currentBid.admin_modified_delivery_timeline ? `${currentBid.admin_modified_delivery_timeline} days` : '--'}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Grid>
+                    )}
+
+                    {/* Technology Preference - Not editable */}
                     {renderInfoItem(
                       <Language />,
                       'Technology Preference',
@@ -600,22 +783,83 @@ const ProjectBidDetail = () => {
                       'Lead Status',
                       currentBid.lead_status === '2' ? 'Active' : 'Inactive'
                     )}
-                    {/* {renderInfoItem(
-                    <AttachMoney />, 
-                    'Sales Commission', 
-                    formatCurrency(currentBid.sales_comm_amount || 0)
-                  )}
-                  {renderInfoItem(
-                    <AttachMoney />, 
-                    'Total Proposal Value', 
-                    formatCurrency(currentBid.total_proposal_value || 0)
-                  )} */}
+
+                    {/* Status - Editable if created_by_admin */}
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Box className="info-item">
+                          <Box className="info-header">
+                            <CheckCircle />
+                            <Typography variant="subtitle2" className="info-label">
+                              Status
+                            </Typography>
+                          </Box>
+                          {isEditingBid ? (
+                            <FormControl fullWidth size="small">
+                              <Select
+                                value={editedBidData.approved_by_admin}
+                                onChange={(e) => handleBidDataChange('approved_by_admin', e.target.value)}
+                                variant="outlined"
+                              >
+                                <MenuItem value={false}>Pending</MenuItem>
+                                <MenuItem value={true}>Approved</MenuItem>
+                              </Select>
+                            </FormControl>
+                          ) : (
+                            <Typography variant="body1" className="info-value">
+                              {currentBid.approved_by_admin ? 'Approved' : 'Pending'}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Grid>
+                    )}
+
+                    {/* Original Bid Message */}
                     {currentBid.message && renderInfoItem(
                       <Description />,
                       'Bid Message',
                       currentBid.message,
                       true
                     )}
+
+                    {/* Bid Message Admin - Editable if created_by_admin */}
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Grid item xs={12}>
+                        <Box className="info-item">
+                          <Box className="info-header">
+                            <Description />
+                            <Typography variant="subtitle2" className="info-label">
+                              Bid Message Admin
+                            </Typography>
+                          </Box>
+                          {isEditingBid ? (
+                            <Box>
+                              <TextField
+                                multiline
+                                rows={4}
+                                value={editedBidData.admin_modified_message}
+                                onChange={(e) => handleBidDataChange('admin_modified_message', e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                placeholder="Enter admin bid message (minimum 100 characters)"
+                                error={editedBidData.admin_modified_message && editedBidData.admin_modified_message.length < 100}
+                                helperText={
+                                  editedBidData.admin_modified_message && editedBidData.admin_modified_message.length < 100
+                                    ? `Minimum 100 characters required. Current: ${editedBidData.admin_modified_message.length}`
+                                    : `${editedBidData.admin_modified_message?.length || 0} characters`
+                                }
+                              />
+                            </Box>
+                          ) : (
+                            <Typography variant="body1" className="info-value">
+                              {currentBid.admin_modified_message || '--'}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Grid>
+                    )}
+
                     {currentBid.gst_note && renderInfoItem(
                       <Description />,
                       'GST Note',
