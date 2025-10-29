@@ -129,6 +129,20 @@ export const updateProjectBid = createAsyncThunk(
   }
 );
 
+// Update admin fields for a specific milestone
+export const updateMilestoneByAdmin = createAsyncThunk(
+  "/updateMilestoneByAdmin",
+  async ({ milestoneId, data }) => {
+    try {
+      const payload = await patchApi(`admin/project-bid/milestone/${milestoneId}/update`, data);
+      return payload;
+    } catch (e) {
+      showError(e.response?.data?.message || "Failed to update milestone");
+      throw e;
+    }
+  }
+);
+
 export const projectBidsSlice = createSlice({
   name: "projectBids",
   initialState,

@@ -54,7 +54,7 @@ import {
   Save,
   Cancel,
 } from '@mui/icons-material';
-import { getProjectBidDetails, clearCurrentBid, approveMilestoneByAdmin, clearApproveMilestoneState, updateProjectBid, clearUpdateBidState } from '../../features/admin/projectBidsSlice';
+import { getProjectBidDetails, clearCurrentBid, approveMilestoneByAdmin, clearApproveMilestoneState, updateProjectBid, clearUpdateBidState, updateMilestoneByAdmin } from '../../features/admin/projectBidsSlice';
 import { showSuccess, showError } from '../../helpers/messageHelper';
 import Breadcrumb from '../../components/Breadcrumb';
 import './ProjectBidDetail.scss';
@@ -74,6 +74,10 @@ const ProjectBidDetail = () => {
     admin_modified_message: '',
     approved_by_admin: false
   });
+  
+  // State for editable admin milestone fields
+  const [isEditingMilestones, setIsEditingMilestones] = useState(false);
+  const [editedMilestones, setEditedMilestones] = useState({});
 
   // Get data from Redux store
   const { currentBid, isApprovingMilestone, approveMilestoneSuccess, approveMilestoneError, isUpdatingBid, updateBidSuccess, updateBidError } = useSelector((state) => state.projectBidsReducer);
@@ -264,6 +268,16 @@ const ProjectBidDetail = () => {
       admin_modified_message: currentBid?.admin_modified_message || '',
       approved_by_admin: currentBid?.approved_by_admin || false
     });
+    // Prepare editable milestone admin fields
+    const initialMilestones = (currentBid?.milestones || []).reduce((acc, m) => {
+      acc[m.id] = {
+        admin_hours: m.admin_hours ? String(m.admin_hours) : '',
+        admin_scope: m.admin_scope || '',
+        admin_amount: m.admin_amount ? parseFloat(m.admin_amount).toString() : '',
+      };
+      return acc;
+    }, {});
+    setEditedMilestones(initialMilestones);
     setIsEditingBid(true);
   };
 
@@ -275,6 +289,57 @@ const ProjectBidDetail = () => {
       admin_modified_message: '',
       approved_by_admin: false
     });
+    setEditedMilestones({});
+  };
+
+  // Milestones edit handlers
+  const handleEditMilestones = () => {
+    const initialMilestones = (currentBid?.milestones || []).reduce((acc, m) => {
+      acc[m.id] = {
+        admin_hours: m.admin_hours ? String(m.admin_hours) : '',
+        admin_scope: m.admin_scope || '',
+        admin_amount: m.admin_amount ? parseFloat(m.admin_amount).toString() : '',
+      };
+      return acc;
+    }, {});
+    setEditedMilestones(initialMilestones);
+    setIsEditingMilestones(true);
+  };
+
+  const handleCancelEditMilestones = () => {
+    setIsEditingMilestones(false);
+    setEditedMilestones({});
+  };
+
+  const handleSaveMilestones = async () => {
+    try {
+      const updates = Object.entries(editedMilestones || {})
+        .map(([milestoneId, values]) => {
+          const payload = {
+            admin_scope: values.admin_scope ?? '',
+            admin_hours: values.admin_hours ?? '',
+            admin_amount: values.admin_amount ? parseFloat(values.admin_amount).toString() : '',
+          };
+          // Only call if any field provided
+          const hasAny = payload.admin_scope !== '' || payload.admin_hours !== '' || payload.admin_amount !== '';
+          if (!hasAny) return null;
+          return dispatch(updateMilestoneByAdmin({ milestoneId, data: payload }));
+        })
+        .filter(Boolean);
+
+      if (updates.length === 0) {
+        setIsEditingMilestones(false);
+        return;
+      }
+
+      await Promise.all(updates);
+      showSuccess('Admin milestones updated successfully!');
+      setIsEditingMilestones(false);
+      setEditedMilestones({});
+      await fetchBidDetails();
+    } catch (error) {
+      showError('Failed to update admin milestones');
+    }
   };
 
   const handleSaveBid = async () => {
@@ -307,6 +372,16 @@ const ProjectBidDetail = () => {
     setEditedBidData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleMilestoneDataChange = (milestoneId, field, value) => {
+    setEditedMilestones(prev => ({
+      ...prev,
+      [milestoneId]: {
+        ...(prev[milestoneId] || {}),
+        [field]: value,
+      },
     }));
   };
 
@@ -957,12 +1032,30 @@ const ProjectBidDetail = () => {
             <Grid item xs={12}>
               <Card className="detail-section">
                 <CardContent>
-                  <Box className="milestones-section">
+                    <Box className="milestones-section">
                     <Box className="milestones-header">
                       <CheckCircle className="milestones-icon" />
                       <Typography variant="h6" className="milestones-title">
                         Project Milestones ({currentBid.sow.milestones.length})
                       </Typography>
+                      {currentBid?.ClientProject?.created_by_admin && (
+                        <Box sx={{ ml: 'auto' }}>
+                          {!isEditingMilestones ? (
+                            <IconButton onClick={handleEditMilestones} color="primary">
+                              <Edit />
+                            </IconButton>
+                          ) : (
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              <IconButton onClick={handleSaveMilestones} color="success">
+                                <Save />
+                              </IconButton>
+                              <IconButton onClick={handleCancelEditMilestones} color="error">
+                                <Cancel />
+                              </IconButton>
+                            </Box>
+                          )}
+                        </Box>
+                      )}
                     </Box>
                     <Divider className="milestones-divider" />
 
@@ -1045,6 +1138,8 @@ const ProjectBidDetail = () => {
                                 </Box>
                                 )}
                               </Box>
+
+                              
                             </CardContent>
                           </Card>
                         </Grid>
@@ -1095,6 +1190,147 @@ const ProjectBidDetail = () => {
                         </Grid>
                       </Grid>
                     </Box>
+
+                    {currentBid?.ClientProject?.created_by_admin && (
+                      <Box className="milestones-section" sx={{ mt: 4 }}>
+                        <Box className="milestones-header">
+                          <CheckCircle className="milestones-icon" />
+                      <Typography variant="h6" className="milestones-title">
+                            Admin Project Milestones ({currentBid.milestones?.length || 0})
+                          </Typography>
+                        </Box>
+                        <Divider className="milestones-divider" />
+
+                        <Grid container spacing={2}>
+                          {currentBid.milestones.map((milestone, index) => (
+                            <Grid item xs={12} md={6} key={`admin-${index}`}>
+                              <Card className="milestone-card">
+                                <CardContent>
+                                  <Box className="milestone-header">
+                                    <Typography variant="h6" className="milestone-number">
+                                      Admin Milestone {index + 1}
+                                    </Typography>
+                                    <Box>
+                                      <Chip
+                                        label={formatCurrency(isEditingMilestones ? parseFloat(editedMilestones[milestone.id]?.admin_amount || 0) : (parseFloat(milestone.admin_amount || 0)))}
+                                        color="primary"
+                                        variant="filled"
+                                        className="milestone-amount"
+                                      />
+                                    </Box>
+                                  </Box>
+
+                                  {/* Scope styled like the standard milestone scope */}
+                                  {isEditingMilestones ? (
+                                    <Box sx={{ mb: 1 }}>
+                                      <TextField
+                                        multiline
+                                        rows={3}
+                                        fullWidth
+                                        size="small"
+                                        placeholder="Enter admin scope"
+                                        value={(editedMilestones[milestone.id]?.admin_scope) || ''}
+                                        onChange={(e) => handleMilestoneDataChange(milestone.id, 'admin_scope', e.target.value)}
+                                      />
+                                    </Box>
+                                  ) : (
+                                    <Typography variant="body1" className="milestone-scope">
+                                      {milestone.admin_scope || '--'}
+                                    </Typography>
+                                  )}
+
+                                  <Box className="milestone-details">
+                                    <Box className="milestone-detail">
+                                      <HourglassEmpty className="milestone-detail-icon" />
+                                      {isEditingMilestones ? (
+                                        <TextField
+                                          type="number"
+                                          size="small"
+                                          placeholder="Hours"
+                                          value={(editedMilestones[milestone.id]?.admin_hours) || ''}
+                                          onChange={(e) => handleMilestoneDataChange(milestone.id, 'admin_hours', e.target.value)}
+                                          InputProps={{
+                                            endAdornment: <Typography variant="body2">hrs</Typography>
+                                          }}
+                                        />
+                                      ) : (
+                                        <Typography variant="body2">
+                                          {(milestone.admin_hours ?? '') !== '' ? `${milestone.admin_hours} hours` : '--'}
+                                        </Typography>
+                                      )}
+                                    </Box>
+                                    <Box className="milestone-detail">
+                                      <AttachMoney className="milestone-detail-icon" />
+                                      {isEditingMilestones ? (
+                                        <TextField
+                                          type="number"
+                                          size="small"
+                                          placeholder="Amount"
+                                          value={(editedMilestones[milestone.id]?.admin_amount) || ''}
+                                          onChange={(e) => handleMilestoneDataChange(milestone.id, 'admin_amount', e.target.value)}
+                                        />
+                                      ) : (
+                                        <Typography variant="body2">
+                                          {formatCurrency(parseFloat(milestone.admin_amount || 0))}
+                                        </Typography>
+                                      )}
+                                    </Box>
+                                  </Box>
+                                </CardContent>
+                              </Card>
+                            </Grid>
+                          ))}
+                        </Grid>
+
+                        <Box className="milestones-summary" sx={{ mt: 2 }}>
+                          <Typography variant="h6" className="summary-title">
+                            Admin Milestones Summary
+                          </Typography>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                              <Box className="summary-item">
+                                <Typography variant="subtitle2" className="summary-label">
+                                  Total Admin Milestones
+                                </Typography>
+                                <Typography variant="h6" className="summary-value">
+                                  {currentBid.milestones?.length || 0}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <Box className="summary-item">
+                                <Typography variant="subtitle2" className="summary-label">
+                                  Total Admin Hours
+                                </Typography>
+                                <Typography variant="h6" className="summary-value">
+                                  {(isEditingMilestones
+                                    ? Object.values(editedMilestones).reduce((t, m) => t + (parseInt(m.admin_hours || 0) || 0), 0)
+                                    : (currentBid.milestones || []).reduce((total, milestone) =>
+                                        total + (parseInt(milestone.admin_hours || 0) || 0), 0
+                                      ))} hours
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <Box className="summary-item">
+                                <Typography variant="subtitle2" className="summary-label">
+                                  Total Admin Amount
+                                </Typography>
+                                <Typography variant="h6" className="summary-value amount">
+                                  {formatCurrency(
+                                    isEditingMilestones
+                                      ? Object.values(editedMilestones).reduce((t, m) => t + (parseFloat(m.admin_amount || 0) || 0), 0)
+                                      : (currentBid.milestones || []).reduce((total, milestone) =>
+                                          total + (parseFloat(milestone.admin_amount || 0) || 0), 0
+                                        )
+                                  )}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 </CardContent>
               </Card>
