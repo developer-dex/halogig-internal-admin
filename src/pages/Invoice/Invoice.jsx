@@ -109,8 +109,8 @@ const Invoice = () => {
     saleOrderNo: sale.sale_order_number || '',
     billDate: sale.sale_order_date || '',
     gstNumber: billing.gst_number || '',
-    projectType: project.milestone_scope || '',
-    rate: Number(project.milestone_amount) || 0,
+    projectType: (project.created_by_admin ? project.admin_scope : project.milestone_scope) || '',
+    rate: Number(project.created_by_admin ? project.admin_amount : project.milestone_amount) || 0,
     clientState: billing.billing_state || '',
     clientCountry: billing.billing_country || '',
   };

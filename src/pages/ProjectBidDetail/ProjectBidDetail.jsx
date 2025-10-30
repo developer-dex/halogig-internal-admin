@@ -78,6 +78,7 @@ const ProjectBidDetail = () => {
   // State for editable admin milestone fields
   const [isEditingMilestones, setIsEditingMilestones] = useState(false);
   const [editedMilestones, setEditedMilestones] = useState({});
+  const [milestoneFieldErrors, setMilestoneFieldErrors] = useState({});
 
   // Get data from Redux store
   const { currentBid, isApprovingMilestone, approveMilestoneSuccess, approveMilestoneError, isUpdatingBid, updateBidSuccess, updateBidError } = useSelector((state) => state.projectBidsReducer);
@@ -303,16 +304,42 @@ const ProjectBidDetail = () => {
       return acc;
     }, {});
     setEditedMilestones(initialMilestones);
+    setMilestoneFieldErrors({});
     setIsEditingMilestones(true);
   };
 
   const handleCancelEditMilestones = () => {
     setIsEditingMilestones(false);
     setEditedMilestones({});
+    setMilestoneFieldErrors({});
   };
 
   const handleSaveMilestones = async () => {
     try {
+      // Prevent save if totals do not match admin_modified_* when present
+      const sumAdminHours = Object.values(editedMilestones || {}).reduce((t, m) => t + (parseInt(m.admin_hours || 0) || 0), 0);
+      const sumAdminAmount = Object.values(editedMilestones || {}).reduce((t, m) => t + (parseFloat(m.admin_amount || 0) || 0), 0);
+      const targetHours = currentBid?.admin_modified_delivery_timeline ? parseInt(currentBid.admin_modified_delivery_timeline) : null;
+      const targetAmount = currentBid?.admin_modified_bid_amount ? parseFloat(currentBid.admin_modified_bid_amount) : null;
+
+      // If mismatched, set inline errors under all related fields and block save
+      const hoursMismatch = targetHours !== null && !Number.isNaN(targetHours) && sumAdminHours !== targetHours;
+      const amountMismatch = targetAmount !== null && !Number.isNaN(targetAmount) && Number(sumAdminAmount.toFixed(2)) !== Number(targetAmount.toFixed(2));
+
+      if (hoursMismatch || amountMismatch) {
+        setMilestoneFieldErrors(() => {
+          const errs = {};
+          Object.keys(editedMilestones || {}).forEach((mid) => {
+            errs[mid] = {
+              admin_hours: hoursMismatch ? `Total hours must equal ${targetHours}` : '',
+              admin_amount: amountMismatch ? `Total amount must equal ${targetAmount?.toFixed(2)}` : '',
+            };
+          });
+          return errs;
+        });
+        return;
+      }
+
       const updates = Object.entries(editedMilestones || {})
         .map(([milestoneId, values]) => {
           const payload = {
@@ -376,13 +403,46 @@ const ProjectBidDetail = () => {
   };
 
   const handleMilestoneDataChange = (milestoneId, field, value) => {
-    setEditedMilestones(prev => ({
-      ...prev,
-      [milestoneId]: {
-        ...(prev[milestoneId] || {}),
-        [field]: value,
-      },
-    }));
+    setEditedMilestones(prev => {
+      const next = {
+        ...prev,
+        [milestoneId]: {
+          ...(prev[milestoneId] || {}),
+          [field]: value,
+        },
+      };
+
+      // Live validation: totals must match admin_modified_* if provided
+      const sumAdminHours = Object.values(next).reduce((t, m) => t + (parseInt(m.admin_hours || 0) || 0), 0);
+      const sumAdminAmount = Object.values(next).reduce((t, m) => t + (parseFloat(m.admin_amount || 0) || 0), 0);
+
+      const targetHours = currentBid?.admin_modified_delivery_timeline ? parseInt(currentBid.admin_modified_delivery_timeline) : null;
+      const targetAmount = currentBid?.admin_modified_bid_amount ? parseFloat(currentBid.admin_modified_bid_amount) : null;
+
+      // Inline errors: attach to the field being edited
+      setMilestoneFieldErrors(prevErrs => {
+        const nextErrs = { ...prevErrs };
+        const errsForThis = { ...(nextErrs[milestoneId] || {}) };
+        if (field === 'admin_hours') {
+          if (targetHours !== null && !Number.isNaN(targetHours) && sumAdminHours !== targetHours) {
+            errsForThis.admin_hours = `Total hours must equal ${targetHours}`;
+          } else {
+            errsForThis.admin_hours = '';
+          }
+        }
+        if (field === 'admin_amount') {
+          if (targetAmount !== null && !Number.isNaN(targetAmount) && Number(sumAdminAmount.toFixed(2)) !== Number(targetAmount.toFixed(2))) {
+            errsForThis.admin_amount = `Total amount must equal ${targetAmount.toFixed(2)}`;
+          } else {
+            errsForThis.admin_amount = '';
+          }
+        }
+        nextErrs[milestoneId] = errsForThis;
+        return nextErrs;
+      });
+
+      return next;
+    });
   };
 
   return (
@@ -1069,12 +1129,14 @@ const ProjectBidDetail = () => {
                                   Milestone {index + 1}
                                 </Typography>
                                 <Box>
-                                  <Chip
-                                    label={milestone.is_paid == true ? 'Paid' : 'Unpaid'}
-                                    color="primary"
-                                    variant="filled"
-                                    className="paid-status"
-                                  />
+                                  {!currentBid?.ClientProject?.created_by_admin && (
+                                    <Chip
+                                      label={milestone.is_paid == true ? 'Paid' : 'Unpaid'}
+                                      color="primary"
+                                      variant="filled"
+                                      className="paid-status"
+                                    />
+                                  )}
                                   <Chip
                                     label={formatCurrency(milestone.amount)}
                                     color="primary"
@@ -1100,7 +1162,7 @@ const ProjectBidDetail = () => {
                                   </Typography>
                                 </Box>
                                 
-                                {milestone.is_paid == true && (
+                                {!currentBid?.ClientProject?.created_by_admin && milestone.is_paid == true && (
                                   <Box>
                                     <Button
                                       variant="contained"
@@ -1112,7 +1174,7 @@ const ProjectBidDetail = () => {
                                     </Button>
                                   </Box>
                                 )}
-                                {milestone.is_paid == true && (
+                                {!currentBid?.ClientProject?.created_by_admin && milestone.is_paid == true && (
                                   <Box>
                                     <Button
                                       variant="contained"
@@ -1124,7 +1186,7 @@ const ProjectBidDetail = () => {
                                     </Button>
                                   </Box>
                                 )}
-                                {milestone.is_paid == true && (
+                                {!currentBid?.ClientProject?.created_by_admin && milestone.is_paid == true && (
                                 <Box>
                                   <Button
                                     variant="contained"
@@ -1212,6 +1274,12 @@ const ProjectBidDetail = () => {
                                     </Typography>
                                     <Box>
                                       <Chip
+                                        label={milestone.is_paid == true ? 'Paid' : 'Unpaid'}
+                                        color="primary"
+                                        variant="filled"
+                                        className="paid-status"
+                                      />
+                                      <Chip
                                         label={formatCurrency(isEditingMilestones ? parseFloat(editedMilestones[milestone.id]?.admin_amount || 0) : (parseFloat(milestone.admin_amount || 0)))}
                                         color="primary"
                                         variant="filled"
@@ -1252,6 +1320,8 @@ const ProjectBidDetail = () => {
                                           InputProps={{
                                             endAdornment: <Typography variant="body2">hrs</Typography>
                                           }}
+                                          error={Boolean(milestoneFieldErrors[milestone.id]?.admin_hours)}
+                                          helperText={milestoneFieldErrors[milestone.id]?.admin_hours}
                                         />
                                       ) : (
                                         <Typography variant="body2">
@@ -1268,6 +1338,8 @@ const ProjectBidDetail = () => {
                                           placeholder="Amount"
                                           value={(editedMilestones[milestone.id]?.admin_amount) || ''}
                                           onChange={(e) => handleMilestoneDataChange(milestone.id, 'admin_amount', e.target.value)}
+                                          error={Boolean(milestoneFieldErrors[milestone.id]?.admin_amount)}
+                                          helperText={milestoneFieldErrors[milestone.id]?.admin_amount}
                                         />
                                       ) : (
                                         <Typography variant="body2">
@@ -1276,6 +1348,49 @@ const ProjectBidDetail = () => {
                                       )}
                                     </Box>
                                   </Box>
+
+                                  {/* Admin actions: mirror standard milestone actions */}
+                                  {currentBid?.ClientProject?.created_by_admin && (
+                                    <Box className="milestone-details" sx={{ mt: 1, gap: 1 }}>
+                                      {milestone.is_paid == true && (
+                                        <Box>
+                                          <Button
+                                            variant="contained"
+                                            size="small"
+                                            className="gradient-primary view-btn"
+                                            onClick={() => handleViewSalesOrder(index)}
+                                          >
+                                            View Sales Order
+                                          </Button>
+                                        </Box>
+                                      )}
+                                      {milestone.is_paid == true && (
+                                        <Box>
+                                          <Button
+                                            variant="contained"
+                                            size="small"
+                                            className="gradient-primary view-btn"
+                                            onClick={() => handleGenerateInvoice(index)}
+                                          >
+                                            View Invoice
+                                          </Button>
+                                        </Box>
+                                      )}
+                                      {milestone.is_paid == true && (
+                                        <Box>
+                                          <Button
+                                            variant="contained"
+                                            size="small"
+                                            className="gradient-primary view-btn"
+                                            onClick={() => handleOrderApproved(index)}
+                                            disabled={isApprovingMilestone || milestone.admin_approved_date != null}
+                                          >
+                                            {isApprovingMilestone ? 'Approving...' : 'Order Approved'}
+                                          </Button>
+                                        </Box>
+                                      )}
+                                    </Box>
+                                  )}
                                 </CardContent>
                               </Card>
                             </Grid>
